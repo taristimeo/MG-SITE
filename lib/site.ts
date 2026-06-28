@@ -109,6 +109,9 @@ export type Project = {
   summary: string; // « Le projet »
   approach: string; // « Notre approche »
   result: string; // « Le résultat »
+  // Extrait vidéo de prévisualisation (boucle muette ~10 s) servi depuis
+  // /public/projects/<slug>/preview.mp4. Si absent, la card affiche le still.
+  preview?: boolean;
   // Générique du film. Par défaut : studio solo (Timéo Taris).
   credits?: { role: string; name: string }[];
 };
@@ -169,6 +172,7 @@ export const projects: Project[] = [
     year: "2024",
     video: "https://www.youtube.com/watch?v=bILWfeK3tM0",
     stills: 6,
+    preview: true,
     summary:
       "Captation live et clip pour DeLaurentis (Summer Live Session), où la couleur et le grain prolongent le morceau.",
     approach:
@@ -184,6 +188,7 @@ export const projects: Project[] = [
     year: "2024",
     video: "https://www.youtube.com/watch?v=oiF81gEEtbg",
     stills: 6,
+    preview: true,
     summary:
       "L'aftermovie d'une soirée de gala : l'énergie d'un événement condensée en quelques minutes.",
     approach:
@@ -199,6 +204,7 @@ export const projects: Project[] = [
     year: "2024",
     video: "https://www.youtube.com/watch?v=Bl0xfF3aY0g",
     stills: 6,
+    preview: true,
     summary:
       "L'after de La Médocaine : foule, rythme et émotion captés au cœur de la fête.",
     approach:
@@ -241,6 +247,11 @@ export function projectStills(p: Project): string[] {
 
 export function projectThumb(p: Project): string {
   return `/projects/${p.slug}/1.jpg`;
+}
+
+// Extrait vidéo de prévisualisation (boucle muette) si le projet en a un.
+export function projectPreview(p: Project): string | undefined {
+  return p.preview ? `/projects/${p.slug}/preview.mp4` : undefined;
 }
 
 // Extrait l'ID d'une URL YouTube (watch?v=…, youtu.be/…, embed/…).

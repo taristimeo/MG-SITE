@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Still, PlayBadge } from "@/components/Poster";
-import { projects, projectThumb } from "@/lib/site";
+import { PlayBadge } from "@/components/Poster";
+import { CardMedia } from "@/components/CardMedia";
+import { projects, projectThumb, projectPreview } from "@/lib/site";
 
 // Réalisations : filtres par catégorie + grille de cartes (comme l'accueil).
 export function WorksList() {
@@ -48,7 +49,11 @@ export function WorksList() {
           >
             <div className="relative aspect-square overflow-hidden rounded-2xl bg-[var(--color-ink-2)]">
               <div className="h-full w-full transition-transform duration-[1.2s] ease-out group-hover:scale-105">
-                <Still src={projectThumb(p)} alt={`${p.title} — ${p.category}`} />
+                <CardMedia
+                  src={projectThumb(p)}
+                  videoSrc={projectPreview(p)}
+                  alt={`${p.title} — ${p.category}`}
+                />
               </div>
               <div
                 aria-hidden

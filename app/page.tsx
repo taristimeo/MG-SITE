@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { Reveal } from "@/components/Reveal";
-import { Still, PlayBadge } from "@/components/Poster";
+import { PlayBadge } from "@/components/Poster";
+import { CardMedia } from "@/components/CardMedia";
 import { RevealTitle } from "@/components/RevealTitle";
 import { LiveImages } from "@/components/LiveImages";
-import { projects, projectThumb, site } from "@/lib/site";
+import { projects, projectThumb, projectPreview, site } from "@/lib/site";
 
 export default function Home() {
   return (
@@ -68,7 +69,11 @@ function Works() {
               <Reveal key={p.slug} delay={(i % 3) * 90}>
                 <Link href={`/realisations/${p.slug}`} className="group block">
                   <div className="relative aspect-square overflow-hidden rounded-2xl bg-[var(--color-ink-2)]">
-                    <Still src={projectThumb(p)} alt={`${p.title} — ${p.category}`} />
+                    <CardMedia
+                      src={projectThumb(p)}
+                      videoSrc={projectPreview(p)}
+                      alt={`${p.title} — ${p.category}`}
+                    />
                     <div
                       aria-hidden
                       className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"

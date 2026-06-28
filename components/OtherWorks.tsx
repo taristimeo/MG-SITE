@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Still } from "@/components/Poster";
-import { projectThumb, type Project } from "@/lib/site";
+import { CardMedia } from "@/components/CardMedia";
+import { projectThumb, projectPreview, type Project } from "@/lib/site";
 
 // Desktop: stacked at rest, fan on hover (CSS group-hover).
 // Mobile: stacked at first, tap the container to deploy the fan.
@@ -47,7 +47,11 @@ export function OtherWorks({ projects }: { projects: Project[] }) {
           >
             <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-[var(--color-ink-2)] shadow-[0_30px_80px_-30px_rgba(0,0,0,0.85)] ring-1 ring-[var(--color-line-soft)]">
               <div className="h-full w-full transition-transform duration-700 ease-out group-hover/card:scale-[1.06]">
-                <Still src={projectThumb(p)} alt={`${p.title} — ${p.category}`} />
+                <CardMedia
+                  src={projectThumb(p)}
+                  videoSrc={projectPreview(p)}
+                  alt={`${p.title} — ${p.category}`}
+                />
               </div>
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
               <div className="absolute inset-x-0 bottom-0 flex items-end justify-between p-4">
