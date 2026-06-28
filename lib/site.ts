@@ -16,7 +16,7 @@ export const site = {
   address: "94 quai des Chartrons, Bordeaux",
   // Liens réseaux — remplacer les href "#" par les vraies URL de Timéo.
   socials: [
-    { label: "Instagram", href: "#" },
+    { label: "Instagram", href: "https://www.instagram.com/mauvaisgrain_/" },
     { label: "YouTube", href: "#" },
     { label: "Vimeo", href: "#" },
   ],
