@@ -127,6 +127,7 @@ export const projects: Project[] = [
     year: "2026",
     video: "https://www.youtube.com/watch?v=VPxP8jyvCUQ",
     stills: 8,
+    preview: true,
     summary:
       "Un voyage sensoriel autoproduit, à la recherche du son et de la lumière d'un territoire.",
     approach:
@@ -142,6 +143,7 @@ export const projects: Project[] = [
     year: "2026",
     video: "https://www.youtube.com/watch?v=s9nfZNalshY",
     stills: 6,
+    preview: true,
     summary:
       "Un clip autoproduit où le corps et l'ombre deviennent matière, entre lumière et contre-jour.",
     approach:
@@ -157,6 +159,7 @@ export const projects: Project[] = [
     year: "2025",
     video: "https://www.youtube.com/watch?v=MQfl1xV6ku0",
     stills: 8,
+    preview: true,
     summary:
       "Un film d'exploration autoproduit, face à l'immensité du paysage et à l'échelle de l'humain.",
     approach:
