@@ -5,9 +5,9 @@ import { Still } from "@/components/Poster";
 import { OtherWorks } from "@/components/OtherWorks";
 import { ProjectStory } from "@/components/ProjectStory";
 import { ProjectVideo } from "@/components/ProjectVideo";
+import { Reveal } from "@/components/Reveal";
 import {
   projectCredits,
-  projectStills,
   projects,
   projectSuggestions,
   projectThumb,
@@ -47,7 +47,6 @@ export default async function ProjectPage({
   const credits = projectCredits(project);
   const suggestions = projectSuggestions(project, 2);
 
-  const stills = projectStills(project);
   const videoId = youtubeId(project.video);
   const sections = [
     { label: "Le projet", body: project.summary },
@@ -67,39 +66,8 @@ export default async function ProjectPage({
         </p>
       </header>
 
-      {/* Galerie de stills — petits cadres « en biais » qui défilent en boucle
-          (dupliquée pour boucler sans saut, légère inclinaison alternée). */}
-      <div className="overflow-hidden py-8">
-        <div className="marquee-x flex w-max items-center">
-          {[...stills, ...stills].map((src, i) => {
-            const tilt = i % 2 === 0 ? "rotate-[-3deg] translate-y-1" : "rotate-[2.5deg] -translate-y-1";
-            return (
-              <div
-                key={`${src}-${i}`}
-                className={`relative mr-4 aspect-[4/3] w-[72vw] shrink-0 overflow-hidden rounded-xl bg-[var(--color-ink-2)] shadow-[0_24px_60px_-28px_rgba(0,0,0,0.85)] ring-1 ring-[var(--color-line-soft)] sm:mr-6 sm:w-[36vw] lg:w-[22vw] ${tilt}`}
-              >
-                <Still src={src} alt={`${project.title} — image ${(i % stills.length) + 1}`} />
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Générique */}
-      <section className="px-5 py-14 sm:px-8 sm:py-24 lg:py-32">
-        <dl className="mx-auto grid max-w-[420px] grid-cols-[auto_1fr] gap-x-6 gap-y-3 sm:grid-cols-[1fr_1.2fr]">
-          {credits.map((c) => (
-            <div key={c.role} className="contents">
-              <dt className="font-cond pt-[2px] text-right text-xs tracking-[0.12em] text-[var(--color-terra)]">
-                {c.role}
-              </dt>
-              <dd className="font-sans text-[var(--color-bone-dim)]">{c.name}</dd>
-            </div>
-          ))}
-        </dl>
-      </section>
-
-      {/* Lecteur vidéo — façade premium, charge l'iframe au clic */}
+      {/* Lecteur vidéo — d'abord la vidéo, point d'entrée du récit.
+          Façade premium, charge l'iframe au clic. */}
       {videoId ? (
         <ProjectVideo
           videoId={videoId}
@@ -113,6 +81,24 @@ export default async function ProjectPage({
           </div>
         </div>
       )}
+
+      {/* Générique — révélé ligne à ligne en cascade */}
+      <section className="px-5 py-14 sm:px-8 sm:py-24 lg:py-32">
+        <dl className="mx-auto flex max-w-[420px] flex-col gap-3">
+          {credits.map((c, i) => (
+            <Reveal
+              key={c.role}
+              delay={i * 110}
+              className="grid grid-cols-[auto_1fr] gap-x-6 sm:grid-cols-[1fr_1.2fr]"
+            >
+              <dt className="font-cond pt-[2px] text-right text-xs tracking-[0.12em] text-[var(--color-terra)]">
+                {c.role}
+              </dt>
+              <dd className="font-sans text-[var(--color-bone-dim)]">{c.name}</dd>
+            </Reveal>
+          ))}
+        </dl>
+      </section>
 
       {/* Texte : Le projet / Notre approche / Le résultat */}
       <section className="px-5 pt-16 sm:px-8 sm:pt-28 lg:pt-36">
