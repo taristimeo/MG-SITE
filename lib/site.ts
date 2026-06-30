@@ -117,7 +117,6 @@ export type Project = {
 };
 
 // Réalisations — du plus récent au plus ancien.
-// NB : textes (résumé / approche / résultat) rédigés en brouillon, à relire.
 export const projects: Project[] = [
   {
     slug: "the-sound-of-discovery",
@@ -129,11 +128,11 @@ export const projects: Project[] = [
     stills: 8,
     preview: true,
     summary:
-      "Un voyage sensoriel autoproduit, à la recherche du son et de la lumière d'un territoire.",
+      "Proposer une façon différente de découvrir l'Égypte. Plutôt que de se concentrer sur les sites emblématiques, l'objectif était de raconter le pays à travers ses habitants, leurs regards et les instants du quotidien qui donnent vie au territoire.",
     approach:
-      "Caméra à l'épaule et écoute du lieu : laisser le paysage et ses sons dicter le rythme du film.",
+      "Observer sans intervenir. Laisser les rencontres, les ambiances et la lumière naturelle guider le récit afin de construire un voyage plus humain, où chaque scène invite à s'immerger dans la culture locale.",
     result:
-      "Un film de territoire immersif, entre documentaire et carte postale sensible.",
+      "Un film qui invite à visiter l'Égypte autrement, en mettant autant en valeur les émotions et les scènes de vie que les lieux traversés.",
   },
   {
     slug: "silhouette",
@@ -145,11 +144,11 @@ export const projects: Project[] = [
     stills: 6,
     preview: true,
     summary:
-      "Un clip autoproduit où le corps et l'ombre deviennent matière, entre lumière et contre-jour.",
+      "Créer un film à contre-courant d'un monde où tout est en mouvement. Revenir à une mise en scène plus calme, centrée sur le cadre, l'architecture et la composition.",
     approach:
-      "Travail du contre-jour et de la silhouette pour une écriture graphique, au plus près du mouvement.",
+      "Construire le film principalement autour de plans fixes. Le mouvement naît uniquement de la danseuse, créant un contraste entre l'immobilité de l'espace et la fluidité du corps.",
     result:
-      "Un clip à la signature visuelle forte, pensé pour l'écran comme pour les réseaux.",
+      "Un film minimaliste où chaque plan est pensé comme une composition graphique, laissant le mouvement révéler toute la force de l'image.",
   },
   {
     slug: "the-shape-of-vastness",
@@ -161,11 +160,11 @@ export const projects: Project[] = [
     stills: 8,
     preview: true,
     summary:
-      "Un film d'exploration autoproduit, face à l'immensité du paysage et à l'échelle de l'humain.",
+      "Explorer ce qui rend les paysages des Canaries si singuliers. À travers leurs reliefs volcaniques, leurs textures et leurs lumières, l'objectif était de révéler l'identité unique de ce territoire.",
     approach:
-      "Plans larges, lenteur et lumière naturelle pour donner à ressentir la grandeur du lieu.",
+      "Prendre le temps d'observer. Construire un film contemplatif où chaque plan laisse respirer le paysage, en laissant la lumière, les formes et l'immensité guider naturellement le regard.",
     result:
-      "Un film contemplatif qui affirme le langage visuel du studio.",
+      "Un voyage visuel qui met en valeur le caractère unique des Canaries et invite à découvrir le territoire à travers les sensations qu'il procure.",
   },
   {
     slug: "delaurentis-gone-colors",
@@ -177,11 +176,11 @@ export const projects: Project[] = [
     stills: 6,
     preview: true,
     summary:
-      "Captation live et clip pour DeLaurentis (Summer Live Session), où la couleur et le grain prolongent le morceau.",
+      "Réaliser une live session sur une plage au coucher du soleil, en utilisant exclusivement la lumière naturelle pour créer une atmosphère en accord avec l'univers musical de l'artiste.",
     approach:
-      "Une grammaire visuelle construite avec l'artiste, au service de l'énergie de la session live.",
+      "Tourner durant les dernières minutes du jour afin de profiter d'une lumière douce et chaleureuse. Le paysage devient un élément essentiel de la mise en scène et accompagne naturellement la performance.",
     result:
-      "Un clip à l'identité forte qui accompagne la sortie du morceau.",
+      "Une performance intimiste où la musique, la lumière et l'environnement se complètent pour créer une esthétique simple, authentique et cinématographique.",
   },
   {
     slug: "graduation",
@@ -193,11 +192,11 @@ export const projects: Project[] = [
     stills: 6,
     preview: true,
     summary:
-      "L'aftermovie d'une soirée de gala : l'énergie d'un événement condensée en quelques minutes.",
+      "Capturer une cérémonie de remise de diplôme sans se limiter au protocole. L'objectif était de raconter les émotions, les retrouvailles et les moments qui rendent cette journée inoubliable.",
     approach:
-      "Captation au plus près de l'action, montage rythmé sur l'énergie de la soirée.",
+      "Adopter une approche immersive et sensorielle, en restant au plus près des étudiants et de leurs proches pour saisir les instants spontanés sans interrompre leur vécu.",
     result:
-      "Un aftermovie qui restitue l'ampleur de l'événement et donne envie d'y être.",
+      "Un film vivant et sincère qui retranscrit autant l'émotion de la cérémonie que l'atmosphère de cette journée si particulière.",
   },
   {
     slug: "la-medocaine",
@@ -209,11 +208,11 @@ export const projects: Project[] = [
     stills: 6,
     preview: true,
     summary:
-      "L'after de La Médocaine : foule, rythme et émotion captés au cœur de la fête.",
+      "Capturer le point culminant de La Médocaine, lorsque la compétition laisse place à la fête. L'objectif était de retranscrire l'énergie de la soirée et l'atmosphère unique qui rassemble les participants.",
     approach:
-      "Au plus près de la foule et de la nuit, un montage nerveux porté par la musique.",
+      "Se mêler au public pour filmer les concerts, le DJ, les jeux de lumière et le feu d'artifice. Alterner plans d'ensemble et instants spontanés afin de faire ressentir toute l'intensité de la soirée.",
     result:
-      "Un aftermovie qui fait revivre l'intensité de l'événement.",
+      "Un film rythmé et immersif qui fait revivre l'ambiance festive de La Médocaine, en mettant en avant l'énergie collective, les émotions et les temps forts de la soirée.",
   },
 ];
 
