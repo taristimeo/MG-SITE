@@ -82,19 +82,17 @@ export default async function ProjectPage({
         </div>
       )}
 
-      {/* Générique — révélé ligne à ligne en cascade */}
+      {/* Générique — centré, révélé ligne à ligne en cascade */}
       <section className="px-5 py-14 sm:px-8 sm:py-24 lg:py-32">
-        <dl className="mx-auto flex max-w-[420px] flex-col gap-3">
+        <dl className="mx-auto flex max-w-[420px] flex-col items-center gap-6 text-center">
           {credits.map((c, i) => (
-            <Reveal
-              key={c.role}
-              delay={i * 110}
-              className="grid grid-cols-[auto_1fr] gap-x-6 sm:grid-cols-[1fr_1.2fr]"
-            >
-              <dt className="font-cond pt-[2px] text-right text-xs tracking-[0.12em] text-[var(--color-terra)]">
+            <Reveal key={c.role} delay={i * 110}>
+              <dt className="font-cond text-xs tracking-[0.2em] text-[var(--color-terra)]">
                 {c.role}
               </dt>
-              <dd className="font-sans text-[var(--color-bone-dim)]">{c.name}</dd>
+              <dd className="font-sans mt-1.5 text-[var(--color-bone-dim)]">
+                {c.name}
+              </dd>
             </Reveal>
           ))}
         </dl>
