@@ -100,6 +100,55 @@
   transform: none;
 }
 
+/* ---- Récit d'une réalisation : révélation premium en trois temps ---- */
+.story-block .story-ghost,
+.story-block .story-index,
+.story-block .story-title,
+.story-block .story-body {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 1s var(--ease-out-expo),
+    transform 1s var(--ease-out-expo);
+  will-change: opacity, transform;
+}
+.story-block .story-ghost {
+  transform: translateY(0) scale(0.92);
+  transition:
+    opacity 1.5s var(--ease-out-expo),
+    transform 1.5s var(--ease-out-expo);
+}
+.story-block .story-rule {
+  opacity: 0;
+  transform: scaleX(0);
+  transition: transform 0.9s var(--ease-out-expo);
+  transition-delay: 0.18s;
+  will-change: transform;
+}
+.story-block .story-index {
+  transition-delay: 0.06s;
+}
+.story-block .story-title {
+  transition-delay: 0.16s;
+}
+.story-block .story-body {
+  transition-delay: 0.32s;
+}
+.story-block.is-in .story-ghost {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.story-block.is-in .story-index,
+.story-block.is-in .story-title,
+.story-block.is-in .story-body {
+  opacity: 1;
+  transform: none;
+}
+.story-block.is-in .story-rule {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
 /* Lien souligné animé */
 .link-underline {
   position: relative;
@@ -325,6 +374,15 @@
     animation: none;
   }
   .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .story-block .story-ghost,
+  .story-block .story-index,
+  .story-block .story-title,
+  .story-block .story-body,
+  .story-block .story-rule {
     opacity: 1;
     transform: none;
     transition: none;

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Still } from "@/components/Poster";
 import { OtherWorks } from "@/components/OtherWorks";
+import { ProjectStory } from "@/components/ProjectStory";
 import { ProjectVideo } from "@/components/ProjectVideo";
 import {
   projectCredits,
@@ -115,21 +116,7 @@ export default async function ProjectPage({
 
       {/* Texte : Le projet / Notre approche / Le résultat */}
       <section className="px-5 pt-16 sm:px-8 sm:pt-28 lg:pt-36">
-        <div className="mx-auto flex max-w-[640px] flex-col gap-10 text-center sm:gap-16">
-          {sections.map((s, i) => (
-            <div key={s.label}>
-              <span className="font-cond text-xs tracking-[0.2em] text-[var(--color-terra)]">
-                0{i + 1}
-              </span>
-              <h2 className="font-wide mt-3 text-2xl text-[var(--color-bone)] sm:text-3xl">
-                {s.label}
-              </h2>
-              <p className="font-sans mt-5 text-[1.05rem] leading-[1.7] text-[var(--color-bone-dim)]">
-                {s.body}
-              </p>
-            </div>
-          ))}
-        </div>
+        <ProjectStory sections={sections} />
       </section>
 
       {/* Autres réalisations */}
