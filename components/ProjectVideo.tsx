@@ -41,7 +41,7 @@ export function ProjectVideo({
     <div className="px-5 sm:px-8 lg:px-10">
       <div
         ref={frameRef}
-        className="video-reveal relative mx-auto aspect-video w-full max-w-[1600px] overflow-hidden rounded-2xl bg-[var(--color-ink-2)] shadow-[0_60px_160px_-50px_rgba(0,0,0,0.9)] ring-1 ring-[var(--color-line-soft)]"
+        className="video-cinema relative mx-auto aspect-video w-full max-w-[1600px] overflow-hidden rounded-2xl bg-[var(--color-ink-2)] shadow-[0_60px_160px_-50px_rgba(0,0,0,0.9)] ring-1 ring-[var(--color-line-soft)]"
       >
         {playing ? (
           <iframe
@@ -58,9 +58,11 @@ export function ProjectVideo({
             aria-label={`Lire la vidéo — ${title}`}
             className="group absolute inset-0 h-full w-full"
           >
-            <Still src={posterSrc} alt={title} />
-            <div className="absolute inset-0 bg-gradient-to-t from-[rgba(10,9,8,0.5)] via-transparent to-[rgba(10,9,8,0.12)]" />
-            <span className="absolute left-1/2 top-1/2 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center sm:h-20 sm:w-20">
+            <div className="video-cinema-inner absolute inset-0">
+              <Still src={posterSrc} alt={title} />
+              <div className="absolute inset-0 bg-gradient-to-t from-[rgba(10,9,8,0.5)] via-transparent to-[rgba(10,9,8,0.12)]" />
+            </div>
+            <span className="video-cinema-play absolute left-1/2 top-1/2 flex h-16 w-16 items-center justify-center sm:h-20 sm:w-20">
               <span className="play-pulse flex h-16 w-16 items-center justify-center rounded-full border border-white/50 bg-black/25 backdrop-blur-[2px] transition-all duration-500 group-hover:scale-110 group-hover:border-[var(--color-terra)] sm:h-20 sm:w-20">
                 <svg width="18" height="22" viewBox="0 0 15 17" fill="none" aria-hidden className="ml-1">
                   <path

@@ -326,18 +326,39 @@
   opacity: 1;
 }
 
-/* ---- Lecteur vidéo : révélation au scroll + halo « play » qui respire ---- */
-.video-reveal {
+/* ---- Lecteur vidéo : ouverture cinématographique (écran qui s'ouvre depuis
+   une fente centrale) + zoom qui se pose + bouton « play » qui éclot ---- */
+.video-cinema {
+  clip-path: inset(47% 0% 47% 0% round 1rem);
   opacity: 0;
-  transform: translateY(44px) scale(1.04);
   transition:
-    opacity 1s var(--ease-out-expo),
-    transform 1.2s var(--ease-out-expo);
-  will-change: transform, opacity;
+    clip-path 1.4s var(--ease-out-expo),
+    opacity 0.6s ease-out;
+  will-change: clip-path;
 }
-.video-reveal.is-in {
+.video-cinema.is-in {
+  clip-path: inset(0% 0% 0% 0% round 1rem);
   opacity: 1;
-  transform: none;
+}
+.video-cinema-inner {
+  transform: scale(1.22);
+  transition: transform 1.8s var(--ease-out-expo);
+  will-change: transform;
+}
+.video-cinema.is-in .video-cinema-inner {
+  transform: scale(1);
+}
+.video-cinema-play {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.7);
+  transition:
+    opacity 0.7s ease-out,
+    transform 0.9s var(--ease-out-expo);
+  transition-delay: 0.7s;
+}
+.video-cinema.is-in .video-cinema-play {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
 }
 @keyframes play-pulse {
   0% {
@@ -365,10 +386,19 @@
     clip-path: none;
     transition: none;
   }
-  .video-reveal {
+  .video-cinema {
+    clip-path: none;
     opacity: 1;
-    transform: none;
     transition: none;
+  }
+  .video-cinema-inner,
+  .video-cinema-play {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+    transition: none;
+  }
+  .video-cinema-play {
+    transform: translate(-50%, -50%) scale(1);
   }
   .play-pulse {
     animation: none;
