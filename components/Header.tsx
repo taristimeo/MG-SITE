@@ -51,15 +51,15 @@ export function Header() {
           aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
-          className="relative z-50 flex h-8 w-8 items-center justify-center md:hidden"
+          className="relative z-[60] h-8 w-8 md:hidden"
         >
           <span
-            className={`absolute h-px w-6 bg-[var(--color-bone)] transition-all duration-300 ease-in-out ${
+            className={`absolute inset-0 m-auto h-px w-6 bg-[var(--color-bone)] transition-all duration-300 ease-in-out ${
               open ? "rotate-45" : "-translate-y-[4px]"
             }`}
           />
           <span
-            className={`absolute h-px w-6 bg-[var(--color-bone)] transition-all duration-300 ease-in-out ${
+            className={`absolute inset-0 m-auto h-px w-6 bg-[var(--color-bone)] transition-all duration-300 ease-in-out ${
               open ? "-rotate-45" : "translate-y-[4px]"
             }`}
           />
