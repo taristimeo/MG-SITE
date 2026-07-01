@@ -14,11 +14,10 @@ export const site = {
   phone: "06 52 06 53 89",
   phoneHref: "+33652065389",
   address: "94 quai des Chartrons, Bordeaux",
-  // Liens réseaux — remplacer les href "#" par les vraies URL de Timéo.
+  // Liens réseaux du studio.
   socials: [
     { label: "Instagram", href: "https://www.instagram.com/mauvaisgrain_/" },
-    { label: "YouTube", href: "#" },
-    { label: "Vimeo", href: "#" },
+    { label: "YouTube", href: "https://www.youtube.com/@MauvaisGrain" },
   ],
 } as const;
 
