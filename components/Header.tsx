@@ -14,6 +14,8 @@ export function Header() {
     };
   }, [open]);
 
+  const menuItems = [...navLinks, { label: "On en parle", href: "/contact" }];
+
   return (
     <header className="fixed inset-x-0 top-0 z-50">
       <div className="header-in mx-auto flex max-w-[1600px] items-center justify-between px-5 py-5 sm:px-8 lg:px-10">
@@ -70,29 +72,82 @@ export function Header() {
 
       {/* Menu mobile */}
       <div
-        className={`fixed inset-0 flex flex-col justify-center bg-[var(--color-ink)] px-6 transition-opacity duration-500 md:hidden ${
+        className={`fixed inset-0 flex flex-col justify-center overflow-hidden bg-[var(--color-ink)] px-8 transition-opacity duration-500 md:hidden ${
           open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         }`}
       >
-        <nav className="flex flex-col gap-3">
-          {[...navLinks, { label: "On en parle", href: "/contact" }].map((l) => (
+        {/* Halo terracotta diffus — profondeur discrète */}
+        <div
+          className={`pointer-events-none absolute -right-24 -top-16 h-80 w-80 rounded-full bg-[var(--color-terra)] blur-[100px] transition-opacity duration-1000 ${
+            open ? "opacity-[0.09]" : "opacity-0"
+          }`}
+        />
+
+        {/* Intitulé de section */}
+        <div
+          style={{ transitionDelay: open ? "80ms" : "0ms" }}
+          className={`mb-8 flex items-center gap-2 font-cond text-[12px] text-[var(--color-bone-faint)] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            open ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+          }`}
+        >
+          <span className="h-px w-8 bg-[var(--color-terra)]" />
+          Menu
+        </div>
+
+        <nav className="flex flex-col">
+          {menuItems.map((l, i) => (
             <Link
               key={l.href}
               href={l.href}
               onClick={() => setOpen(false)}
-              className="font-wide text-[clamp(2.2rem,9vw,3.5rem)] text-[var(--color-cream)] transition-colors hover:text-[var(--color-terra)]"
+              style={{ transitionDelay: open ? `${160 + i * 90}ms` : "0ms" }}
+              className={`group flex items-center gap-4 border-b border-[var(--color-line-soft)] py-4 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                open ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+              }`}
             >
-              {l.label}
+              <span className="font-cond text-[13px] text-[var(--color-terra)]">
+                0{i + 1}
+              </span>
+              <span className="font-wide text-[clamp(2.2rem,10vw,3.6rem)] leading-none text-[var(--color-cream)] transition-colors duration-300 group-hover:text-[var(--color-terra)]">
+                {l.label}
+              </span>
+              <span
+                aria-hidden
+                className="ml-auto text-[var(--color-terra)] opacity-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1 group-hover:opacity-100"
+              >
+                &#8594;
+              </span>
             </Link>
           ))}
         </nav>
-        <div className="mt-12 space-y-1 font-cond text-sm text-[var(--color-bone-dim)]">
-          <a href={`mailto:${site.email}`} className="block w-fit link-underline">
-            {site.email}
-          </a>
-          <a href={`tel:${site.phoneHref}`} className="block w-fit link-underline">
-            {site.phone}
-          </a>
+
+        <div
+          style={{ transitionDelay: open ? `${160 + menuItems.length * 90 + 80}ms` : "0ms" }}
+          className={`mt-12 space-y-4 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            open ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+          }`}
+        >
+          <div className="space-y-1 font-cond text-sm text-[var(--color-bone-dim)]">
+            <a href={`mailto:${site.email}`} className="block w-fit link-underline">
+              {site.email}
+            </a>
+            <a href={`tel:${site.phoneHref}`} className="block w-fit link-underline">
+              {site.phone}
+            </a>
+          </div>
+          <div className="flex gap-5 font-cond text-[12px] text-[var(--color-bone-faint)]">
+            {site.socials.map((s) => (
+              <a
+                key={s.label}
+                href={s.href}
+                target="_blank"
+                rel="noreferrer"
+                className="transition-colors duration-300 hover:text-[var(--color-terra)]"
+              >
+                {s.label}
+              </a>
+            ))}
+          </div>
         </div>
       </div>
     </header>
