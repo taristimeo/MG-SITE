@@ -13,7 +13,16 @@ export const site = {
   email: "timeotaris@mauvaisgrain.com",
   phone: "06 52 06 53 89",
   phoneHref: "+33652065389",
+  // Adresse postale décomposée (utile pour les données structurées / SEO local).
   address: "94 quai des Chartrons, Bordeaux",
+  street: "94 quai des Chartrons",
+  postalCode: "33000",
+  region: "Nouvelle-Aquitaine",
+  country: "FR",
+  geo: { lat: 44.8546, lng: -0.5698 }, // approx. quai des Chartrons, Bordeaux
+  // Domaine de production — source unique pour metadataBase, sitemap, canoniques
+  // et données structurées. À adapter si le domaine change.
+  url: "https://mauvaisgrain.com",
   // Liens réseaux du studio.
   socials: [
     { label: "Instagram", href: "https://www.instagram.com/mauvaisgrain_/" },
