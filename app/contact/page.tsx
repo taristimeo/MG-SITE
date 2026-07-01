@@ -6,6 +6,7 @@ import { site } from "@/lib/site";
 export const metadata: Metadata = {
   title: "On en parle",
   description: `Démarrer un projet avec ${site.name} — studio de production vidéo à ${site.city}.`,
+  alternates: { canonical: "/contact" },
 };
 
 export default function ContactPage() {

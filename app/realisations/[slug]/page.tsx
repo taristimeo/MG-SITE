@@ -11,6 +11,7 @@ import {
   projects,
   projectSuggestions,
   projectThumb,
+  site,
   youtubeId,
 } from "@/lib/site";
 
@@ -28,9 +29,25 @@ export async function generateMetadata({
   const { slug } = await params;
   const project = projects.find((p) => p.slug === slug);
   if (!project) return {};
+  const path = `/realisations/${project.slug}`;
+  const title = `${project.title} — ${project.category}`;
   return {
-    title: `${project.title} — ${project.category}`,
+    title,
     description: project.summary,
+    alternates: { canonical: path },
+    openGraph: {
+      title,
+      description: project.summary,
+      url: `${site.url}${path}`,
+      type: "video.other",
+      images: [{ url: projectThumb(project), alt: project.title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description: project.summary,
+      images: [projectThumb(project)],
+    },
   };
 }
 
@@ -54,8 +71,54 @@ export default async function ProjectPage({
     { label: "Le résultat", body: project.result },
   ];
 
+  // Données structurées : la vidéo (résultats enrichis Google) + le fil
+  // d'Ariane. Construites à partir des données du projet.
+  const path = `/realisations/${project.slug}`;
+  const pageUrl = `${site.url}${path}`;
+  const videoLd = videoId
+    ? {
+        "@context": "https://schema.org",
+        "@type": "VideoObject",
+        name: project.title,
+        description: project.summary,
+        thumbnailUrl: `${site.url}${projectThumb(project)}`,
+        uploadDate: `${project.year}-01-01`,
+        embedUrl: `https://www.youtube.com/embed/${videoId}`,
+        contentUrl: project.video,
+        publisher: {
+          "@type": "Organization",
+          name: site.name,
+          logo: { "@type": "ImageObject", url: `${site.url}/icon.png` },
+        },
+      }
+    : null;
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Accueil", item: site.url },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Réalisations",
+        item: `${site.url}/realisations`,
+      },
+      { "@type": "ListItem", position: 3, name: project.title, item: pageUrl },
+    ],
+  };
+
   return (
     <article className="pb-24">
+      {videoLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(videoLd) }}
+        />
+      )}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
       {/* Hero : titre centré + catégorie terracotta (façon générique de film) */}
       <header className="flex min-h-[55svh] flex-col items-center justify-center px-5 pt-20 text-center sm:min-h-[62svh] sm:px-8 sm:pt-28">
         <h1 className="font-wide mx-auto max-w-[16ch] text-[clamp(3rem,13vw,12rem)] leading-[0.95] text-[var(--color-cream)]">

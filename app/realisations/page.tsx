@@ -6,6 +6,7 @@ import { site } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Réalisations",
   description: `Toutes les réalisations de ${site.name} — ${site.intro}`,
+  alternates: { canonical: "/realisations" },
 };
 
 // Page dédiée « Réalisations » : index aligné à gauche, type de projet à

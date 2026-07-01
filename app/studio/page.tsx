@@ -9,6 +9,7 @@ import { site, values } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Studio",
   description: `${site.name} — studio de production vidéo à ${site.city}. ${site.intro}`,
+  alternates: { canonical: "/studio" },
 };
 
 const chapters = [
