@@ -51,16 +51,16 @@ export function Header() {
           aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
-          className="relative z-50 flex h-8 w-8 flex-col items-center justify-center gap-[6px] md:hidden"
+          className="relative z-50 flex h-8 w-8 items-center justify-center md:hidden"
         >
           <span
-            className={`h-px w-6 bg-[var(--color-bone)] transition-transform duration-300 ${
-              open ? "translate-y-[3.5px] rotate-45" : ""
+            className={`absolute h-px w-6 bg-[var(--color-bone)] transition-all duration-300 ease-in-out ${
+              open ? "rotate-45" : "-translate-y-[4px]"
             }`}
           />
           <span
-            className={`h-px w-6 bg-[var(--color-bone)] transition-transform duration-300 ${
-              open ? "-translate-y-[3.5px] -rotate-45" : ""
+            className={`absolute h-px w-6 bg-[var(--color-bone)] transition-all duration-300 ease-in-out ${
+              open ? "-rotate-45" : "translate-y-[4px]"
             }`}
           />
         </button>
