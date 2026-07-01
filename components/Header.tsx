@@ -45,26 +45,28 @@ export function Header() {
         >
           On en parle
         </Link>
-
-        <button
-          type="button"
-          aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
-          aria-expanded={open}
-          onClick={() => setOpen((v) => !v)}
-          className="relative z-[60] h-8 w-8 md:hidden"
-        >
-          <span
-            className={`absolute inset-0 m-auto h-px w-6 bg-[var(--color-bone)] transition-all duration-300 ease-in-out ${
-              open ? "rotate-45" : "-translate-y-[4px]"
-            }`}
-          />
-          <span
-            className={`absolute inset-0 m-auto h-px w-6 bg-[var(--color-bone)] transition-all duration-300 ease-in-out ${
-              open ? "-rotate-45" : "translate-y-[4px]"
-            }`}
-          />
-        </button>
       </div>
+
+      {/* Bouton menu : hors de .header-in (qui crée un contexte d'empilement)
+          pour rester cliquable et visible au-dessus de l'overlay */}
+      <button
+        type="button"
+        aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className="absolute right-5 top-5 z-[60] flex h-8 w-8 items-center justify-center sm:right-8 lg:right-10 md:hidden"
+      >
+        <span
+          className={`absolute inset-0 m-auto h-px w-6 bg-[var(--color-bone)] transition-all duration-300 ease-in-out ${
+            open ? "rotate-45" : "-translate-y-[4px]"
+          }`}
+        />
+        <span
+          className={`absolute inset-0 m-auto h-px w-6 bg-[var(--color-bone)] transition-all duration-300 ease-in-out ${
+            open ? "-rotate-45" : "translate-y-[4px]"
+          }`}
+        />
+      </button>
 
       {/* Menu mobile */}
       <div
