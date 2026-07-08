@@ -43,7 +43,7 @@ export function Header() {
 
         <Link
           href="/contact"
-          className="hidden font-cond text-[14px] text-[var(--color-bone)] transition-colors hover:text-[var(--color-terra)] md:block"
+          className="hidden rounded-full border border-[var(--color-line)] px-5 py-2 font-cond text-[13px] text-[var(--color-bone)] transition-colors hover:border-[var(--color-terra)] hover:bg-[var(--color-terra)] hover:text-[var(--color-ink)] md:block"
         >
           On en parle
         </Link>

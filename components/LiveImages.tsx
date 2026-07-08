@@ -61,10 +61,13 @@ export function LiveImages() {
           </div>
         </div>
 
-        <div className="mt-16 flex justify-center">
+        <div className="mt-16 flex flex-col items-center gap-5">
+          <p className="font-cond text-center text-xs tracking-[0.2em] text-[var(--color-bone-faint)]">
+            Un projet en tête ?
+          </p>
           <Link
             href="/contact"
-            className="font-cond rounded-full border border-[var(--color-line)] px-7 py-3 text-sm text-[var(--color-bone)] transition-colors hover:border-[var(--color-terra)] hover:text-[var(--color-terra)]"
+            className="btn-cta font-cond rounded-full bg-[var(--color-terra)] px-9 py-4 text-sm text-[var(--color-ink)]"
           >
             Démarrer un projet
           </Link>

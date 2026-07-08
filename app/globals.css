@@ -15,8 +15,8 @@
   --color-bone-dim: #9b9384;
   --color-bone-faint: #6e685c;
 
-  /* Accent terracotta — le point signature, parcimonieux */
-  --color-terra: #b96e4d;
+  /* Accent terracotta — le point signature, parcimonieux (valeur charte DA) */
+  --color-terra: #b76e4e;
   --color-terra-dim: #8f5439;
 
   /* Typo : Gloock (logotype/titres), mono (labels/méta), Saira (texte) */
@@ -31,7 +31,7 @@
   :root {
     /* défini explicitement pour garantir l'émission (dev + prod) */
     --color-cream: #e8e4d8;
-    --color-terra: #b96e4d;
+    --color-terra: #b76e4e;
   }
 
   html {
@@ -73,6 +73,24 @@
 /* Le point terracotta signature du logotype */
 .dot {
   color: var(--color-terra);
+}
+
+/* Bouton d'action principal — l'unique aplat terracotta, comme une
+   ponctuation. Relief et halo doux au survol, texte sombre pour la lisibilité. */
+.btn-cta {
+  transition:
+    transform 0.45s var(--ease-out-expo),
+    box-shadow 0.45s var(--ease-out-expo),
+    filter 0.45s var(--ease-out-expo);
+  box-shadow: 0 4px 16px -8px rgba(183, 110, 78, 0.45);
+}
+.btn-cta:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+  box-shadow: 0 14px 34px -10px rgba(183, 110, 78, 0.55);
+}
+.btn-cta:active {
+  transform: translateY(0);
 }
 
 /* ---- Grain argentique : très subtil, clin d'œil au nom ---- */
