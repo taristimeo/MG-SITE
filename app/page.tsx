@@ -4,6 +4,7 @@ import { PlayBadge } from "@/components/Poster";
 import { CardMedia } from "@/components/CardMedia";
 import { RevealTitle } from "@/components/RevealTitle";
 import { LiveImages } from "@/components/LiveImages";
+import { Testimonials } from "@/components/Testimonials";
 import { projects, projectThumb, projectPreview, site } from "@/lib/site";
 
 export default function Home() {
@@ -11,6 +12,7 @@ export default function Home() {
     <>
       <Hero />
       <Works />
+      <Testimonials />
       <LiveImages />
     </>
   );

@@ -106,6 +106,30 @@ export const values: Value[] = [
   },
 ];
 
+// Avis clients (Google) — affichés en preuve sociale sur l'accueil.
+// Noms réduits au prénom + initiale, mentions studio normalisées.
+export type Testimonial = { quote: string; name: string; meta?: string };
+
+export const testimonials: Testimonial[] = [
+  {
+    quote:
+      "Ma femme et moi avons eu la chance de collaborer avec Mauvais Grain pour l'ouverture de notre boutique. Il nous a produit une qualité de travail que nous n'avons jamais trouvée ailleurs. Nous vous le recommandons à 1000%. Merci Timéo.",
+    name: "Samuel C.",
+    meta: "Ouverture de boutique",
+  },
+  {
+    quote:
+      "J'ai eu la chance de travailler avec Mauvais Grain pour plusieurs projets vidéos et c'est excellent ! Un travail remarquable, de qualité, en peu de temps. Si vous cherchez un vidéaste, je recommande vivement.",
+    name: "Pandhi M.",
+    meta: "Saint-Barthélemy",
+  },
+  {
+    quote:
+      "Super expérience avec Timéo : professionnalisme, fiabilité, compétence. Un vrai plaisir de travailler avec lui, avec un résultat au top.",
+    name: "Emmanuelle B.",
+  },
+];
+
 export type Project = {
   slug: string;
   title: string;
