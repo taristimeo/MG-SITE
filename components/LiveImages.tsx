@@ -5,7 +5,6 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 import { Still } from "@/components/Poster";
 import { Parallax } from "@/components/Parallax";
-import { site } from "@/lib/site";
 
 // Section « Donner vie à vos images » : titre révélé ligne par ligne (masque
 // qui monte) et photo qui s'ouvre en se dézoomant, avec léger parallax.
@@ -32,12 +31,7 @@ export function LiveImages() {
   return (
     <section className="relative overflow-hidden px-5 pb-16 pt-20 sm:px-8 sm:pb-24 sm:pt-28 lg:px-10 lg:pt-40">
       <div ref={ref} className={`mx-auto max-w-[1600px] ${inView ? "in-view" : ""}`}>
-        <p className="font-cond text-center text-sm tracking-[0.2em] text-[var(--color-bone-dim)]">
-          {site.name}
-          <span className="dot">.</span>
-        </p>
-
-        <div className="mt-12 flex flex-col items-center">
+        <div className="flex flex-col items-center">
           <h2 className="font-wide text-center text-[clamp(2.4rem,9vw,8.5rem)] leading-[0.98] text-[var(--color-bone)]">
             <span className="mask-line">
               <span>Donner vie</span>
