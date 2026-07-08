@@ -4,6 +4,7 @@ import { RevealTitle } from "@/components/RevealTitle";
 import { MaskTitle } from "@/components/MaskTitle";
 import { StudioStory } from "@/components/StudioStory";
 import { Clients } from "@/components/Clients";
+import { Testimonials } from "@/components/Testimonials";
 import { site, values } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -66,6 +67,9 @@ export default function StudioPage() {
 
       {/* Clients */}
       <Clients />
+
+      {/* Avis clients */}
+      <Testimonials />
 
       {/* Énoncé */}
       <section className="px-5 sm:px-8 lg:px-10">

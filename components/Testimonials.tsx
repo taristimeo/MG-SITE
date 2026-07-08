@@ -30,16 +30,8 @@ export function Testimonials() {
           {testimonials.map((t, i) => (
             <Reveal key={t.name} delay={i * 110}>
               <figure className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--color-line-soft)] bg-[var(--color-ink-2)] p-8 sm:p-9">
-                {/* Guillemet ouvrant, signature terracotta */}
-                <span
-                  aria-hidden
-                  className="font-wide pointer-events-none absolute -top-3 left-6 select-none text-[5.5rem] leading-none text-[var(--color-terra)]"
-                >
-                  &laquo;
-                </span>
-
                 <div
-                  className="relative mb-6 flex gap-1.5 pt-8 text-[var(--color-terra)]"
+                  className="mb-6 flex gap-1.5 text-[var(--color-terra)]"
                   aria-label="Note : 5 sur 5"
                 >
                   {Array.from({ length: 5 }).map((_, s) => (
@@ -48,7 +40,19 @@ export function Testimonials() {
                 </div>
 
                 <blockquote className="font-sans text-[15px] leading-relaxed text-[var(--color-cream)] sm:text-base">
+                  <span
+                    aria-hidden
+                    className="font-wide mr-1 align-[-0.15em] text-xl text-[var(--color-terra)]"
+                  >
+                    &laquo;
+                  </span>
                   {t.quote}
+                  <span
+                    aria-hidden
+                    className="font-wide ml-1 align-[-0.15em] text-xl text-[var(--color-terra)]"
+                  >
+                    &raquo;
+                  </span>
                 </blockquote>
 
                 <figcaption className="mt-auto flex items-center gap-3 pt-9">
