@@ -43,6 +43,7 @@ async function postDevis(payload: unknown): Promise<boolean> {
 }
 
 export function DevisForm() {
+  const [client, setClient] = useState("");
   const [type, setType] = useState("");
   const [projet, setProjet] = useState("");
   const [echeance, setEcheance] = useState("");
@@ -52,13 +53,16 @@ export function DevisForm() {
   const [touched, setTouched] = useState(false);
 
   const errors = {
+    client: !client.trim(),
     type: !type.trim(),
     projet: !projet.trim(),
     contact: !contact.trim(),
   };
-  const invalid = errors.type || errors.projet || errors.contact;
+  const invalid =
+    errors.client || errors.type || errors.projet || errors.contact;
 
   function reset() {
+    setClient("");
     setType("");
     setProjet("");
     setEcheance("");
@@ -75,6 +79,7 @@ export function DevisForm() {
 
     // On ne transmet que les champs non vides, dans l'ordre attendu.
     const data: Record<string, string> = {
+      client: client.trim(),
       type: type.trim(),
       projet: projet.trim(),
     };
@@ -127,6 +132,28 @@ export function DevisForm() {
       className="mx-auto max-w-[560px] text-left"
     >
       <div className="flex flex-col gap-6">
+        {/* Nom / société — pré-remplit le client dans le cockpit */}
+        <div>
+          <label htmlFor="devis-client" className={labelClass}>
+            Votre nom ou société{" "}
+            <span className="text-[var(--color-terra)]">*</span>
+          </label>
+          <input
+            id="devis-client"
+            type="text"
+            value={client}
+            onChange={(e) => setClient(e.target.value)}
+            aria-invalid={touched && errors.client}
+            placeholder="Prénom Nom, ou raison sociale"
+            className={fieldClass}
+          />
+          {touched && errors.client && (
+            <p className="font-cond mt-2 text-[11px] tracking-[0.1em] text-[var(--color-terra)]">
+              Champ requis
+            </p>
+          )}
+        </div>
+
         {/* Type de projet */}
         <div>
           <label htmlFor="devis-type" className={labelClass}>
