@@ -94,7 +94,7 @@ export function DevisForm() {
   if (status === "success") {
     return (
       <div
-        className="mx-auto max-w-[560px] rounded-2xl border border-[var(--color-line-soft)] bg-[var(--color-ink-2)] px-8 py-14 text-center"
+        className="mx-auto max-w-[560px] px-2 py-8 text-center"
         role="status"
         aria-live="polite"
       >

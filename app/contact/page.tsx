@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Reveal } from "@/components/Reveal";
 import { RevealTitle } from "@/components/RevealTitle";
-import { DevisForm } from "@/components/DevisForm";
+import { DevisModal } from "@/components/DevisModal";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -24,18 +24,26 @@ export default function ContactPage() {
             text="On en parle"
             className="mt-3 text-[clamp(2rem,6.5vw,5rem)] text-[var(--color-cream)]"
           />
-          <Reveal delay={140}>
-            <p className="font-sans mx-auto mt-6 max-w-[46ch] text-[15px] leading-relaxed text-[var(--color-bone-dim)]">
-              Décrivez votre projet en quelques lignes, on vous répond avec une
-              proposition claire.
-            </p>
-          </Reveal>
         </div>
 
-        {/* Formulaire de devis */}
-        <div className="mt-14 sm:mt-16">
+        {/* Carte d'appel — ouvre le formulaire de devis en fenêtre */}
+        <div className="mx-auto mt-14 max-w-[600px] sm:mt-16">
           <Reveal delay={200}>
-            <DevisForm />
+            <div className="rounded-2xl border border-[var(--color-line-soft)] bg-[var(--color-ink-2)] p-8 text-center sm:p-10">
+              <p className="font-cond text-[11px] tracking-[0.22em] text-[var(--color-bone-faint)]">
+                Devis sans engagement
+              </p>
+              <p className="font-wide mt-3 text-[clamp(1.3rem,3.4vw,2rem)] leading-tight text-[var(--color-cream)]">
+                Parlez-nous de votre projet
+              </p>
+              <p className="font-sans mx-auto mt-3 max-w-[42ch] text-sm leading-relaxed text-[var(--color-bone-dim)]">
+                Quelques lignes suffisent — on revient vers vous avec une
+                proposition adaptée.
+              </p>
+              <div className="mt-8 flex justify-center">
+                <DevisModal label="Demander un devis" />
+              </div>
+            </div>
           </Reveal>
         </div>
 
