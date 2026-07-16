@@ -5,8 +5,8 @@ import { DevisModal } from "@/components/DevisModal";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "On en parle",
-  description: `Démarrer un projet avec ${site.name} — studio de production vidéo à ${site.city}.`,
+  title: "Contact — Demander un devis",
+  description: `Demandez un devis à ${site.name}, studio de production vidéo à ${site.city}. Parlez-nous de votre projet vidéo : corporate, événement, mariage, publicité ou clip.`,
   alternates: { canonical: "/contact" },
 };
 

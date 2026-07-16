@@ -140,7 +140,10 @@ export default async function ProjectPage({
       ) : (
         <div className="px-5 sm:px-8 lg:px-10">
           <div className="relative mx-auto aspect-video max-w-[1600px] overflow-hidden rounded-2xl bg-[var(--color-ink-2)]">
-            <Still src={projectThumb(project)} alt={project.title} />
+            <Still
+              src={projectThumb(project)}
+              alt={`${project.title} — ${project.category} · film réalisé par Mauvais Grain`}
+            />
           </div>
         </div>
       )}

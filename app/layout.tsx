@@ -4,7 +4,7 @@ import "./globals.css";
 import { Grain } from "@/components/Grain";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { site } from "@/lib/site";
+import { services, site } from "@/lib/site";
 
 // Logotype & titres — Gloock (serif display fort contraste, cf. la charte).
 const gloock = Gloock({
@@ -63,7 +63,9 @@ const localBusinessLd = {
   "@type": "ProfessionalService",
   "@id": `${site.url}/#studio`,
   name: site.name,
+  alternateName: `${site.name} — Studio de production vidéo`,
   description: site.intro,
+  slogan: site.tagline,
   url: site.url,
   email: site.email,
   telephone: site.phoneHref,
@@ -71,6 +73,7 @@ const localBusinessLd = {
   logo: `${site.url}/icon.png`,
   foundingDate: site.founded,
   founder: { "@type": "Person", name: site.founder },
+  knowsLanguage: ["fr-FR"],
   address: {
     "@type": "PostalAddress",
     streetAddress: site.street,
@@ -84,8 +87,30 @@ const localBusinessLd = {
     latitude: site.geo.lat,
     longitude: site.geo.lng,
   },
-  areaServed: { "@type": "Country", name: "France" },
+  // Zones desservies — signal fort pour le référencement local.
+  areaServed: [
+    { "@type": "City", name: "Bordeaux" },
+    { "@type": "AdministrativeArea", name: "Gironde" },
+    { "@type": "AdministrativeArea", name: "Nouvelle-Aquitaine" },
+    { "@type": "Country", name: "France" },
+  ],
+  serviceType: services.map((s) => s.title),
   sameAs: site.socials.map((s) => s.href),
+  // Catalogue de prestations — aide Google à comprendre ce que tu proposes.
+  hasOfferCatalog: {
+    "@type": "OfferCatalog",
+    name: "Production vidéo",
+    itemListElement: services.map((s) => ({
+      "@type": "Offer",
+      itemOffered: {
+        "@type": "Service",
+        name: s.title,
+        description: s.line,
+        provider: { "@id": `${site.url}/#studio` },
+        areaServed: { "@type": "Country", name: "France" },
+      },
+    })),
+  },
 };
 
 export default function RootLayout({

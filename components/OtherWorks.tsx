@@ -50,7 +50,7 @@ export function OtherWorks({ projects }: { projects: Project[] }) {
                 <CardMedia
                   src={projectThumb(p)}
                   videoSrc={projectPreview(p)}
-                  alt={`${p.title} — ${p.category}`}
+                  alt={`${p.title} — ${p.category} · film Mauvais Grain`}
                 />
               </div>
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />

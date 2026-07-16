@@ -8,8 +8,8 @@ import { Testimonials } from "@/components/Testimonials";
 import { site, values } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Studio",
-  description: `${site.name} — studio de production vidéo à ${site.city}. ${site.intro}`,
+  title: "Studio — Vidéaste & réalisateur à Bordeaux",
+  description: `${site.name}, studio de production vidéo fondé par ${site.founder} à ${site.city}. Notre approche : observer avant de filmer, du repérage à la post-production.`,
   alternates: { canonical: "/studio" },
 };
 

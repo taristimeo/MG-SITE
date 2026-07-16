@@ -52,7 +52,7 @@ export function WorksList() {
                 <CardMedia
                   src={projectThumb(p)}
                   videoSrc={projectPreview(p)}
-                  alt={`${p.title} — ${p.category}`}
+                  alt={`${p.title} — ${p.category} · film Mauvais Grain, studio vidéo à Bordeaux`}
                 />
               </div>
               <div

@@ -4,8 +4,8 @@ import { WorksList } from "@/components/WorksList";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Réalisations",
-  description: `Toutes les réalisations de ${site.name} — ${site.intro}`,
+  title: "Réalisations — Films & vidéos",
+  description: `Portfolio de ${site.name}, studio de production vidéo à ${site.city} : films corporate, événementiel, clips, tourisme et publicité. Découvrez nos réalisations.`,
   alternates: { canonical: "/realisations" },
 };
 

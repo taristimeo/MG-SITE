@@ -39,7 +39,13 @@ export function CardMedia({ src, alt, videoSrc, className = "" }: CardMediaProps
   if (!videoSrc) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
-      <img src={src} alt={alt} className={`h-full w-full object-cover ${className}`} />
+      <img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        decoding="async"
+        className={`h-full w-full object-cover ${className}`}
+      />
     );
   }
 
