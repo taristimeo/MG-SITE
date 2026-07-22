@@ -6,10 +6,10 @@ import { processSteps } from "@/lib/site";
 const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
 
 // Frise du process, du repérage à l'étalonnage. Horizontale sur desktop,
-// verticale sur mobile. Le trait de liaison se TRACE au scroll (scaleX / scaleY
-// avec origine, comme .story-rule) et un seul point terracotta reste actif — le
-// front de progression. En prefers-reduced-motion : trait plein, dernier point
-// actif, aucun mouvement (voir globals.css + garde JS ci-dessous).
+// verticale sur mobile. Quand la frise entre à l'écran, une tête de lecture
+// AVANCE DANS LE TEMPS : le trait se remplit progressivement et chaque étape
+// s'allume l'une après l'autre (le point actif « ping »). En
+// prefers-reduced-motion : trait plein, dernier point actif, aucun mouvement.
 export function Process() {
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const hFillRef = useRef<HTMLSpanElement | null>(null);
@@ -33,37 +33,51 @@ export function Process() {
       }
     };
 
-    // Repli sans animation : trait plein, dernier point actif.
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      if (hFillRef.current) hFillRef.current.style.transform = "scaleX(1)";
-      if (vFillRef.current) vFillRef.current.style.transform = "scaleY(1)";
-      paintDots(n - 1, () => true);
-      return;
-    }
-
-    let raf = 0;
-    const render = () => {
-      raf = 0;
-      const rect = section.getBoundingClientRect();
-      const vh = window.innerHeight;
-      // Progression : 0 quand la frise entre par le bas, 1 quand elle atteint
-      // le tiers haut de l'écran.
-      const p = clamp01((vh * 0.82 - rect.top) / (vh * 0.82 - vh * 0.32));
+    // Applique une progression p ∈ [0,1] : remplit le trait et allume les points
+    // jusqu'à la tête de lecture.
+    const setProgress = (p: number) => {
       if (hFillRef.current) hFillRef.current.style.transform = `scaleX(${p})`;
       if (vFillRef.current) vFillRef.current.style.transform = `scaleY(${p})`;
       const active = Math.min(n - 1, Math.round(p * (n - 1)));
       paintDots(active, (i) => p >= i / (n - 1) - 0.02);
     };
-    const onScroll = () => {
-      if (!raf) raf = requestAnimationFrame(render);
+
+    // Repli sans animation : trait plein, dernier point actif.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setProgress(1);
+      return;
+    }
+
+    // Adoucissement (easeInOutSine) : départ et arrivée en douceur, vitesse
+    // régulière au milieu — comme une horloge qui avance.
+    const ease = (t: number) => -(Math.cos(Math.PI * t) - 1) / 2;
+    // Durée calée sur le nombre d'étapes (~0,5 s par étape) pour qu'on voie
+    // chaque étape s'allumer tour à tour.
+    const duration = Math.max(2400, n * 500);
+
+    let raf = 0;
+    let startTs = 0;
+    const tick = (ts: number) => {
+      if (!startTs) startTs = ts;
+      const t = clamp01((ts - startTs) / duration);
+      setProgress(ease(t));
+      raf = t < 1 ? requestAnimationFrame(tick) : 0;
     };
 
-    render();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
+    // On ne lance la progression que lorsque la frise entre dans le champ.
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          io.disconnect();
+          raf = requestAnimationFrame(tick);
+        }
+      },
+      { threshold: 0.4 },
+    );
+    io.observe(section);
+
     return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
+      io.disconnect();
       if (raf) cancelAnimationFrame(raf);
     };
   }, [n]);

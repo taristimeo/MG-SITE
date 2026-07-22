@@ -501,8 +501,20 @@
 }
 .process-dot[data-state="active"] {
   background: var(--color-terra);
-  box-shadow: 0 0 0 4px rgba(183, 110, 78, 0.16);
   transform: scale(1.35);
+  animation: process-pulse 1.6s var(--ease-out-expo) infinite;
+}
+/* Le point actif « ping » comme une tête de lecture qui avance dans le temps. */
+@keyframes process-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(183, 110, 78, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 9px rgba(183, 110, 78, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(183, 110, 78, 0);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -523,6 +535,10 @@
   }
   .process-dot {
     transition: none;
+  }
+  .process-dot[data-state="active"] {
+    animation: none;
+    box-shadow: 0 0 0 4px rgba(183, 110, 78, 0.16);
   }
   .mask-line > span,
   .img-open {
