@@ -30,7 +30,10 @@ async function postDevis(payload: unknown): Promise<boolean> {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (res.ok) return true;
+      // On valide le contrat de l'API : succès = HTTP 200 avec { ok: true }.
+      // Un 200 sans ce corps ne doit PAS être compté comme un succès.
+      const body = await res.json().catch(() => null);
+      if (res.ok) return body?.ok === true;
       // 4xx : erreur définitive, on n'insiste pas.
       if (res.status >= 400 && res.status < 500) return false;
       // 5xx : on relance (via le catch).
@@ -144,11 +147,17 @@ export function DevisForm() {
             value={client}
             onChange={(e) => setClient(e.target.value)}
             aria-invalid={touched && errors.client}
+            aria-describedby={
+              touched && errors.client ? "devis-client-error" : undefined
+            }
             placeholder="Prénom Nom, ou raison sociale"
             className={fieldClass}
           />
           {touched && errors.client && (
-            <p className="font-cond mt-2 text-[11px] tracking-[0.1em] text-[var(--color-terra)]">
+            <p
+              id="devis-client-error"
+              className="font-cond mt-2 text-[11px] tracking-[0.1em] text-[var(--color-terra)]"
+            >
               Champ requis
             </p>
           )}
@@ -165,6 +174,9 @@ export function DevisForm() {
               value={type}
               onChange={(e) => setType(e.target.value)}
               aria-invalid={touched && errors.type}
+              aria-describedby={
+                touched && errors.type ? "devis-type-error" : undefined
+              }
               className={`${fieldClass} appearance-none pr-10 ${type ? "" : "text-[var(--color-bone-faint)]"}`}
             >
               <option value="" disabled>
@@ -184,7 +196,10 @@ export function DevisForm() {
             </span>
           </div>
           {touched && errors.type && (
-            <p className="font-cond mt-2 text-[11px] tracking-[0.1em] text-[var(--color-terra)]">
+            <p
+              id="devis-type-error"
+              className="font-cond mt-2 text-[11px] tracking-[0.1em] text-[var(--color-terra)]"
+            >
               Champ requis
             </p>
           )}
@@ -202,11 +217,17 @@ export function DevisForm() {
             onChange={(e) => setProjet(e.target.value)}
             rows={5}
             aria-invalid={touched && errors.projet}
+            aria-describedby={
+              touched && errors.projet ? "devis-projet-error" : undefined
+            }
             placeholder="Contexte, objectif, format, lieu…"
             className={`${fieldClass} resize-y`}
           />
           {touched && errors.projet && (
-            <p className="font-cond mt-2 text-[11px] tracking-[0.1em] text-[var(--color-terra)]">
+            <p
+              id="devis-projet-error"
+              className="font-cond mt-2 text-[11px] tracking-[0.1em] text-[var(--color-terra)]"
+            >
               Champ requis
             </p>
           )}
@@ -254,11 +275,17 @@ export function DevisForm() {
             value={contact}
             onChange={(e) => setContact(e.target.value)}
             aria-invalid={touched && errors.contact}
+            aria-describedby={
+              touched && errors.contact ? "devis-contact-error" : undefined
+            }
             placeholder="E-mail ou téléphone"
             className={fieldClass}
           />
           {touched && errors.contact && (
-            <p className="font-cond mt-2 text-[11px] tracking-[0.1em] text-[var(--color-terra)]">
+            <p
+              id="devis-contact-error"
+              className="font-cond mt-2 text-[11px] tracking-[0.1em] text-[var(--color-terra)]"
+            >
               Champ requis
             </p>
           )}

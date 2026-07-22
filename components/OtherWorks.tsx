@@ -39,8 +39,13 @@ export function OtherWorks({ projects }: { projects: Project[] }) {
             href={`/realisations/${p.slug}`}
             className={`group/card [grid-area:1/1] w-[clamp(130px,44vw,360px)] transition-transform duration-[850ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform ${zClass} ${desktopRest} ${desktopHover} ${deployed ? mobileDeployed : ""}`}
             // prevent the link from firing on the first tap (which deploys the fan)
+            // only on coarse/touch pointers: on a fine pointer (desktop mouse) the
+            // fan opens on CSS hover, so the first click must navigate normally.
             onClick={(e) => {
-              if (!deployed) {
+              const coarse =
+                typeof window !== "undefined" &&
+                window.matchMedia("(hover: none)").matches;
+              if (coarse && !deployed) {
                 e.preventDefault();
               }
             }}

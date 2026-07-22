@@ -70,8 +70,10 @@ export function Header() {
         />
       </button>
 
-      {/* Menu mobile */}
+      {/* Menu mobile — inerte quand fermé : liens ni focusables ni annoncés */}
       <div
+        inert={!open}
+        aria-hidden={!open}
         className={`fixed inset-0 flex flex-col justify-center overflow-hidden bg-[var(--color-ink)] px-8 transition-opacity duration-500 md:hidden ${
           open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         }`}

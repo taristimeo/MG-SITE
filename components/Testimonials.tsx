@@ -27,8 +27,15 @@ function Star({ className }: { className?: string }) {
 function Card({ t, index }: { t: Testimonial; index: number }) {
   const ref = useRef<HTMLElement>(null);
   const [on, setOn] = useState(false);
+  const [reduced, setReduced] = useState(false);
 
   useEffect(() => {
+    // prefers-reduced-motion : on affiche tout immédiatement, sans transitions.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setReduced(true);
+      setOn(true);
+      return;
+    }
     const el = ref.current;
     if (!el) return;
     const io = new IntersectionObserver(
@@ -55,14 +62,20 @@ function Card({ t, index }: { t: Testimonial; index: number }) {
       className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--color-line-soft)] bg-[var(--color-ink-2)] p-8 sm:p-9"
     >
       {/* Étoiles — remplissage séquentiel */}
-      <div className="mb-6 flex gap-1.5" aria-label="Note : 5 sur 5">
+      <div
+        className="mb-6 flex gap-1.5"
+        role="img"
+        aria-label="Note : 5 sur 5"
+      >
         {Array.from({ length: 5 }).map((_, s) => (
           <span key={s} className="relative inline-flex">
             <Star className="text-[var(--color-line)]" />
             <span
               className="absolute inset-0 inline-flex text-[var(--color-terra)]"
               style={{
-                transition: `opacity 340ms ${EASE}, transform 340ms ${EASE}`,
+                transition: reduced
+                  ? "none"
+                  : `opacity 340ms ${EASE}, transform 340ms ${EASE}`,
                 transitionDelay: on ? `${starsStart + s * 120}ms` : "0ms",
                 opacity: on ? 1 : 0,
                 transform: on ? "scale(1)" : "scale(0.3)",
@@ -78,7 +91,9 @@ function Card({ t, index }: { t: Testimonial; index: number }) {
       <blockquote
         className="font-sans text-[15px] leading-relaxed text-[var(--color-cream)] sm:text-base"
         style={{
-          transition: `opacity 700ms ${EASE}, transform 700ms ${EASE}`,
+          transition: reduced
+            ? "none"
+            : `opacity 700ms ${EASE}, transform 700ms ${EASE}`,
           transitionDelay: on ? `${base}ms` : "0ms",
           opacity: on ? 1 : 0,
           transform: on ? "translateY(0)" : "translateY(12px)",
@@ -104,7 +119,7 @@ function Card({ t, index }: { t: Testimonial; index: number }) {
         <span
           className="h-px w-7 origin-left bg-[var(--color-terra)]"
           style={{
-            transition: `transform 560ms ${EASE}`,
+            transition: reduced ? "none" : `transform 560ms ${EASE}`,
             transitionDelay: on ? `${lineStart}ms` : "0ms",
             transform: on ? "scaleX(1)" : "scaleX(0)",
           }}
@@ -112,7 +127,9 @@ function Card({ t, index }: { t: Testimonial; index: number }) {
         <span
           className="font-cond text-sm text-[var(--color-bone)]"
           style={{
-            transition: `opacity 520ms ${EASE}, transform 520ms ${EASE}`,
+            transition: reduced
+              ? "none"
+              : `opacity 520ms ${EASE}, transform 520ms ${EASE}`,
             transitionDelay: on ? `${nameStart}ms` : "0ms",
             opacity: on ? 1 : 0,
             transform: on ? "translateX(0)" : "translateX(-8px)",

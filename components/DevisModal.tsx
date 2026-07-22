@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { DevisForm } from "@/components/DevisForm";
 
@@ -16,25 +16,74 @@ export function DevisModal({
 }) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+  // Élément déclencheur mémorisé pour restaurer le focus à la fermeture.
+  const triggerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => setMounted(true), []);
 
-  // Verrou du scroll de la page + fermeture au clavier (Échap).
+  // Verrou du scroll + fermeture clavier (Échap) + gestion du focus (a11y).
   useEffect(() => {
     if (!open) return;
     document.body.style.overflow = "hidden";
+
+    // Mémorise l'élément qui avait le focus avant l'ouverture.
+    triggerRef.current = document.activeElement as HTMLElement | null;
+
+    const focusables = () =>
+      Array.from(
+        panelRef.current?.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])',
+        ) ?? [],
+      ).filter((el) => el.offsetParent !== null || el === document.activeElement);
+
+    // Déplace le focus dans la modale (1er champ, sinon le panneau).
+    const first = focusables()[0];
+    (first ?? panelRef.current)?.focus();
+
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        setOpen(false);
+        return;
+      }
+      // Piège de focus : Tab / Shift+Tab bouclent à l'intérieur du panneau.
+      if (e.key === "Tab") {
+        const items = focusables();
+        if (items.length === 0) {
+          e.preventDefault();
+          panelRef.current?.focus();
+          return;
+        }
+        const firstEl = items[0];
+        const lastEl = items[items.length - 1];
+        const active = document.activeElement;
+        if (e.shiftKey) {
+          if (active === firstEl || !panelRef.current?.contains(active)) {
+            e.preventDefault();
+            lastEl.focus();
+          }
+        } else if (active === lastEl || !panelRef.current?.contains(active)) {
+          e.preventDefault();
+          firstEl.focus();
+        }
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = "";
       window.removeEventListener("keydown", onKey);
+      // Restaure le focus sur l'élément déclencheur.
+      triggerRef.current?.focus?.();
     };
   }, [open]);
 
   const overlay = (
-    <div className="fixed inset-0 z-[100] overflow-y-auto overscroll-contain">
+    <div
+      className="fixed inset-0 z-[100] overflow-y-auto overscroll-contain"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="devis-modal-title"
+    >
       {/* Fond assombri — couvre tout l'écran, ferme au clic */}
       <div
         className="modal-backdrop fixed inset-0 bg-[rgba(6,5,4,0.78)] backdrop-blur-sm"
@@ -43,13 +92,20 @@ export function DevisModal({
 
       {/* Zone centrée et défilable si le contenu dépasse la hauteur d'écran */}
       <div className="relative flex min-h-full items-center justify-center p-4 sm:p-6">
-        <div className="modal-panel relative w-full max-w-[600px] rounded-2xl border border-[var(--color-line-soft)] bg-[var(--color-ink)] p-6 shadow-2xl sm:p-9">
+        <div
+          ref={panelRef}
+          tabIndex={-1}
+          className="modal-panel relative w-full max-w-[600px] rounded-2xl border border-[var(--color-line-soft)] bg-[var(--color-ink)] p-6 shadow-2xl outline-none sm:p-9"
+        >
           <div className="mb-7 flex items-start justify-between gap-4">
             <div>
               <p className="font-cond text-[11px] tracking-[0.22em] text-[var(--color-bone-faint)]">
                 Un projet en tête ?
               </p>
-              <h2 className="font-wide mt-2 text-[clamp(1.5rem,4.2vw,2.2rem)] leading-none text-[var(--color-cream)]">
+              <h2
+                id="devis-modal-title"
+                className="font-wide mt-2 text-[clamp(1.5rem,4.2vw,2.2rem)] leading-none text-[var(--color-cream)]"
+              >
                 Demander un devis<span className="dot">.</span>
               </h2>
             </div>
