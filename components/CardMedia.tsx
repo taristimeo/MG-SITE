@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type CardMediaProps = {
   src: string; // image (poster / still) — toujours affichée d'abord
@@ -16,6 +16,16 @@ type CardMediaProps = {
 // instantanément pendant que la vidéo se charge.
 export function CardMedia({ src, alt, videoSrc, className = "" }: CardMediaProps) {
   const ref = useRef<HTMLVideoElement | null>(null);
+  const [saveData, setSaveData] = useState(false);
+
+  // Économiseur de données actif (ou connexion qui le demande) : on s'en tient
+  // à l'image — aucune vidéo téléchargée ni décodée.
+  useEffect(() => {
+    const conn = (
+      navigator as { connection?: { saveData?: boolean } }
+    ).connection;
+    if (conn?.saveData) setSaveData(true);
+  }, []);
 
   useEffect(() => {
     const el = ref.current;
@@ -36,7 +46,7 @@ export function CardMedia({ src, alt, videoSrc, className = "" }: CardMediaProps
     return () => io.disconnect();
   }, []);
 
-  if (!videoSrc) {
+  if (!videoSrc || saveData) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img

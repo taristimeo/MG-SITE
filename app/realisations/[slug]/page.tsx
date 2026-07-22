@@ -7,11 +7,10 @@ import { OtherWorks } from "@/components/OtherWorks";
 import { ProjectStory } from "@/components/ProjectStory";
 import { ProjectVideo } from "@/components/ProjectVideo";
 import { Reveal } from "@/components/Reveal";
-import { CardMedia } from "@/components/CardMedia";
+import { HeroZoom } from "@/components/HeroZoom";
 import {
   projectCredits,
   projects,
-  projectPreview,
   projectSuggestions,
   projectThumb,
   site,
@@ -122,16 +121,15 @@ export default async function ProjectPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
-      {/* Hero cinéma : la preview du film en fond très assombri, le titre
-          par-dessus (façon générique de film qui s'ouvre sur une image). */}
+      {/* Hero cinéma : le still du film en fond très assombri (zoom arrière au
+          scroll), le titre par-dessus. La vidéo, c'est le lecteur en dessous —
+          une seule vidéo par page, l'image d'ouverture ne consomme rien. */}
       <header className="relative flex min-h-[68svh] flex-col items-center justify-center overflow-hidden px-5 pt-20 text-center sm:min-h-[78svh] sm:px-8 sm:pt-28">
         <div aria-hidden className="absolute inset-0">
           <div className="h-full w-full opacity-40">
-            <CardMedia
-              src={projectThumb(project)}
-              videoSrc={projectPreview(project)}
-              alt=""
-            />
+            <HeroZoom>
+              <Still src={projectThumb(project)} alt="" />
+            </HeroZoom>
           </div>
           {/* Voiles : le fond reste une ambiance, jamais une distraction */}
           <div className="absolute inset-0 bg-[rgba(10,9,8,0.35)]" />

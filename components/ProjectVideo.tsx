@@ -20,28 +20,30 @@ export function ProjectVideo({
   useEffect(() => {
     const node = frameRef.current;
     if (!node) return;
-    // En reduced-motion : pas d'animation ni de lecture auto, on garde le clic.
+    // En reduced-motion : pas d'animation, on garde le clic.
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       node.classList.add("is-in");
       return;
     }
 
-    // Lance la lecture muette ~1 s après la fin de l'ouverture (≈1,8 s).
-    let timer: ReturnType<typeof setTimeout> | undefined;
+    // Le lecteur ne doit JAMAIS rester invisible : si l'observer ne déclenche
+    // pas (viewport atypique, scroll rapide), un filet l'ouvre quand même.
+    const fallback = setTimeout(() => node.classList.add("is-in"), 1400);
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           node.classList.add("is-in");
           observer.disconnect();
-          timer = setTimeout(() => setPlaying(true), 2800);
         }
       },
       { threshold: 0.2 },
     );
     observer.observe(node);
+    // La lecture YouTube ne démarre qu'AU CLIC : pas d'iframe (~1 Mo de JS
+    // tiers) chargée d'office — meilleur pour la batterie, la data et l'INP.
     return () => {
       observer.disconnect();
-      if (timer) clearTimeout(timer);
+      clearTimeout(fallback);
     };
   }, []);
 

@@ -659,6 +659,10 @@ html {
   html.snap-films {
     scroll-snap-type: none;
   }
+  /* Défilé de logos arrêté : la rangée devient défilable manuellement */
+  .marquee-wrap {
+    overflow-x: auto;
+  }
   .avail-dot::after {
     animation: none;
     display: none;

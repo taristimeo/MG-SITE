@@ -85,6 +85,18 @@ export const clients: Client[] = [
   { name: "Wimco", logo: "/clients/wimco.png" },
 ];
 
+// Le fondateur — trois partis pris issus du brand book, révélés ligne à ligne
+// dans le portrait de la page Studio.
+export const founder = {
+  name: "Timéo Taris",
+  role: "Réalisateur & fondateur",
+  lines: [
+    "Observer plutôt que mettre en scène.",
+    "Accompagner plutôt que diriger.",
+    "Raconter plutôt que vendre.",
+  ],
+} as const;
+
 // Manifeste — la phrase signature du brand book, révélée mot à mot au scroll
 // sur l'accueil (les mots « accents » passent en terracotta).
 export const manifesto = {

@@ -9,9 +9,11 @@ import { Testimonials } from "@/components/Testimonials";
 import { DevisModal } from "@/components/DevisModal";
 import { Still } from "@/components/Poster";
 import { HeroFade } from "@/components/HeroFade";
+import { HeroZoom } from "@/components/HeroZoom";
 import { Manifesto } from "@/components/Manifesto";
 import { MethodRail } from "@/components/MethodRail";
-import { site } from "@/lib/site";
+import { Parallax } from "@/components/Parallax";
+import { founder, site } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Studio — Vidéaste & réalisateur à Bordeaux",
@@ -47,7 +49,9 @@ export default function StudioPage() {
       <section className="relative flex min-h-[80svh] flex-col justify-center overflow-hidden px-5 pt-20 sm:min-h-[88svh] sm:px-8 sm:pt-24 lg:px-10">
         <div aria-hidden className="absolute inset-0">
           <div className="h-full w-full opacity-30">
-            <Still src="/projects/the-shape-of-vastness/1.jpg" alt="" />
+            <HeroZoom>
+              <Still src="/projects/the-shape-of-vastness/1.jpg" alt="" />
+            </HeroZoom>
           </div>
           <div className="absolute inset-0 bg-[rgba(10,9,8,0.4)]" />
           <div className="absolute inset-0 bg-gradient-to-b from-[rgba(10,9,8,0.85)] via-transparent to-[var(--color-ink)]" />
@@ -76,15 +80,49 @@ export default function StudioPage() {
       {/* Scroll narratif */}
       <StudioStory
         chapters={chapters}
-        imageSrc="/photo-studio.jpg"
-        imageAlt={`${site.founder} — ${site.name}`}
+        imageSrc="/projects/silhouette/1.jpg"
+        imageAlt={`Silhouette — image extraite d'un film ${site.name}`}
       />
 
-      {/* Clients */}
-      <Clients />
+      {/* ── Le regard derrière la caméra ──────────────────────────────── */}
+      <section className="px-5 py-28 sm:px-8 sm:py-40 lg:px-10">
+        <div className="mx-auto grid max-w-[1200px] grid-cols-1 items-center gap-14 lg:grid-cols-2 lg:gap-24">
+          <Reveal>
+            <Parallax amount={30}>
+              <div className="mx-auto aspect-[3/4] w-full max-w-[420px] overflow-hidden rounded-2xl bg-[var(--color-ink-2)]">
+                <Still
+                  src="/photo-studio.jpg"
+                  alt={`${founder.name} — ${founder.role} de ${site.name}`}
+                />
+              </div>
+            </Parallax>
+          </Reveal>
 
-      {/* Avis clients */}
-      <Testimonials />
+          <div className="text-center lg:text-left">
+            <Reveal>
+              <p className="font-cond text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
+                Le regard derrière la caméra
+              </p>
+            </Reveal>
+            <div className="font-wide mt-8 text-[clamp(1.55rem,3.6vw,2.9rem)] leading-[1.16] text-[var(--color-cream)]">
+              {founder.lines.map((l, i) => (
+                <MaskTitle key={l} delay={140 + i * 150}>
+                  <span>{l}</span>
+                </MaskTitle>
+              ))}
+            </div>
+            <Reveal delay={620}>
+              <p className="font-cond mt-10 text-[11px] tracking-[0.22em] text-[var(--color-bone-dim)]">
+                <span
+                  aria-hidden
+                  className="mr-3 inline-block h-px w-8 bg-[var(--color-terra)] align-middle"
+                />
+                {founder.name} · {founder.role}
+              </p>
+            </Reveal>
+          </div>
+        </div>
+      </section>
 
       {/* Énoncé — révélé mot à mot, épinglé plein écran (scrollytelling) */}
       <Manifesto
@@ -108,6 +146,14 @@ export default function StudioPage() {
         </div>
         <Process />
       </section>
+
+      {/* Clients — défilé de logos */}
+      <div className="mt-24 sm:mt-32">
+        <Clients />
+      </div>
+
+      {/* Avis clients */}
+      <Testimonials />
 
       {/* ── La suite s'écrit avec vous ────────────────────────────────── */}
       <section className="px-5 pb-10 pt-28 text-center sm:pt-40">
