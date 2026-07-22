@@ -44,13 +44,13 @@ const chapters = [
 export default function StudioPage() {
   return (
     <>
-      {/* Hero — porté par la vraie photo du studio : la silhouette de Timéo au
-          coucher de soleil (déjà dans les tons terracotta de la marque). */}
+      {/* Hero — porté par un paysage du studio : coucher de soleil sur l'océan
+          (The Shape of Vastness), déjà dans les tons terracotta de la marque. */}
       <section className="relative flex min-h-[80svh] flex-col justify-center overflow-hidden px-5 pt-20 sm:min-h-[88svh] sm:px-8 sm:pt-24 lg:px-10">
         <div aria-hidden className="absolute inset-0">
           <div className="h-full w-full">
             <HeroZoom>
-              <Still src="/photo-studio.jpg" alt="" />
+              <Still src="/projects/the-shape-of-vastness/2.jpg" alt="" />
             </HeroZoom>
           </div>
           {/* Voiles légers : on garde la photo lumineuse, juste assez de contraste
@@ -79,11 +79,12 @@ export default function StudioPage() {
         </HeroFade>
       </section>
 
-      {/* Scroll narratif */}
+      {/* Scroll narratif — image intérim : la silhouette du studio (en attente
+          de la vraie photo de Timéo, à intégrer ici dès réception). */}
       <StudioStory
         chapters={chapters}
-        imageSrc="/projects/silhouette/1.jpg"
-        imageAlt={`Silhouette — image extraite d'un film ${site.name}`}
+        imageSrc="/photo-studio.jpg"
+        imageAlt={`${founder.name} — ${founder.role} de ${site.name}`}
       />
 
       {/* ── Le regard derrière la caméra ──────────────────────────────────
