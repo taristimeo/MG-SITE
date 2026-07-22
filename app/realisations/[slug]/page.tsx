@@ -65,6 +65,10 @@ export default async function ProjectPage({
   const project = projects[index];
   const credits = projectCredits(project);
   const suggestions = projectSuggestions(project, 2);
+  // Navigation cyclique film précédent / suivant (geste « à l'affiche »).
+  const n = projects.length;
+  const prev = projects[(index - 1 + n) % n];
+  const next = projects[(index + 1) % n];
 
   const videoId = youtubeId(project.video);
   const sections = [
@@ -169,10 +173,10 @@ export default async function ProjectPage({
       )}
 
       {/* Générique — centré, révélé ligne à ligne en cascade */}
-      <section className="px-5 py-14 sm:px-8 sm:py-24 lg:py-32">
+      <section className="px-5 py-14 sm:px-8 sm:py-20 lg:py-24">
         <dl className="mx-auto flex max-w-[420px] flex-col items-center gap-6 text-center">
           {credits.map((c, i) => (
-            <Reveal key={c.role} delay={i * 110}>
+            <Reveal key={c.role} delay={i * 70}>
               <dt className="font-cond text-xs tracking-[0.2em] text-[var(--color-terra)]">
                 {c.role}
               </dt>
@@ -195,18 +199,55 @@ export default async function ProjectPage({
           Autres réalisations
         </h2>
         <OtherWorks projects={suggestions} />
-        <div className="mt-16 flex justify-center">
-          <Link
-            href="/realisations"
-            className="font-cond rounded-full border border-[var(--color-line)] px-7 py-3 text-sm text-[var(--color-bone)] transition-colors hover:border-[var(--color-terra)] hover:text-[var(--color-terra)]"
-          >
-            Toutes les réalisations
-          </Link>
-        </div>
       </section>
 
+      {/* Navigation film précédent / suivant — la continuité « à l'affiche » */}
+      <nav className="mt-24 border-t border-[var(--color-line-soft)] px-5 pt-10 sm:mt-32 sm:px-8 lg:px-10">
+        <div className="mx-auto flex max-w-[1100px] items-center justify-between gap-6">
+          <Link href={`/realisations/${prev.slug}`} className="group max-w-[45%]">
+            <p className="font-cond text-[11px] tracking-[0.2em] text-[var(--color-bone-faint)]">
+              <span
+                aria-hidden
+                className="mr-1 inline-block transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-x-2"
+              >
+                ←
+              </span>
+              Film précédent
+            </p>
+            <p className="font-wide mt-2 truncate text-[clamp(1.3rem,2.6vw,2rem)] leading-tight text-[var(--color-bone)] transition-colors duration-500 group-hover:text-[var(--color-cream)]">
+              {prev.title}
+            </p>
+          </Link>
+
+          <Link
+            href="/realisations"
+            className="hidden shrink-0 font-cond text-[11px] tracking-[0.2em] text-[var(--color-bone-faint)] transition-colors duration-300 hover:text-[var(--color-terra)] sm:block"
+          >
+            Tous les films
+          </Link>
+
+          <Link
+            href={`/realisations/${next.slug}`}
+            className="group max-w-[45%] text-right"
+          >
+            <p className="font-cond text-[11px] tracking-[0.2em] text-[var(--color-bone-faint)]">
+              Film suivant
+              <span
+                aria-hidden
+                className="ml-1 inline-block transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-2"
+              >
+                →
+              </span>
+            </p>
+            <p className="font-wide mt-2 truncate text-[clamp(1.3rem,2.6vw,2rem)] leading-tight text-[var(--color-bone)] transition-colors duration-500 group-hover:text-[var(--color-cream)]">
+              {next.title}
+            </p>
+          </Link>
+        </div>
+      </nav>
+
       {/* Appel à l'action — un seul CTA sobre pour ne pas finir en cul-de-sac */}
-      <section className="px-5 pt-28 text-center sm:px-8 sm:pt-40 lg:px-10">
+      <section className="px-5 pt-20 text-center sm:px-8 sm:pt-28 lg:px-10">
         <Reveal>
           <p className="font-cond text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
             Un projet comme celui-ci ?

@@ -32,11 +32,11 @@ function LogoRow({ decorative = false }: { decorative?: boolean }) {
 // s'arrête et la rangée devient défilable au doigt (voir globals.css).
 export function Clients() {
   return (
-    <section className="overflow-hidden px-0 pb-28 pt-8">
+    <section className="overflow-hidden px-0 pb-20 pt-8">
       <div className="px-5 sm:px-8 lg:px-10">
         <Reveal>
           <p className="font-cond text-center text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
-            Ils nous font confiance
+            Nos clients
           </p>
         </Reveal>
         <Reveal delay={120}>

@@ -68,7 +68,7 @@ export default function StudioPage() {
               text="Studio"
               className="mt-3 text-[clamp(2.4rem,7.5vw,6.5rem)] text-[var(--color-cream)]"
             />
-            <Reveal delay={500}>
+            <Reveal delay={700}>
               <p className="font-cond mt-12 text-[0.7rem] tracking-[0.25em] text-[var(--color-bone-faint)]">
                 Défiler <span aria-hidden>↓</span>
               </p>
@@ -124,18 +124,20 @@ export default function StudioPage() {
         </div>
       </section>
 
-      {/* Énoncé — révélé mot à mot, épinglé plein écran (scrollytelling) */}
+      {/* Énoncé — statique ici (le scrollytelling mot-à-mot reste propre à
+          l'accueil) : simple révélation d'une phrase forte. */}
       <Manifesto
         kicker="Le studio"
         text={`${site.name} transforme une idée en histoire visuelle, du repérage à la post-production, avec la même exigence.`}
         accents={["exigence"]}
+        pinned={false}
       />
 
       {/* ── Notre méthode — rail horizontal piloté par le scroll ───────── */}
       <MethodRail />
 
       {/* ── Le process : du repérage à l'étalonnage ───────────────────── */}
-      <section className="mx-auto mt-32 max-w-[1100px] px-5 pb-4 sm:mt-40 sm:px-8 lg:px-10">
+      <section className="mx-auto mt-24 max-w-[1100px] px-5 pb-4 sm:mt-32 sm:px-8 lg:px-10">
         <div className="mb-16 sm:mb-20">
           <p className="font-cond mb-4 text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
             Le process
@@ -148,7 +150,7 @@ export default function StudioPage() {
       </section>
 
       {/* Clients — défilé de logos */}
-      <div className="mt-24 sm:mt-32">
+      <div className="mt-20 sm:mt-24">
         <Clients />
       </div>
 

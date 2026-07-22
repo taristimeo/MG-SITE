@@ -14,8 +14,9 @@ export function OtherWorks({ projects }: { projects: Project[] }) {
   if (pair.length === 0) return null;
 
   return (
+    <div className="mt-14">
     <div
-      className="group relative mx-auto mt-14 grid h-[clamp(220px,56vw,440px)] max-w-[900px] place-items-center [perspective:1400px]"
+      className="group relative mx-auto grid h-[clamp(220px,56vw,440px)] max-w-[900px] place-items-center [perspective:1400px]"
       // tap anywhere on the stack to toggle on mobile
       onClick={() => setDeployed((d) => !d)}
     >
@@ -51,7 +52,7 @@ export function OtherWorks({ projects }: { projects: Project[] }) {
             }}
           >
             <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-[var(--color-ink-2)] shadow-[0_30px_80px_-30px_rgba(0,0,0,0.85)] ring-1 ring-[var(--color-line-soft)]">
-              <div className="h-full w-full transition-transform duration-700 ease-out group-hover/card:scale-[1.06]">
+              <div className="h-full w-full transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/card:scale-[1.06]">
                 <CardMedia
                   src={projectThumb(p)}
                   videoSrc={projectPreview(p)}
@@ -71,6 +72,11 @@ export function OtherWorks({ projects }: { projects: Project[] }) {
           </Link>
         );
       })}
+    </div>
+      {/* Affordance tactile (masquée sur desktop où le survol suffit) */}
+      <p className="mt-6 text-center font-cond text-[10px] tracking-[0.22em] text-[var(--color-bone-faint)] sm:hidden">
+        {deployed ? "Choisir un film" : "Toucher pour déployer"}
+      </p>
     </div>
   );
 }

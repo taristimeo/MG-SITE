@@ -13,10 +13,14 @@ export function Manifesto({
   kicker,
   text,
   accents = [],
+  pinned = true,
 }: {
   kicker: string;
   text: string;
   accents?: string[];
+  // pinned=false : rendu statique (tout le texte visible, pas d'épinglage) —
+  // le scrollytelling mot-à-mot reste un moment unique de l'accueil.
+  pinned?: boolean;
 }) {
   const outerRef = useRef<HTMLElement | null>(null);
   const [p, setP] = useState(0);
@@ -50,16 +54,18 @@ export function Manifesto({
     };
   }, []);
 
+  // Mode « plat » : mouvement réduit OU manifeste non épinglé (Studio).
+  const flat = reduced || !pinned;
   const words = text.split(/\s+/);
   const accentSet = new Set(accents.map((a) => a.toLowerCase()));
   // Légère avance pour que la phrase soit complète juste avant le dépin.
-  const shown = reduced ? words.length : Math.floor(p * words.length * 1.15);
+  const shown = flat ? words.length : Math.floor(p * words.length * 1.15);
 
   return (
-    <section ref={outerRef} className={reduced ? "py-32" : "h-[190vh]"}>
+    <section ref={outerRef} className={flat ? "py-28 sm:py-36" : "h-[190vh]"}>
       <div
         className={
-          reduced
+          flat
             ? "flex items-center justify-center"
             : "sticky top-0 flex h-svh items-center justify-center"
         }
@@ -81,7 +87,7 @@ export function Manifesto({
                         ? "var(--color-terra)"
                         : "var(--color-cream)"
                       : "rgba(232, 228, 216, 0.14)",
-                    transition: reduced ? "none" : "color 0.35s ease-out",
+                    transition: flat ? "none" : "color 0.35s ease-out",
                   }}
                 >
                   {w}{" "}

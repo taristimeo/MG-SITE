@@ -53,8 +53,8 @@ function Card({ t, index }: { t: Testimonial; index: number }) {
 
   const base = index * 140; // léger décalage entre les cartes
   const starsStart = base + 220; // les étoiles suivent de près le texte
-  const lineStart = starsStart + 5 * 120 + 120; // après la dernière étoile
-  const nameStart = lineStart + 260;
+  const lineStart = starsStart + 5 * 90 + 100; // après la dernière étoile
+  const nameStart = lineStart + 160; // séquence totale < 1,3 s
 
   return (
     <figure
@@ -76,7 +76,7 @@ function Card({ t, index }: { t: Testimonial; index: number }) {
                 transition: reduced
                   ? "none"
                   : `opacity 340ms ${EASE}, transform 340ms ${EASE}`,
-                transitionDelay: on ? `${starsStart + s * 120}ms` : "0ms",
+                transitionDelay: on ? `${starsStart + s * 90}ms` : "0ms",
                 opacity: on ? 1 : 0,
                 transform: on ? "scale(1)" : "scale(0.3)",
               }}
