@@ -435,7 +435,9 @@ html {
 .mask-line {
   display: block;
   overflow: hidden;
-  padding-bottom: 0.04em; /* évite de rogner les jambages */
+  /* Réserve sous la ligne de base pour ne pas rogner les jambages (g, j, p…)
+     de Gloock, marqués aux grandes tailles. */
+  padding-bottom: 0.16em;
 }
 .mask-line > span {
   display: block;
