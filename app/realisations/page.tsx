@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Reveal } from "@/components/Reveal";
 import { RevealTitle } from "@/components/RevealTitle";
-import { WorksIndex } from "@/components/WorksIndex";
+import { WorksCinema } from "@/components/WorksCinema";
 import { projects, site } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -10,14 +10,14 @@ export const metadata: Metadata = {
   alternates: { canonical: "/realisations" },
 };
 
-// Page « Réalisations » : index façon programmation de festival — grandes
-// lignes typographiques, aperçu vidéo flottant au survol (desktop), vignettes
-// embarquées sur mobile.
+// Page « Réalisations » : après l'écran-titre, chaque film occupe un écran
+// entier (preview plein cadre, générique bas de cadre) et le scroll s'aimante
+// de film en film — comme on passe d'une salle à l'autre.
 export default function RealisationsPage() {
   return (
-    <section className="px-5 pb-20 pt-24 sm:px-8 sm:pb-28 sm:pt-32 lg:px-10 lg:pt-40">
-      <div className="mx-auto max-w-[1200px]">
-        <div className="text-center">
+    <>
+      <section className="px-5 pb-4 pt-24 sm:px-8 sm:pt-32 lg:pt-40">
+        <div className="mx-auto max-w-[1100px] text-center">
           <p className="font-cond text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
             Le travail
           </p>
@@ -27,15 +27,14 @@ export default function RealisationsPage() {
           />
           <Reveal delay={300}>
             <p className="font-cond mt-6 text-[11px] tracking-[0.3em] text-[var(--color-bone-faint)]">
-              ({String(projects.length).padStart(2, "0")} films)
+              ({String(projects.length).padStart(2, "0")} films) · Défiler{" "}
+              <span aria-hidden>↓</span>
             </p>
           </Reveal>
         </div>
+      </section>
 
-        <div className="mt-14 sm:mt-20">
-          <WorksIndex />
-        </div>
-      </div>
-    </section>
+      <WorksCinema />
+    </>
   );
 }

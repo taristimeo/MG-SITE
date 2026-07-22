@@ -184,6 +184,15 @@
   }
 }
 
+/* ---- Catalogue plein écran (réalisations) : scroll aimanté de film en
+   film. « proximity » guide sans jamais emprisonner le défilement. ---- */
+html.snap-films {
+  scroll-snap-type: y proximity;
+}
+.snap-panel {
+  scroll-snap-align: start;
+}
+
 /* Barre de défilement fine, dans les tons du site */
 html {
   scrollbar-width: thin;
@@ -646,6 +655,9 @@ html {
   }
   .grid-fade {
     animation: none;
+  }
+  html.snap-films {
+    scroll-snap-type: none;
   }
   .avail-dot::after {
     animation: none;

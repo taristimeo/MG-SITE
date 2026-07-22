@@ -11,7 +11,7 @@ export function DevisModal({
   label = "Demander un devis",
   className,
 }: {
-  label?: string;
+  label?: React.ReactNode;
   className?: string;
 }) {
   const [open, setOpen] = useState(false);

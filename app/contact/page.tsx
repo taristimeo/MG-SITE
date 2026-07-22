@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Reveal } from "@/components/Reveal";
 import { RevealTitle } from "@/components/RevealTitle";
+import { MaskTitle } from "@/components/MaskTitle";
 import { DevisModal } from "@/components/DevisModal";
 import { site } from "@/lib/site";
 
@@ -36,12 +37,23 @@ export default function ContactPage() {
           </Reveal>
         </div>
 
-        {/* La bande devis — l'unique geste fort de la page */}
+        {/* La bande devis — l'unique geste fort de la page : elle se remplit
+            de terracotta et sa flèche file vers l'avant */}
         <Reveal delay={340}>
           <div className="mt-16 sm:mt-24">
             <DevisModal
-              label="Demander un devis →"
-              className="group font-wide block w-full rounded-3xl border border-[var(--color-line-soft)] bg-[var(--color-ink-2)] px-6 py-16 text-center text-[clamp(1.7rem,5.5vw,4.2rem)] leading-none text-[var(--color-cream)] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-[var(--color-terra)] hover:bg-[var(--color-terra)] hover:text-[var(--color-ink)] sm:py-24"
+              label={
+                <span className="inline-flex items-baseline justify-center gap-4 sm:gap-6">
+                  Demander un devis
+                  <span
+                    aria-hidden
+                    className="inline-block transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-3"
+                  >
+                    →
+                  </span>
+                </span>
+              }
+              className="group font-wide block w-full rounded-3xl border border-[var(--color-line-soft)] bg-[var(--color-ink-2)] px-6 py-16 text-center text-[clamp(1.7rem,5.5vw,4.2rem)] leading-none text-[var(--color-cream)] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-[var(--color-terra)] hover:bg-[var(--color-terra)] hover:text-[var(--color-ink)] active:scale-[0.995] sm:py-24"
             />
             <p className="font-cond mt-5 text-center text-[10px] tracking-[0.22em] text-[var(--color-bone-faint)]">
               Gratuit et sans engagement · quelques lignes suffisent
@@ -49,30 +61,38 @@ export default function ContactPage() {
           </div>
         </Reveal>
 
-        {/* Accès directs — deux colonnes généreuses */}
+        {/* Accès directs — deux grandes lignes qui montent par masque */}
         <div className="mt-24 grid grid-cols-1 gap-14 border-t border-[var(--color-line-soft)] pt-16 text-center sm:mt-28 sm:grid-cols-2 sm:gap-10">
-          <Reveal delay={120}>
-            <p className="font-cond text-[11px] tracking-[0.25em] text-[var(--color-bone-faint)]">
-              Écrivez-nous
-            </p>
-            <a
-              href={`mailto:${site.email}`}
-              className="font-wide mt-4 inline-block break-words text-[clamp(1.15rem,2.6vw,1.9rem)] leading-tight text-[var(--color-bone)] transition-colors hover:text-[var(--color-terra)]"
-            >
-              {site.email}
-            </a>
-          </Reveal>
-          <Reveal delay={220}>
-            <p className="font-cond text-[11px] tracking-[0.25em] text-[var(--color-bone-faint)]">
-              Appelez-nous
-            </p>
-            <a
-              href={`tel:${site.phoneHref}`}
-              className="font-wide mt-4 inline-block text-[clamp(1.15rem,2.6vw,1.9rem)] leading-tight text-[var(--color-bone)] transition-colors hover:text-[var(--color-terra)]"
-            >
-              {site.phone}
-            </a>
-          </Reveal>
+          <div>
+            <Reveal>
+              <p className="font-cond text-[11px] tracking-[0.25em] text-[var(--color-bone-faint)]">
+                Écrivez-nous
+              </p>
+            </Reveal>
+            <MaskTitle delay={140} className="mt-4">
+              <a
+                href={`mailto:${site.email}`}
+                className="font-wide inline-block break-words text-[clamp(1.15rem,2.6vw,1.9rem)] leading-tight text-[var(--color-bone)] transition-colors hover:text-[var(--color-terra)]"
+              >
+                {site.email}
+              </a>
+            </MaskTitle>
+          </div>
+          <div>
+            <Reveal>
+              <p className="font-cond text-[11px] tracking-[0.25em] text-[var(--color-bone-faint)]">
+                Appelez-nous
+              </p>
+            </Reveal>
+            <MaskTitle delay={260} className="mt-4">
+              <a
+                href={`tel:${site.phoneHref}`}
+                className="font-wide inline-block text-[clamp(1.15rem,2.6vw,1.9rem)] leading-tight text-[var(--color-bone)] transition-colors hover:text-[var(--color-terra)]"
+              >
+                {site.phone}
+              </a>
+            </MaskTitle>
+          </div>
         </div>
 
         {/* Générique de fin : le lieu + les réseaux */}

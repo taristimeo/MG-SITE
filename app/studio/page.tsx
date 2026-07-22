@@ -8,7 +8,10 @@ import { Clients } from "@/components/Clients";
 import { Testimonials } from "@/components/Testimonials";
 import { DevisModal } from "@/components/DevisModal";
 import { Still } from "@/components/Poster";
-import { site, values } from "@/lib/site";
+import { HeroFade } from "@/components/HeroFade";
+import { Manifesto } from "@/components/Manifesto";
+import { MethodRail } from "@/components/MethodRail";
+import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Studio — Vidéaste & réalisateur à Bordeaux",
@@ -49,23 +52,25 @@ export default function StudioPage() {
           <div className="absolute inset-0 bg-[rgba(10,9,8,0.4)]" />
           <div className="absolute inset-0 bg-gradient-to-b from-[rgba(10,9,8,0.85)] via-transparent to-[var(--color-ink)]" />
         </div>
-        <div className="relative mx-auto w-full max-w-[1100px] text-center">
-          <Reveal>
-            <p className="font-cond text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
-              Le studio — depuis{" "}
-              <span className="text-[var(--color-terra)]">{site.founded}</span>
-            </p>
-          </Reveal>
-          <RevealTitle
-            text="Studio"
-            className="mt-3 text-[clamp(2.4rem,7.5vw,6.5rem)] text-[var(--color-cream)]"
-          />
-          <Reveal delay={500}>
-            <p className="font-cond mt-12 text-[0.7rem] tracking-[0.25em] text-[var(--color-bone-faint)]">
-              Défiler <span aria-hidden>↓</span>
-            </p>
-          </Reveal>
-        </div>
+        <HeroFade>
+          <div className="relative mx-auto w-full max-w-[1100px] text-center">
+            <Reveal>
+              <p className="font-cond text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
+                Le studio — depuis{" "}
+                <span className="text-[var(--color-terra)]">{site.founded}</span>
+              </p>
+            </Reveal>
+            <RevealTitle
+              text="Studio"
+              className="mt-3 text-[clamp(2.4rem,7.5vw,6.5rem)] text-[var(--color-cream)]"
+            />
+            <Reveal delay={500}>
+              <p className="font-cond mt-12 text-[0.7rem] tracking-[0.25em] text-[var(--color-bone-faint)]">
+                Défiler <span aria-hidden>↓</span>
+              </p>
+            </Reveal>
+          </div>
+        </HeroFade>
       </section>
 
       {/* Scroll narratif */}
@@ -81,49 +86,15 @@ export default function StudioPage() {
       {/* Avis clients */}
       <Testimonials />
 
-      {/* Énoncé */}
-      <section className="px-5 sm:px-8 lg:px-10">
-        <Reveal>
-          <p className="font-wide mx-auto max-w-[24ch] text-center text-[clamp(1.5rem,3.6vw,3rem)] leading-[1.14] text-[var(--color-bone)]">
-            {site.name} transforme une idée en histoire visuelle, du repérage à la
-            post-production avec la même exigence.
-          </p>
-        </Reveal>
-      </section>
+      {/* Énoncé — révélé mot à mot, épinglé plein écran (scrollytelling) */}
+      <Manifesto
+        kicker="Le studio"
+        text={`${site.name} transforme une idée en histoire visuelle, du repérage à la post-production, avec la même exigence.`}
+        accents={["exigence"]}
+      />
 
-      {/* ── Notre méthode ─────────────────────────────────────────────── */}
-      <section className="mx-auto mt-32 max-w-[1100px] px-5 pb-4 sm:mt-40 sm:px-8 lg:px-10">
-        {/* En-tête de section */}
-        <div className="mb-16 sm:mb-20">
-          <h2 className="font-wide overflow-hidden text-[clamp(2.2rem,5vw,4.5rem)] leading-[0.99] text-[var(--color-cream)]">
-            <MaskTitle delay={80}>Notre méthode</MaskTitle>
-          </h2>
-        </div>
-
-        {/* 4 étapes en grille */}
-        <div className="grid grid-cols-1 gap-px bg-[var(--color-line-soft)] sm:grid-cols-2">
-          {values.map((v, i) => (
-            <Reveal key={v.title} delay={i * 80}>
-              <div className="group bg-[var(--color-ink)] p-8 transition-colors duration-500 hover:bg-[var(--color-ink-2)] sm:p-10">
-                <div className="flex items-start justify-between">
-                  <span className="font-cond text-xs tracking-[0.2em] text-[var(--color-terra)]">
-                    0{i + 1}
-                  </span>
-                  <span className="font-cond text-[10px] tracking-[0.15em] text-[var(--color-bone-faint)] opacity-0 transition-opacity duration-500 group-hover:opacity-100">
-                    ↗
-                  </span>
-                </div>
-                <h3 className="font-wide mt-6 text-2xl text-[var(--color-bone)] transition-colors duration-300 group-hover:text-[var(--color-terra)]">
-                  {v.title}
-                </h3>
-                <p className="font-sans mt-4 text-sm leading-relaxed text-[var(--color-bone-dim)]">
-                  {v.text}
-                </p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </section>
+      {/* ── Notre méthode — rail horizontal piloté par le scroll ───────── */}
+      <MethodRail />
 
       {/* ── Le process : du repérage à l'étalonnage ───────────────────── */}
       <section className="mx-auto mt-32 max-w-[1100px] px-5 pb-4 sm:mt-40 sm:px-8 lg:px-10">
