@@ -104,11 +104,14 @@ export default function StudioPage() {
                 Le regard derrière la caméra
               </p>
             </Reveal>
-            <div className="font-wide mt-8 text-[clamp(1.55rem,3.6vw,2.9rem)] leading-[1.16] text-[var(--color-cream)]">
+            {/* Reveal (et non MaskTitle) : ces phrases reviennent à la ligne
+                sur mobile — le masque ligne-à-ligne les ferait se chevaucher.
+                gap explicite pour un rythme net quel que soit l'écran. */}
+            <div className="mt-8 flex flex-col gap-3 font-wide text-[clamp(1.5rem,3.6vw,2.9rem)] leading-[1.2] text-[var(--color-cream)] sm:gap-2">
               {founder.lines.map((l, i) => (
-                <MaskTitle key={l} delay={140 + i * 150}>
-                  <span>{l}</span>
-                </MaskTitle>
+                <Reveal key={l} delay={140 + i * 130}>
+                  {l}
+                </Reveal>
               ))}
             </div>
             <Reveal delay={620}>

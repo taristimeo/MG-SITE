@@ -62,7 +62,7 @@ export function Manifesto({
   const shown = flat ? words.length : Math.floor(p * words.length * 1.15);
 
   return (
-    <section ref={outerRef} className={flat ? "py-28 sm:py-36" : "h-[190vh]"}>
+    <section ref={outerRef} className={flat ? "py-28 sm:py-36" : "h-[150vh] sm:h-[190vh]"}>
       <div
         className={
           flat

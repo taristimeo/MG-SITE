@@ -16,7 +16,12 @@ export function MethodRail() {
   const [reduced, setReduced] = useState(false);
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    // Repli grille verticale : mouvement réduit OU téléphone (le rail
+    // horizontal piloté au scroll est peu confortable au doigt).
+    if (
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      window.matchMedia("(max-width: 639px)").matches
+    ) {
       setReduced(true);
       return;
     }
