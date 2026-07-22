@@ -1,11 +1,9 @@
 import Link from "next/link";
 import { Reveal } from "@/components/Reveal";
-import { PlayBadge } from "@/components/Poster";
-import { CardMedia } from "@/components/CardMedia";
 import { RevealTitle } from "@/components/RevealTitle";
 import { LiveImages } from "@/components/LiveImages";
-import { CardCursor } from "@/components/CardCursor";
 import { HeroFade } from "@/components/HeroFade";
+import { WorksShowcase } from "@/components/WorksShowcase";
 import { Manifesto } from "@/components/Manifesto";
 import { FeatureReel } from "@/components/FeatureReel";
 import { Stats } from "@/components/Stats";
@@ -109,54 +107,35 @@ function Hero() {
 /* ------------------------------------------------------------------ */
 
 function Works() {
+  // Sélection éditoriale : le film vedette (01) vit dans le FeatureReel ;
+  // ici les quatre suivants en grandes rangées cinéma, puis l'index complet.
+  const selection = projects.slice(1, 5);
   return (
-    <section id="realisations" className="px-3 pt-10 sm:px-5 sm:pt-16 lg:px-6">
-      <div className="mb-12 text-center sm:mb-16">
-        <p className="font-cond text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
-          Réalisations
-        </p>
-        <h2 className="font-wide mt-4 text-[clamp(1.9rem,5vw,3.6rem)] leading-[1] text-[var(--color-bone)]">
-          Des films, pas des vidéos<span className="dot">.</span>
-        </h2>
-      </div>
-      <CardCursor className="mx-auto max-w-[1600px]">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {projects.map((p, i) => {
-            return (
-              <Reveal key={p.slug} delay={(i % 3) * 90}>
-                <Link
-                  href={`/realisations/${p.slug}`}
-                  data-card
-                  className="group block"
-                >
-                  <div className="relative aspect-square overflow-hidden rounded-2xl bg-[var(--color-ink-2)]">
-                    <CardMedia
-                      src={projectThumb(p)}
-                      videoSrc={projectPreview(p)}
-                      alt={`${p.title} — ${p.category} · film Mauvais Grain, studio vidéo à Bordeaux`}
-                    />
-                    <div
-                      aria-hidden
-                      className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-                    />
-                    <div className="card-play-badge absolute inset-0 flex items-center justify-center text-white opacity-0 transition-opacity duration-500 group-hover:opacity-100">
-                      <PlayBadge />
-                    </div>
-                  </div>
-                  <div className="mt-3 flex items-baseline justify-between px-1 pb-2">
-                    <span className="font-cond text-base text-[var(--color-bone)] transition-colors group-hover:text-[var(--color-terra)]">
-                      {p.title}
-                    </span>
-                    <span className="font-cond text-xs text-[var(--color-bone-faint)]">
-                      {p.category}
-                    </span>
-                  </div>
-                </Link>
-              </Reveal>
-            );
-          })}
+    <section
+      id="realisations"
+      className="px-5 pt-14 sm:px-8 sm:pt-20 lg:px-10"
+    >
+      <div className="mx-auto max-w-[1400px]">
+        <div className="mb-14 text-center sm:mb-20">
+          <p className="font-cond text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
+            Réalisations
+          </p>
+          <h2 className="font-wide mt-4 text-[clamp(1.9rem,5vw,3.6rem)] leading-[1] text-[var(--color-bone)]">
+            Des films, pas des vidéos<span className="dot">.</span>
+          </h2>
         </div>
-      </CardCursor>
+
+        <WorksShowcase items={selection} startIndex={2} />
+
+        <div className="mt-16 flex justify-center sm:mt-24">
+          <Link
+            href="/realisations"
+            className="font-cond rounded-full border border-[var(--color-line)] px-7 py-3 text-sm text-[var(--color-bone)] transition-colors hover:border-[var(--color-terra)] hover:text-[var(--color-terra)]"
+          >
+            Toutes les réalisations
+          </Link>
+        </div>
+      </div>
     </section>
   );
 }
