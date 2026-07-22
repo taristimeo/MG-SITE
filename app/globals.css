@@ -51,6 +51,13 @@
     background: var(--color-terra);
     color: var(--color-ink);
   }
+
+  /* Focus clavier visible, à la charte (remplace l'anneau UA bleu) */
+  :focus-visible {
+    outline: 1px solid var(--color-terra);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
 }
 
 /* Logotype & titres — Gloock, serif fort contraste, casse naturelle */
@@ -172,6 +179,10 @@
   background: var(--color-terra);
   animation: avail-ping 2.2s var(--ease-out-expo) infinite;
 }
+.avail-dot::after {
+  /* Une pulsation n'est pas une entrée de contenu : courbe dédiée, pas expo */
+  animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+}
 @keyframes avail-ping {
   0% {
     transform: scale(1);
@@ -182,15 +193,6 @@
     transform: scale(2.6);
     opacity: 0;
   }
-}
-
-/* ---- Catalogue plein écran (réalisations) : scroll aimanté de film en
-   film. « proximity » guide sans jamais emprisonner le défilement. ---- */
-html.snap-films {
-  scroll-snap-type: y proximity;
-}
-.snap-panel {
-  scroll-snap-align: start;
 }
 
 /* Barre de défilement fine, dans les tons du site */
@@ -324,7 +326,7 @@ html {
   background: var(--color-terra);
   transform: scaleX(0);
   transform-origin: left;
-  animation: kw-draw 0.7s var(--ease-out-expo) var(--kw-delay, 2.6s) forwards;
+  animation: kw-draw 0.7s var(--ease-out-expo) var(--kw-delay, 1.8s) forwards;
 }
 @keyframes kw-draw {
   to {
@@ -369,7 +371,7 @@ html {
 }
 .reveal-word-text {
   opacity: 0;
-  animation: title-fade 1.5s ease-out 0.1s forwards;
+  animation: title-fade 0.9s ease-out 0.1s forwards;
 }
 
 /* Le point apparaît à sa place (pas de mouvement), clignote 3 fois comme un
@@ -411,7 +413,7 @@ html {
 }
 .hero-dot {
   opacity: 0;
-  animation: dot-rec 1.5s ease-in-out 1.3s both;
+  animation: dot-rec 1.2s ease-in-out 0.8s both;
 }
 
 /* Le header se révèle en fondu doux au chargement */
@@ -500,13 +502,13 @@ html {
 }
 @keyframes play-pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(185, 110, 77, 0.45);
+    box-shadow: 0 0 0 0 rgba(183, 110, 78, 0.45);
   }
   70% {
-    box-shadow: 0 0 0 22px rgba(185, 110, 77, 0);
+    box-shadow: 0 0 0 22px rgba(183, 110, 78, 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(185, 110, 77, 0);
+    box-shadow: 0 0 0 0 rgba(183, 110, 78, 0);
   }
 }
 .play-pulse {
@@ -655,9 +657,6 @@ html {
   }
   .grid-fade {
     animation: none;
-  }
-  html.snap-films {
-    scroll-snap-type: none;
   }
   /* Défilé de logos arrêté : la rangée devient défilable manuellement */
   .marquee-wrap {

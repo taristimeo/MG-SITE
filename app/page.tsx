@@ -63,7 +63,7 @@ function Hero() {
 
         {/* Deux colonnes de légendes — enchaînées après l'intro */}
         <div className="mt-10 flex flex-col items-center gap-6 sm:mt-14 sm:w-full sm:flex-row sm:items-start sm:justify-between">
-          <Reveal delay={1500}>
+          <Reveal delay={900}>
             <p className="font-cond pb-[0.3em] text-center text-xs leading-relaxed tracking-wide text-[var(--color-bone-dim)] sm:text-left">
               Studio de{" "}
               <span className="kw" style={{ color: "inherit" }}>
@@ -71,7 +71,7 @@ function Hero() {
               </span>
             </p>
           </Reveal>
-          <Reveal delay={1650}>
+          <Reveal delay={1050}>
             <p className="font-cond pb-[0.3em] text-center text-xs leading-relaxed tracking-wide text-[var(--color-bone-dim)] sm:text-right">
               L&apos;image au service de
               <br className="hidden sm:block" />{" "}
@@ -82,6 +82,13 @@ function Hero() {
             </p>
           </Reveal>
         </div>
+
+        {/* Indication de scroll — même traitement que la page studio */}
+        <Reveal delay={1200}>
+          <p className="font-cond mt-12 text-center text-[0.7rem] tracking-[0.25em] text-[var(--color-bone-faint)]">
+            Défiler <span aria-hidden>↓</span>
+          </p>
+        </Reveal>
       </div>
       </HeroFade>
     </section>

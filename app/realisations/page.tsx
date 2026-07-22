@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Reveal } from "@/components/Reveal";
 import { RevealTitle } from "@/components/RevealTitle";
-import { WorksCinema } from "@/components/WorksCinema";
+import { WorksMosaic } from "@/components/WorksMosaic";
 import { projects, site } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -10,13 +10,13 @@ export const metadata: Metadata = {
   alternates: { canonical: "/realisations" },
 };
 
-// Page « Réalisations » : après l'écran-titre, chaque film occupe un écran
-// entier (preview plein cadre, générique bas de cadre) et le scroll s'aimante
-// de film en film — comme on passe d'une salle à l'autre.
+// Page « Réalisations » : écran-titre resserré (le catalogue affleure sous le
+// pli), puis « la colonne montée » — mosaïque éditoriale en deux colonnes
+// décalées, cartouches sous les médias, parallaxe différentielle.
 export default function RealisationsPage() {
   return (
     <>
-      <section className="px-5 pb-4 pt-24 sm:px-8 sm:pt-32 lg:pt-40">
+      <section className="px-5 pb-10 pt-24 sm:px-8 sm:pt-32">
         <div className="mx-auto max-w-[1100px] text-center">
           <p className="font-cond text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
             Le travail
@@ -34,7 +34,7 @@ export default function RealisationsPage() {
         </div>
       </section>
 
-      <WorksCinema />
+      <WorksMosaic />
     </>
   );
 }

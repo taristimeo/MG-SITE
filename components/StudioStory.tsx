@@ -19,8 +19,8 @@ type Props = {
 
 // Course de scroll (en svh) : intro = révélation de l'image seule, puis un
 // palier par chapitre.
-const SVH_INTRO = 90;
-const SVH_PER_CHAPTER = 150;
+const SVH_INTRO = 70;
+const SVH_PER_CHAPTER = 110;
 
 const clamp01 = (n: number) => (n < 0 ? 0 : n > 1 ? 1 : n);
 const clamp = (n: number, lo: number, hi: number) =>
@@ -77,7 +77,8 @@ export function StudioStory({ chapters, imageSrc, imageAlt }: Props) {
         innerRef.current.style.transform = `scale(${breathScale})`;
       }
 
-      // Textes : plateau lisible au centre, sortie en fondu + glissement + flou.
+      // Textes : plateau lisible au centre, sortie en fondu + glissement +
+      // scale (pas de blur par frame : filter force des repaints coûteux).
       for (let i = 0; i < steps; i++) {
         const center = introFrac + (i + 0.5) * textSeg;
         const t = (p - center) / textSeg;
@@ -87,7 +88,6 @@ export function StudioStory({ chapters, imageSrc, imageAlt }: Props) {
         const tc = clamp(t, -0.5, 0.5);
         const y = -tc * 140;
         const x = tc * (i % 2 === 0 ? 24 : -24);
-        const blur = fade * 4.5;
         const scale = 1 - a * 0.06;
 
         const layer = layerRefs.current[i];
@@ -99,7 +99,6 @@ export function StudioStory({ chapters, imageSrc, imageAlt }: Props) {
         }
         if (art) {
           art.style.transform = `translate3d(${x}px,${y}px,0) scale(${scale})`;
-          art.style.filter = blur > 0.05 ? `blur(${blur}px)` : "none";
         }
         if (tick) tick.style.transform = `scaleX(${opacity})`;
       }
@@ -186,7 +185,7 @@ export function StudioStory({ chapters, imageSrc, imageAlt }: Props) {
     <section
       ref={sectionRef}
       aria-label="Le studio en trois temps"
-      style={{ height: `${totalScroll + 100}svh` }}
+      style={{ height: `${totalScroll + 40}svh` }}
       className="relative"
     >
       <div className="sticky top-0 flex h-[100svh] items-center overflow-hidden">
@@ -206,7 +205,7 @@ export function StudioStory({ chapters, imageSrc, imageAlt }: Props) {
           </div>
         </div>
 
-        {/* Textes : gauche → droite → gauche, fondu + glissement + flou */}
+        {/* Textes : gauche → droite → gauche, fondu + glissement + scale */}
         {chapters.map((c, i) => {
           const side = i % 2 === 0 ? "left" : "right";
           const colClass =
@@ -233,7 +232,7 @@ export function StudioStory({ chapters, imageSrc, imageAlt }: Props) {
                 >
                   <span
                     aria-hidden
-                    className={`pointer-events-none absolute -top-[0.5em] -z-10 hidden select-none font-wide text-[clamp(6rem,11vw,11rem)] leading-none text-[rgba(185,110,77,0.08)] sm:block ${side === "left" ? "-left-3" : "-right-3"}`}
+                    className={`pointer-events-none absolute -top-[0.5em] -z-10 hidden select-none font-wide text-[clamp(6rem,11vw,11rem)] leading-none text-[rgba(183,110,78,0.08)] sm:block ${side === "left" ? "-left-3" : "-right-3"}`}
                   >
                     {num}
                   </span>

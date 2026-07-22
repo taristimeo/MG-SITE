@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
-import Link from "next/link";
 import { Still } from "@/components/Poster";
+import { DevisModal } from "@/components/DevisModal";
 import { Parallax } from "@/components/Parallax";
 
 // Section « Donner vie à vos images » : titre révélé ligne par ligne (masque
@@ -48,7 +48,10 @@ export function LiveImages() {
                   className="img-open h-full w-full"
                   style={{ "--mask-delay": "220ms" } as CSSProperties}
                 >
-                  <Still src="/photo-studio.jpg" alt="Timéo Taris — Mauvais Grain" />
+                  <Still
+                    src="/projects/la-medocaine/1.jpg"
+                    alt="Tournage — La Médocaine, film Mauvais Grain"
+                  />
                 </div>
               </div>
             </Parallax>
@@ -59,12 +62,7 @@ export function LiveImages() {
           <p className="font-cond text-center text-xs tracking-[0.2em] text-[var(--color-bone-faint)]">
             Un projet en tête ?
           </p>
-          <Link
-            href="/contact"
-            className="btn-cta font-cond rounded-full bg-[var(--color-terra)] px-9 py-4 text-sm text-[var(--color-ink)]"
-          >
-            Démarrer un projet
-          </Link>
+          <DevisModal label="Démarrer un projet" />
         </div>
       </div>
     </section>

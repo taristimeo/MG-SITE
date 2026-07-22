@@ -26,7 +26,7 @@ export function ServicesStack() {
               style={{ top: `calc(84px + ${i * 18}px)` }}
             >
               <div
-                className="flex min-h-[52vh] flex-col justify-between rounded-3xl border border-[var(--color-line-soft)] p-8 shadow-2xl sm:min-h-[56vh] sm:p-14"
+                className="flex min-h-[38vh] flex-col justify-between rounded-3xl border border-[var(--color-line-soft)] p-8 shadow-2xl sm:min-h-[42vh] sm:p-12"
                 style={{
                   background:
                     i % 2 ? "var(--color-ink-3)" : "var(--color-ink-2)",
