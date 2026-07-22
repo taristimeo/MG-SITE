@@ -12,7 +12,6 @@ import { HeroFade } from "@/components/HeroFade";
 import { HeroZoom } from "@/components/HeroZoom";
 import { Manifesto } from "@/components/Manifesto";
 import { MethodRail } from "@/components/MethodRail";
-import { Parallax } from "@/components/Parallax";
 import { founder, site } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -45,16 +44,19 @@ const chapters = [
 export default function StudioPage() {
   return (
     <>
-      {/* Hero — habité par une image du territoire du studio, très assombrie */}
+      {/* Hero — porté par la vraie photo du studio : la silhouette de Timéo au
+          coucher de soleil (déjà dans les tons terracotta de la marque). */}
       <section className="relative flex min-h-[80svh] flex-col justify-center overflow-hidden px-5 pt-20 sm:min-h-[88svh] sm:px-8 sm:pt-24 lg:px-10">
         <div aria-hidden className="absolute inset-0">
-          <div className="h-full w-full opacity-55">
+          <div className="h-full w-full">
             <HeroZoom>
-              <Still src="/projects/the-shape-of-vastness/1.jpg" alt="" />
+              <Still src="/photo-studio.jpg" alt="" />
             </HeroZoom>
           </div>
-          <div className="absolute inset-0 bg-[rgba(10,9,8,0.18)]" />
-          <div className="absolute inset-0 bg-gradient-to-b from-[rgba(10,9,8,0.65)] via-transparent to-[var(--color-ink)]" />
+          {/* Voiles légers : on garde la photo lumineuse, juste assez de contraste
+              pour la lisibilité du titre, puis fondu vers l'encre en bas. */}
+          <div className="absolute inset-0 bg-[rgba(10,9,8,0.28)]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[rgba(10,9,8,0.4)] via-[rgba(10,9,8,0.12)] to-[var(--color-ink)]" />
         </div>
         <HeroFade>
           <div className="relative mx-auto w-full max-w-[1100px] text-center">
@@ -84,46 +86,36 @@ export default function StudioPage() {
         imageAlt={`Silhouette — image extraite d'un film ${site.name}`}
       />
 
-      {/* ── Le regard derrière la caméra ──────────────────────────────── */}
-      <section className="px-5 py-28 sm:px-8 sm:py-40 lg:px-10">
-        <div className="mx-auto grid max-w-[1200px] grid-cols-1 items-center gap-14 lg:grid-cols-2 lg:gap-24">
+      {/* ── Le regard derrière la caméra ──────────────────────────────────
+          Énoncé centré : la photo de Timéo porte déjà le hero, on ne la
+          redécoupe pas ici en portrait (ce qui trahirait son cadrage 16:9).
+          Cette section affirme sa manière de faire, en toutes lettres. */}
+      <section className="px-5 py-28 text-center sm:px-8 sm:py-40 lg:px-10">
+        <div className="mx-auto max-w-[900px]">
           <Reveal>
-            <Parallax amount={30}>
-              <div className="mx-auto aspect-[3/4] w-full max-w-[420px] overflow-hidden rounded-2xl bg-[var(--color-ink-2)]">
-                <Still
-                  src="/photo-studio.jpg"
-                  alt={`${founder.name} — ${founder.role} de ${site.name}`}
-                />
-              </div>
-            </Parallax>
+            <p className="font-cond text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
+              Le regard derrière la caméra
+            </p>
           </Reveal>
-
-          <div className="text-center lg:text-left">
-            <Reveal>
-              <p className="font-cond text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
-                Le regard derrière la caméra
-              </p>
-            </Reveal>
-            {/* Reveal (et non MaskTitle) : ces phrases reviennent à la ligne
-                sur mobile — le masque ligne-à-ligne les ferait se chevaucher.
-                gap explicite pour un rythme net quel que soit l'écran. */}
-            <div className="mt-8 flex flex-col gap-3 font-wide text-[clamp(1.5rem,3.6vw,2.9rem)] leading-[1.2] text-[var(--color-cream)] sm:gap-2">
-              {founder.lines.map((l, i) => (
-                <Reveal key={l} delay={140 + i * 130}>
-                  {l}
-                </Reveal>
-              ))}
-            </div>
-            <Reveal delay={620}>
-              <p className="font-cond mt-10 text-[11px] tracking-[0.22em] text-[var(--color-bone-dim)]">
-                <span
-                  aria-hidden
-                  className="mr-3 inline-block h-px w-8 bg-[var(--color-terra)] align-middle"
-                />
-                {founder.name} · {founder.role}
-              </p>
-            </Reveal>
+          {/* Reveal (et non MaskTitle) : ces phrases reviennent à la ligne
+              sur mobile — le masque ligne-à-ligne les ferait se chevaucher.
+              gap explicite pour un rythme net quel que soit l'écran. */}
+          <div className="mx-auto mt-8 flex max-w-[16ch] flex-col gap-3 font-wide text-[clamp(1.7rem,4.4vw,3.4rem)] leading-[1.18] text-[var(--color-cream)] sm:gap-2">
+            {founder.lines.map((l, i) => (
+              <Reveal key={l} delay={140 + i * 130}>
+                {l}
+              </Reveal>
+            ))}
           </div>
+          <Reveal delay={620}>
+            <p className="font-cond mt-10 text-[11px] tracking-[0.22em] text-[var(--color-bone-dim)]">
+              <span
+                aria-hidden
+                className="mr-3 inline-block h-px w-8 bg-[var(--color-terra)] align-middle"
+              />
+              {founder.name} · {founder.role}
+            </p>
+          </Reveal>
         </div>
       </section>
 

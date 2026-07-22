@@ -11,10 +11,10 @@ import { projects, projectThumb, projectPreview } from "@/lib/site";
 import type { Project } from "@/lib/site";
 
 // « La colonne montée » — mosaïque éditoriale en deux colonnes décalées.
-// Les films filtrés sont alternés gauche/droite (0→G, 1→D, 2→G…) et chaque
-// colonne alterne un format large (16/10) et un format portrait (4/5) poussé
-// vers le bord extérieur. La colonne droite démarre plus bas et glisse un peu
-// plus vite (Parallax différentiel) — de la profondeur, pas de scrolljack.
+// Les films filtrés sont alternés gauche/droite (0→G, 1→D, 2→G…). Toutes les
+// vignettes sont en 16:9 : on respecte le cadrage cinéma d'origine, aucun
+// recadrage portrait. La colonne droite démarre plus bas et glisse un peu plus
+// vite (Parallax différentiel) — de la profondeur, pas de scrolljack.
 // Cartouche toujours SOUS le média, jamais en overlay.
 
 const EASE_EXPO = "ease-[cubic-bezier(0.16,1,0.3,1)]";
@@ -29,13 +29,11 @@ function MosaicCard({
   project: p,
   index,
   total,
-  format,
   className = "",
 }: {
   project: Project;
   index: number;
   total: number;
-  format: "wide" | "tall";
   className?: string;
 }) {
   return (
@@ -44,11 +42,8 @@ function MosaicCard({
       data-card
       className={`group block ${className}`}
     >
-      <div
-        className={`overflow-hidden ${
-          format === "wide" ? "aspect-[16/10]" : "aspect-[4/5]"
-        }`}
-      >
+      {/* 16:9 — cadrage cinéma respecté, l'image entière sans recadrage */}
+      <div className="aspect-video overflow-hidden">
         <CardMedia
           src={projectThumb(p)}
           videoSrc={projectPreview(p)}
@@ -120,29 +115,18 @@ export function WorksMosaic() {
         <CardCursor>
           {/* Re-key au changement de filtre : la mosaïque refond en entier */}
           <div key={filter} className="grid-fade">
-            {/* Mobile : une colonne, zigzag 16/10 puis 4/5 à 86 % */}
+            {/* Mobile : une colonne, toutes les vignettes en 16:9 pleine largeur */}
             <div className="flex flex-col gap-y-[4.5rem] lg:hidden">
-              {entries.map(({ project, index }) => {
-                const tall = index % 2 === 1;
-                const tallPos = (index - 1) / 2;
-                return (
-                  <Reveal key={project.slug}>
-                    <MosaicCard
-                      project={project}
-                      index={index}
-                      total={total}
-                      format={tall ? "tall" : "wide"}
-                      className={
-                        tall
-                          ? tallPos % 2 === 0
-                            ? "w-[86%]"
-                            : "ml-auto w-[86%]"
-                          : "w-full"
-                      }
-                    />
-                  </Reveal>
-                );
-              })}
+              {entries.map(({ project, index }) => (
+                <Reveal key={project.slug}>
+                  <MosaicCard
+                    project={project}
+                    index={index}
+                    total={total}
+                    className="w-full"
+                  />
+                </Reveal>
+              ))}
             </div>
 
             {/* Desktop : deux colonnes décalées, parallaxe différentielle */}
@@ -151,14 +135,13 @@ export function WorksMosaic() {
                 amount={0}
                 className="flex flex-col gap-y-[clamp(5rem,12vh,9rem)]"
               >
-                {leftCol.map(({ project, index }, pos) => (
+                {leftCol.map(({ project, index }) => (
                   <Reveal key={project.slug}>
                     <MosaicCard
                       project={project}
                       index={index}
                       total={total}
-                      format={pos % 2 === 0 ? "wide" : "tall"}
-                      className={pos % 2 === 0 ? "w-full" : "w-[78%]"}
+                      className="w-full"
                     />
                   </Reveal>
                 ))}
@@ -175,8 +158,7 @@ export function WorksMosaic() {
                       project={project}
                       index={index}
                       total={total}
-                      format={pos % 2 === 0 ? "wide" : "tall"}
-                      className={pos % 2 === 0 ? "w-full" : "ml-auto w-[78%]"}
+                      className="w-full"
                     />
                   </Reveal>
                 ))}
