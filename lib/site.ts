@@ -85,6 +85,14 @@ export const clients: Client[] = [
   { name: "Wimco", logo: "/clients/wimco.png" },
 ];
 
+// Manifeste — la phrase signature du brand book, révélée mot à mot au scroll
+// sur l'accueil (les mots « accents » passent en terracotta).
+export const manifesto = {
+  kicker: "Le regard",
+  text: "Nous ne filmons pas ce qu'il se passe. Nous filmons ce que l'on ressent lorsqu'on y est.",
+  accents: ["ressent"],
+} as const;
+
 export type Value = { title: string; text: string };
 
 export const values: Value[] = [

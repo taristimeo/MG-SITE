@@ -5,13 +5,59 @@ import { CardMedia } from "@/components/CardMedia";
 import { RevealTitle } from "@/components/RevealTitle";
 import { LiveImages } from "@/components/LiveImages";
 import { CardCursor } from "@/components/CardCursor";
-import { projects, projectThumb, projectPreview, site } from "@/lib/site";
+import { HeroFade } from "@/components/HeroFade";
+import { Manifesto } from "@/components/Manifesto";
+import { FeatureReel } from "@/components/FeatureReel";
+import { Stats } from "@/components/Stats";
+import { ServicesStack } from "@/components/ServicesStack";
+import {
+  clients,
+  manifesto,
+  projects,
+  projectThumb,
+  projectPreview,
+  site,
+} from "@/lib/site";
 
+// Accueil « page produit » : écran-titre, manifeste révélé au scroll, film
+// vedette qui s'étire en plein cadre, réalisations, chiffres, prestations en
+// cartes empilées, puis l'appel à projet. Un récit qui se déroule.
 export default function Home() {
+  const featured = projects[0];
   return (
     <>
       <Hero />
+      <Manifesto
+        kicker={manifesto.kicker}
+        text={manifesto.text}
+        accents={[...manifesto.accents]}
+      />
+      <FeatureReel
+        href={`/realisations/${featured.slug}`}
+        videoSrc={projectPreview(featured)}
+        poster={projectThumb(featured)}
+        title={featured.title}
+        category={featured.category}
+      />
       <Works />
+      <section className="px-5 py-24 sm:px-8 sm:py-32 lg:px-10">
+        <div className="mx-auto max-w-[1200px]">
+          <Stats
+            items={[
+              { display: site.founded, label: `naissance du studio à ${site.city}` },
+              { value: projects.length, label: "films phares au portfolio" },
+              {
+                value: 5,
+                decimals: 1,
+                label: "note des avis Google",
+                accent: "★",
+              },
+              { value: clients.length, label: "clients accompagnés" },
+            ]}
+          />
+        </div>
+      </section>
+      <ServicesStack />
       <LiveImages />
     </>
   );
@@ -24,7 +70,8 @@ function Hero() {
     <section className="flex min-h-[100svh] flex-col justify-center px-5 py-24 sm:px-8 lg:px-10">
       {/* Conteneur calé sur la largeur exacte du logotype (w-fit) : les deux
           légendes s'ancrent ainsi sur les bords du logo — la gauche sous le
-          « M », la droite sous le point. */}
+          « M », la droite sous le point. Le tout s'estompe au premier scroll. */}
+      <HeroFade>
       <div className="mx-auto w-full max-w-[1600px] sm:w-fit sm:max-w-none">
         {/* Logotype animé : fondu puis point terracotta « REC » */}
         <RevealTitle
@@ -54,6 +101,7 @@ function Hero() {
           </Reveal>
         </div>
       </div>
+      </HeroFade>
     </section>
   );
 }
@@ -62,7 +110,15 @@ function Hero() {
 
 function Works() {
   return (
-    <section id="realisations" className="px-3 pt-4 sm:px-5 lg:px-6">
+    <section id="realisations" className="px-3 pt-10 sm:px-5 sm:pt-16 lg:px-6">
+      <div className="mb-12 text-center sm:mb-16">
+        <p className="font-cond text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
+          Réalisations
+        </p>
+        <h2 className="font-wide mt-4 text-[clamp(1.9rem,5vw,3.6rem)] leading-[1] text-[var(--color-bone)]">
+          Des films, pas des vidéos<span className="dot">.</span>
+        </h2>
+      </div>
       <CardCursor className="mx-auto max-w-[1600px]">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {projects.map((p, i) => {
