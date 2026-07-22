@@ -6,6 +6,7 @@ import { StudioStory } from "@/components/StudioStory";
 import { Process } from "@/components/Process";
 import { Clients } from "@/components/Clients";
 import { Testimonials } from "@/components/Testimonials";
+import { DevisModal } from "@/components/DevisModal";
 import { site, values } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -129,6 +130,20 @@ export default function StudioPage() {
         <Process />
       </section>
 
+      {/* ── La suite s'écrit avec vous ────────────────────────────────── */}
+      <section className="px-5 pb-10 pt-28 text-center sm:pt-40">
+        <Reveal>
+          <p className="font-cond text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
+            Et maintenant ?
+          </p>
+          <p className="font-wide mx-auto mt-4 max-w-[16ch] text-[clamp(1.9rem,5vw,3.8rem)] leading-[1.08] text-[var(--color-cream)]">
+            Écrivons votre histoire<span className="dot">.</span>
+          </p>
+          <div className="mt-10 flex justify-center">
+            <DevisModal label="Démarrer un projet" />
+          </div>
+        </Reveal>
+      </section>
     </>
   );
 }

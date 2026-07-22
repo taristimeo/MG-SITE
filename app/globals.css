@@ -119,6 +119,91 @@
   animation: modal-panel 0.45s var(--ease-out-expo) both;
 }
 
+/* ---- Filtres (liste des réalisations) : soulignement terracotta tracé ---- */
+.filter-chip {
+  position: relative;
+  padding-bottom: 6px;
+}
+.filter-chip::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 1px;
+  width: 100%;
+  background: var(--color-terra);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.45s var(--ease-out-expo);
+}
+.filter-chip.is-active::after {
+  transform: scaleX(1);
+}
+
+/* Fondu de la grille quand le filtre change */
+@keyframes grid-fade {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.grid-fade {
+  animation: grid-fade 0.5s var(--ease-out-expo) both;
+}
+
+/* Point de disponibilité — pulse doux, comme un témoin d'enregistrement */
+.avail-dot {
+  position: relative;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--color-terra);
+}
+.avail-dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: var(--color-terra);
+  animation: avail-ping 2.2s var(--ease-out-expo) infinite;
+}
+@keyframes avail-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  70%,
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+/* Barre de défilement fine, dans les tons du site */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-ink-3) var(--color-ink);
+}
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-ink);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-ink-3);
+  border-radius: 999px;
+  border: 2px solid var(--color-ink);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-line);
+}
+
 /* ---- Grain argentique : très subtil, clin d'œil au nom ---- */
 .grain {
   position: fixed;
@@ -558,6 +643,16 @@
     transition: none;
     opacity: 1;
     transform: none;
+  }
+  .grid-fade {
+    animation: none;
+  }
+  .avail-dot::after {
+    animation: none;
+    display: none;
+  }
+  .filter-chip::after {
+    transition: none;
   }
   .mask-line > span,
   .img-open {

@@ -22,16 +22,17 @@ export function WorksList() {
 
   return (
     <div>
-      {/* Filtres par catégorie (centrés) */}
-      <div className="flex flex-wrap justify-center gap-x-7 gap-y-2">
+      {/* Filtres par catégorie : soulignement terracotta qui se trace */}
+      <div className="flex flex-wrap justify-center gap-x-8 gap-y-3">
         {categories.map((c) => (
           <button
             key={c}
             type="button"
             onClick={() => setFilter(c)}
-            className={`font-cond text-xs transition-colors ${
+            aria-pressed={filter === c}
+            className={`filter-chip font-cond text-[11px] tracking-[0.18em] transition-colors duration-300 ${
               filter === c
-                ? "text-[var(--color-terra)]"
+                ? "is-active text-[var(--color-cream)]"
                 : "text-[var(--color-bone-faint)] hover:text-[var(--color-bone)]"
             }`}
           >
@@ -40,8 +41,11 @@ export function WorksList() {
         ))}
       </div>
 
-      {/* Grille de cartes */}
-      <CardCursor className="mt-12 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {/* Grille de cartes — remontée en fondu à chaque changement de filtre */}
+      <CardCursor
+        key={filter}
+        className="grid-fade mt-12 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
+      >
         {visible.map((p) => (
           <Link
             key={p.slug}

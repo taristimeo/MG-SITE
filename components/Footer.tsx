@@ -66,7 +66,25 @@ export function Footer() {
         ))}
       </div>
 
-      <div className="mt-14 text-center font-cond text-[0.72rem] tracking-[0.12em] text-[var(--color-bone-faint)]">
+      {/* NAP en clair — cohérent avec la fiche Google (référencement local) */}
+      <address className="mt-14 text-center font-cond text-[0.72rem] not-italic leading-relaxed tracking-[0.14em] text-[var(--color-bone-dim)]">
+        {site.name} · {site.street}, {site.postalCode} {site.city} ·{" "}
+        <a
+          href={`tel:${site.phoneHref}`}
+          className="transition-colors hover:text-[var(--color-terra)]"
+        >
+          {site.phone}
+        </a>{" "}
+        ·{" "}
+        <a
+          href={`mailto:${site.email}`}
+          className="transition-colors hover:text-[var(--color-terra)]"
+        >
+          {site.email}
+        </a>
+      </address>
+
+      <div className="mt-5 text-center font-cond text-[0.72rem] tracking-[0.12em] text-[var(--color-bone-faint)]">
         © {site.founded}—{new Date().getFullYear()} {site.name}
         <span className="dot">.</span> · {site.city} — {site.founder}
       </div>

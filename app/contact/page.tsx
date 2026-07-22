@@ -24,6 +24,12 @@ export default function ContactPage() {
             text="On en parle"
             className="mt-3 text-[clamp(2rem,6.5vw,5rem)] text-[var(--color-cream)]"
           />
+          <Reveal delay={260}>
+            <p className="mt-7 inline-flex items-center gap-3 font-cond text-[11px] tracking-[0.2em] text-[var(--color-bone-dim)]">
+              <span className="avail-dot" aria-hidden />
+              Disponible pour de nouveaux projets · Réponse sous 24 h
+            </p>
+          </Reveal>
         </div>
 
         {/* Carte d'appel — ouvre le formulaire de devis en fenêtre */}

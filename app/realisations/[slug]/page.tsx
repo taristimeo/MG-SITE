@@ -7,9 +7,11 @@ import { OtherWorks } from "@/components/OtherWorks";
 import { ProjectStory } from "@/components/ProjectStory";
 import { ProjectVideo } from "@/components/ProjectVideo";
 import { Reveal } from "@/components/Reveal";
+import { CardMedia } from "@/components/CardMedia";
 import {
   projectCredits,
   projects,
+  projectPreview,
   projectSuggestions,
   projectThumb,
   site,
@@ -120,14 +122,33 @@ export default async function ProjectPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
-      {/* Hero : titre centré + catégorie terracotta (façon générique de film) */}
-      <header className="flex min-h-[55svh] flex-col items-center justify-center px-5 pt-20 text-center sm:min-h-[62svh] sm:px-8 sm:pt-28">
-        <h1 className="font-wide mx-auto max-w-[16ch] text-[clamp(3rem,13vw,12rem)] leading-[0.95] text-[var(--color-cream)]">
-          {project.title}
-        </h1>
-        <p className="font-cond mt-6 text-sm tracking-[0.3em] text-[var(--color-terra)]">
-          {project.category}
-        </p>
+      {/* Hero cinéma : la preview du film en fond très assombri, le titre
+          par-dessus (façon générique de film qui s'ouvre sur une image). */}
+      <header className="relative flex min-h-[68svh] flex-col items-center justify-center overflow-hidden px-5 pt-20 text-center sm:min-h-[78svh] sm:px-8 sm:pt-28">
+        <div aria-hidden className="absolute inset-0">
+          <div className="h-full w-full opacity-40">
+            <CardMedia
+              src={projectThumb(project)}
+              videoSrc={projectPreview(project)}
+              alt=""
+            />
+          </div>
+          {/* Voiles : le fond reste une ambiance, jamais une distraction */}
+          <div className="absolute inset-0 bg-[rgba(10,9,8,0.35)]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[rgba(10,9,8,0.85)] via-transparent to-[var(--color-ink)]" />
+        </div>
+
+        <div className="relative">
+          <h1 className="font-wide mx-auto max-w-[16ch] text-[clamp(3rem,13vw,12rem)] leading-[0.95] text-[var(--color-cream)]">
+            {project.title}
+          </h1>
+          <p className="font-cond mt-6 text-sm tracking-[0.3em] text-[var(--color-terra)]">
+            {project.category}
+          </p>
+          <p className="font-cond mt-3 text-[11px] tracking-[0.25em] text-[var(--color-bone-dim)]">
+            {project.client} · {project.year}
+          </p>
+        </div>
       </header>
 
       {/* Lecteur vidéo — d'abord la vidéo, point d'entrée du récit.
