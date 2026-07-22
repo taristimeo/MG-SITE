@@ -49,8 +49,8 @@ export function LiveImages() {
                   style={{ "--mask-delay": "220ms" } as CSSProperties}
                 >
                   <Still
-                    src="/projects/la-medocaine/1.jpg"
-                    alt="Tournage — La Médocaine, film Mauvais Grain"
+                    src="/projects/delaurentis-gone-colors/4.jpg"
+                    alt="Gros plan — mains sur un contrôleur, tournage du clip DeLaurentis par Mauvais Grain"
                   />
                 </div>
               </div>
