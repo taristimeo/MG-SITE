@@ -419,9 +419,110 @@
   animation: play-pulse 2.4s var(--ease-out-expo) infinite;
 }
 
+/* ---- Transition d'entrée de page : léger fondu + montée (template.tsx) ---- */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.page-enter {
+  animation: page-enter 0.4s var(--ease-out-expo) both;
+}
+
+/* ---- Curseur « VOIR » qui suit le pointeur au survol des cards ---- */
+/* Actif uniquement sur pointeur fin (activé côté JS) ; le disque suit le
+   pointeur, se teinte terracotta au contact d'une card. */
+.card-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 70;
+  display: flex;
+  height: 4rem;
+  width: 4rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 1px solid rgba(232, 228, 216, 0.55);
+  color: var(--color-cream);
+  background: rgba(10, 9, 8, 0.28);
+  backdrop-filter: blur(2px);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(-100px, -100px, 0) translate(-50%, -50%) scale(0.6);
+  transition:
+    opacity 0.3s var(--ease-out-expo),
+    background-color 0.3s var(--ease-out-expo),
+    border-color 0.3s var(--ease-out-expo),
+    color 0.3s var(--ease-out-expo);
+  will-change: transform, opacity;
+}
+.card-cursor.is-visible {
+  opacity: 1;
+}
+.card-cursor.is-active {
+  border-color: var(--color-terra);
+  background: var(--color-terra);
+  color: var(--color-ink);
+}
+/* Sur desktop (pointeur fin), le badge play central cède la place au curseur
+   « VOIR ». En tactile, le badge reste (le curseur y est désactivé). */
+@media (hover: hover) and (pointer: fine) {
+  .card-play-badge {
+    display: none;
+  }
+}
+
+/* ---- Frise du process (page Studio) : trait qui se trace au scroll ---- */
+.process-fill {
+  transform: scaleX(0);
+  transform-origin: left;
+  will-change: transform;
+}
+.process-fill-v {
+  transform: scaleY(0);
+  transform-origin: top;
+  will-change: transform;
+}
+.process-dot {
+  background: var(--color-bone-faint);
+  transition:
+    background-color 0.45s var(--ease-out-expo),
+    box-shadow 0.45s var(--ease-out-expo),
+    transform 0.45s var(--ease-out-expo);
+}
+.process-dot[data-state="done"] {
+  background: var(--color-bone);
+}
+.process-dot[data-state="active"] {
+  background: var(--color-terra);
+  box-shadow: 0 0 0 4px rgba(183, 110, 78, 0.16);
+  transform: scale(1.35);
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+  .page-enter {
+    animation: none;
+  }
+  .card-cursor {
+    display: none;
+  }
+  .process-fill {
+    transform: scaleX(1);
+  }
+  .process-fill-v {
+    transform: scaleY(1);
+  }
+  .process-dot {
+    transition: none;
   }
   .mask-line > span,
   .img-open {

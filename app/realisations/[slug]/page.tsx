@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Still } from "@/components/Poster";
+import { DevisModal } from "@/components/DevisModal";
 import { OtherWorks } from "@/components/OtherWorks";
 import { ProjectStory } from "@/components/ProjectStory";
 import { ProjectVideo } from "@/components/ProjectVideo";
@@ -183,6 +184,20 @@ export default async function ProjectPage({
             Toutes les réalisations
           </Link>
         </div>
+      </section>
+
+      {/* Appel à l'action — un seul CTA sobre pour ne pas finir en cul-de-sac */}
+      <section className="px-5 pt-28 text-center sm:px-8 sm:pt-40 lg:px-10">
+        <Reveal>
+          <p className="font-cond text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
+            Un projet comme celui-ci ?
+          </p>
+        </Reveal>
+        <Reveal delay={120}>
+          <div className="mt-8 flex justify-center">
+            <DevisModal label="Démarrer un projet" />
+          </div>
+        </Reveal>
       </section>
     </article>
   );

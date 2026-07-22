@@ -4,6 +4,7 @@ import { PlayBadge } from "@/components/Poster";
 import { CardMedia } from "@/components/CardMedia";
 import { RevealTitle } from "@/components/RevealTitle";
 import { LiveImages } from "@/components/LiveImages";
+import { CardCursor } from "@/components/CardCursor";
 import { projects, projectThumb, projectPreview, site } from "@/lib/site";
 
 export default function Home() {
@@ -62,12 +63,16 @@ function Hero() {
 function Works() {
   return (
     <section id="realisations" className="px-3 pt-4 sm:px-5 lg:px-6">
-      <div className="mx-auto max-w-[1600px]">
+      <CardCursor className="mx-auto max-w-[1600px]">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {projects.map((p, i) => {
             return (
               <Reveal key={p.slug} delay={(i % 3) * 90}>
-                <Link href={`/realisations/${p.slug}`} className="group block">
+                <Link
+                  href={`/realisations/${p.slug}`}
+                  data-card
+                  className="group block"
+                >
                   <div className="relative aspect-square overflow-hidden rounded-2xl bg-[var(--color-ink-2)]">
                     <CardMedia
                       src={projectThumb(p)}
@@ -78,7 +83,7 @@ function Works() {
                       aria-hidden
                       className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"
                     />
-                    <div className="absolute inset-0 flex items-center justify-center text-white opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+                    <div className="card-play-badge absolute inset-0 flex items-center justify-center text-white opacity-0 transition-opacity duration-500 group-hover:opacity-100">
                       <PlayBadge />
                     </div>
                   </div>
@@ -95,7 +100,7 @@ function Works() {
             );
           })}
         </div>
-      </div>
+      </CardCursor>
     </section>
   );
 }

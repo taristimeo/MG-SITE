@@ -128,6 +128,37 @@ export const testimonials: Testimonial[] = [
   },
 ];
 
+// Étapes du process de fabrication d'un film — de l'écoute à la livraison.
+// Affichées en frise sur la page Studio.
+export type ProcessStep = { label: string; text: string };
+
+export const processSteps: ProcessStep[] = [
+  {
+    label: "Écoute",
+    text: "On part de vous : intention, contraintes, public. Une base claire avant toute image.",
+  },
+  {
+    label: "Écriture",
+    text: "On traduit l'intention en parti pris — angle, rythme, lumière. La direction se valide ici.",
+  },
+  {
+    label: "Tournage",
+    text: "On capte sur le terrain, au bon moment, avec le soin d'un plan pensé, jamais subi.",
+  },
+  {
+    label: "Montage",
+    text: "On assemble le récit, on choisit ce qui reste, on donne son souffle au film.",
+  },
+  {
+    label: "Étalonnage",
+    text: "On travaille la couleur image par image, jusqu'à la texture juste, celle qu'on garde.",
+  },
+  {
+    label: "Livraison",
+    text: "On livre aux bons formats, prêt à diffuser, avec un interlocuteur unique jusqu'au bout.",
+  },
+];
+
 export type Project = {
   slug: string;
   title: string;

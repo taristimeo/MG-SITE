@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { PlayBadge } from "@/components/Poster";
 import { CardMedia } from "@/components/CardMedia";
+import { CardCursor } from "@/components/CardCursor";
 import { projects, projectThumb, projectPreview } from "@/lib/site";
 
 // Réalisations : filtres par catégorie + grille de cartes (comme l'accueil).
@@ -40,11 +41,12 @@ export function WorksList() {
       </div>
 
       {/* Grille de cartes */}
-      <div className="mt-12 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <CardCursor className="mt-12 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {visible.map((p) => (
           <Link
             key={p.slug}
             href={`/realisations/${p.slug}`}
+            data-card
             className="group block"
           >
             <div className="relative aspect-square overflow-hidden rounded-2xl bg-[var(--color-ink-2)]">
@@ -59,7 +61,7 @@ export function WorksList() {
                 aria-hidden
                 className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"
               />
-              <div className="absolute inset-0 flex items-center justify-center text-white opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+              <div className="card-play-badge absolute inset-0 flex items-center justify-center text-white opacity-0 transition-opacity duration-500 group-hover:opacity-100">
                 <PlayBadge />
               </div>
             </div>
@@ -73,7 +75,7 @@ export function WorksList() {
             </div>
           </Link>
         ))}
-      </div>
+      </CardCursor>
     </div>
   );
 }
