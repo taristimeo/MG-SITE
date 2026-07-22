@@ -1,0 +1,448 @@
+<!--
+  TEMPLATE — scaffold for the site-audit skill.
+  The content below is a real example (Mauvais Grain). When running an audit:
+  copy this file, REPLACE all findings with the agents' real output, and retune
+  the palette (:root tokens) to the audited site's brand. Do not ship as-is.
+-->
+<title>Audit Mauvais Grain — SEO, bugs & pistes d'évolution</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --ink:#0a0908; --ink-2:#15120f; --ink-3:#1e1a15;
+    --line:#2a241d; --line-soft:#201b15;
+    --cream:#e8e4d8; --bone:#d9d4c6; --dim:#9b9384; --faint:#6e685c;
+    --terra:#b76e4e; --terra-dim:#8f5439;
+    --amber:#c9a06a;
+    --serif:Georgia,"Times New Roman",serif;
+    --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    --maxw:1080px;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--ink); color:var(--bone);
+    font-family:var(--sans); line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(1200px 600px at 80% -10%, rgba(183,110,78,.06), transparent 60%);
+  }
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 20px}
+  .eyebrow{font-family:var(--mono); font-size:11px; letter-spacing:.24em; text-transform:uppercase; color:var(--faint)}
+  .dot{color:var(--terra)}
+  a{color:var(--terra); text-decoration:none}
+  a:hover{color:var(--cream)}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--terra); outline-offset:3px; border-radius:3px}
+
+  /* Header */
+  header.hero{padding:76px 0 40px; border-bottom:1px solid var(--line-soft)}
+  .hero .eyebrow{margin-bottom:22px}
+  h1{
+    font-family:var(--serif); font-weight:400; letter-spacing:-.015em;
+    font-size:clamp(2.3rem,6vw,4.2rem); line-height:1.02; margin:0 0 18px;
+    color:var(--cream); text-wrap:balance;
+  }
+  .lede{max-width:62ch; color:var(--dim); font-size:1.02rem; margin:0}
+  .meta-row{display:flex; flex-wrap:wrap; gap:10px 26px; margin-top:26px; font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint)}
+  .meta-row b{color:var(--bone); font-weight:500}
+
+  /* Verdict stats */
+  .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line-soft); border:1px solid var(--line-soft); border-radius:14px; overflow:hidden; margin:34px 0 8px}
+  .stat{background:var(--ink); padding:22px 20px}
+  .stat .n{font-family:var(--serif); font-size:2.1rem; line-height:1; color:var(--cream)}
+  .stat .n .dot{font-size:1.5rem}
+  .stat .l{font-family:var(--mono); font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--dim); margin-top:10px}
+  @media(max-width:680px){.stats{grid-template-columns:repeat(2,1fr)}}
+
+  /* Filter bar */
+  .filters{position:sticky; top:0; z-index:5; display:flex; flex-wrap:wrap; gap:8px; padding:16px 0; margin-top:14px; background:linear-gradient(var(--ink) 70%, transparent)}
+  .filters .fl{font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); align-self:center; margin-right:6px}
+  .chip{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--bone); background:transparent; border:1px solid var(--line); border-radius:999px; padding:7px 14px; cursor:pointer; transition:all .25s cubic-bezier(.16,1,.3,1)}
+  .chip:hover{border-color:var(--terra); color:var(--cream)}
+  .chip[aria-pressed="true"]{background:var(--terra); border-color:var(--terra); color:var(--ink)}
+
+  /* Sections */
+  section.block{padding:30px 0 10px; border-top:1px solid var(--line-soft); margin-top:20px}
+  .block > .head{display:flex; align-items:baseline; gap:16px; flex-wrap:wrap; margin-bottom:8px}
+  .block h2{font-family:var(--serif); font-weight:400; font-size:clamp(1.6rem,3.5vw,2.4rem); color:var(--cream); margin:0; letter-spacing:-.01em}
+  .block .tag{font-family:var(--mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--terra)}
+  .block .sub{color:var(--dim); max-width:64ch; margin:6px 0 22px; font-size:.96rem}
+
+  .goodline{display:flex; gap:12px; flex-wrap:wrap; padding:14px 16px; border:1px solid var(--line-soft); border-radius:12px; background:var(--ink-2); margin-bottom:22px}
+  .goodline .lbl{font-family:var(--mono); font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--dim); white-space:nowrap; padding-top:2px}
+  .goodline ul{margin:0; padding:0; list-style:none; display:flex; flex-wrap:wrap; gap:6px 18px; font-size:.86rem; color:var(--bone)}
+  .goodline li::before{content:"✓"; color:var(--terra); margin-right:7px; font-size:.8em}
+
+  /* Cards */
+  .cards{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+  @media(max-width:760px){.cards{grid-template-columns:1fr}}
+  .card{border:1px solid var(--line); border-radius:14px; background:var(--ink-2); padding:20px 20px 18px; display:flex; flex-direction:column; gap:10px; transition:border-color .3s, transform .3s}
+  .card:hover{border-color:var(--line); transform:translateY(-2px)}
+  .card .top{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+  .ref{font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; color:var(--faint); border:1px solid var(--line); border-radius:5px; padding:2px 7px}
+  .card h3{font-family:var(--serif); font-weight:400; font-size:1.18rem; color:var(--cream); margin:2px 0 0; line-height:1.25; letter-spacing:-.005em}
+  .card p{margin:0; font-size:.9rem; color:var(--dim)}
+  .card p b{color:var(--bone); font-weight:600}
+  .card .reco{color:var(--bone)}
+  .card .reco::before{content:"→ "; color:var(--terra)}
+
+  /* Badges */
+  .badges{display:flex; gap:6px; flex-wrap:wrap; margin-left:auto}
+  .b{font-family:var(--mono); font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; padding:3px 8px; border-radius:999px; border:1px solid transparent; white-space:nowrap}
+  .b.p-haute,.b.s-majeur{background:rgba(183,110,78,.16); color:var(--terra); border-color:rgba(183,110,78,.4)}
+  .b.p-moyenne{background:transparent; color:var(--amber); border-color:rgba(201,160,106,.4)}
+  .b.p-basse,.b.s-mineur{background:transparent; color:var(--faint); border-color:var(--line)}
+  .b.e{background:var(--ink-3); color:var(--dim); border-color:var(--line)}
+  .b.qw{background:transparent; color:var(--cream); border-color:var(--terra)}
+
+  .card.is-hidden{display:none}
+
+  /* Offsite / notes */
+  .note{border:1px solid var(--line-soft); border-left:2px solid var(--terra); border-radius:0 12px 12px 0; background:var(--ink-2); padding:16px 20px; margin:22px 0; font-size:.9rem; color:var(--dim)}
+  .note b{color:var(--cream)}
+  .offsite{display:grid; grid-template-columns:1fr 1fr; gap:8px 26px; margin:16px 0 4px; padding:0; list-style:none}
+  @media(max-width:680px){.offsite{grid-template-columns:1fr}}
+  .offsite li{font-size:.9rem; color:var(--bone); padding:9px 0; border-bottom:1px solid var(--line-soft)}
+  .offsite li span{font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--terra); display:block; margin-bottom:2px}
+
+  /* Top picks */
+  .picks{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:6px}
+  @media(max-width:760px){.picks{grid-template-columns:1fr}}
+  .pick{border:1px solid var(--line); border-radius:14px; background:linear-gradient(180deg,var(--ink-3),var(--ink-2)); padding:22px 20px}
+  .pick .rank{font-family:var(--serif); font-size:2.4rem; color:var(--terra); line-height:1}
+  .pick h4{font-family:var(--serif); font-weight:400; font-size:1.15rem; color:var(--cream); margin:10px 0 8px}
+  .pick p{margin:0; font-size:.88rem; color:var(--dim)}
+
+  footer{border-top:1px solid var(--line-soft); margin-top:40px; padding:34px 0 60px; color:var(--faint); font-family:var(--mono); font-size:11px; letter-spacing:.1em}
+  footer .dot{font-size:1.1em}
+
+  @media (prefers-reduced-motion: reduce){*{transition:none!important; animation:none!important}}
+</style>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">Audit du site · mauvaisgrain.com · 18 juillet 2026</div>
+    <h1>Trois regards sur le site<span class="dot">.</span><br>Ce qui est solide, ce qui bloque, ce qui peut grandir.</h1>
+    <p class="lede">Trois agents ont passé le site au crible en parallèle — un pour le référencement, un pour les bugs, un pour l'inspiration créative. Voici la synthèse actionnable : chaque piste porte sa <b style="color:var(--bone)">priorité</b> et son <b style="color:var(--bone)">effort</b>, pour que tu choisisses quoi lancer. Rien n'a été modifié sur le site.</p>
+
+    <div class="meta-row">
+      <span>Stack&nbsp;: <b>Next.js 16 · React 19 · Tailwind 4</b></span>
+      <span>Build&nbsp;: <b>OK (exit 0)</b></span>
+      <span>Bugs critiques&nbsp;: <b>0</b></span>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="n">11</div><div class="l">Pistes SEO</div></div>
+      <div class="stat"><div class="n">4<span class="dot">·</span>12</div><div class="l">Bugs majeurs · mineurs</div></div>
+      <div class="stat"><div class="n">16</div><div class="l">Idées créatives</div></div>
+      <div class="stat"><div class="n">7</div><div class="l">Quick wins</div></div>
+    </div>
+  </header>
+
+  <div class="filters" role="group" aria-label="Filtrer les pistes">
+    <span class="fl">Filtrer</span>
+    <button class="chip" data-filter="all" aria-pressed="true">Tout</button>
+    <button class="chip" data-filter="haute" aria-pressed="false">Priorité haute</button>
+    <button class="chip" data-filter="qw" aria-pressed="false">Quick wins ★</button>
+    <button class="chip" data-filter="bug" aria-pressed="false">Bugs</button>
+  </div>
+
+  <!-- ============ SEO ============ -->
+  <section class="block">
+    <div class="head"><span class="tag">Agent 1</span><h2>Référencement</h2></div>
+    <p class="sub">Le socle technique est déjà excellent (données structurées, sitemap dynamique, canoniques). Les gains restants sont surtout du <b style="color:var(--bone)">contenu</b> (pages services, FAQ, NAP visible) et de la <b style="color:var(--bone)">performance image</b>.</p>
+
+    <div class="goodline">
+      <span class="lbl">Déjà en place</span>
+      <ul>
+        <li>metadataBase + canoniques</li><li>OpenGraph / Twitter + image 1200×630</li><li>JSON-LD LocalBusiness</li><li>VideoObject + fil d'Ariane</li><li>Sitemap + images</li><li>robots.txt</li><li>1 seul H1 / page</li><li>Polices next/font swap</li><li>alt descriptifs</li><li>CLS maîtrisé</li>
+      </ul>
+    </div>
+
+    <div class="cards">
+      <article class="card" data-priority="haute" data-effort="moyen" data-tags="haute">
+        <div class="top"><span class="ref">SEO · A</span><div class="badges"><span class="b p-haute">Haute</span><span class="b e">Effort moyen</span></div></div>
+        <h3>Passer les images en <code>next/image</code></h3>
+        <p>100% des visuels sont en <b>&lt;img&gt; brut</b> — thumbs de 1600px/150-270 Ko servies sans AVIF/WebP ni srcset. LCP dégradé sur les pages projet (poster sans <code>priority</code>).</p>
+        <p class="reco">Migrer vers <code>next/image</code> (fill + sizes), <code>priority</code> sur le poster vidéo. Gain direct PageSpeed mobile.</p>
+      </article>
+
+      <article class="card" data-priority="haute" data-effort="eleve" data-tags="haute">
+        <div class="top"><span class="ref">SEO · C</span><div class="badges"><span class="b p-haute">Haute</span><span class="b e">Effort élevé</span></div></div>
+        <h3>Créer des pages « Services »</h3>
+        <p>Tes 5 prestations vivent seulement dans le JSON-LD, <b>aucune page publique</b>. Le site ne cible aucune requête transactionnelle (« vidéaste corporate Bordeaux »).</p>
+        <p class="reco">Une page par prestation (H1 localisé, 300-500 mots, 2-3 réalisations liées, Service JSON-LD). Fort levier longue traîne.</p>
+      </article>
+
+      <article class="card" data-priority="moyenne" data-effort="faible" data-tags="qw">
+        <div class="top"><span class="ref">SEO · E</span><div class="badges"><span class="b qw">★ Quick win</span><span class="b p-moyenne">Moyenne</span></div></div>
+        <h3>Afficher le NAP en clair</h3>
+        <p>L'adresse (94 quai des Chartrons) et le téléphone ne sont <b>nulle part en texte visible</b>. Google valorise un NAP visible et cohérent avec la fiche Google.</p>
+        <p class="reco">Bloc <code>&lt;address&gt;</code> dans le footer : nom · adresse · téléphone.</p>
+      </article>
+
+      <article class="card" data-priority="moyenne" data-effort="faible" data-tags="qw">
+        <div class="top"><span class="ref">SEO · F</span><div class="badges"><span class="b qw">★ Quick win</span><span class="b p-moyenne">Moyenne</span></div></div>
+        <h3>Baliser les avis (aggregateRating)</h3>
+        <p>3 avis 5★ réels affichés mais <b>non structurés</b> — opportunité d'<code>aggregateRating</code> + <code>Review</code> manquée.</p>
+        <p class="reco">Ajouter aggregateRating/review au JSON-LD (les étoiles affichées viendront surtout de la fiche Google).</p>
+      </article>
+
+      <article class="card" data-priority="moyenne" data-effort="faible" data-tags="qw">
+        <div class="top"><span class="ref">SEO · B</span><div class="badges"><span class="b qw">★ Quick win</span><span class="b p-moyenne">Moyenne</span></div></div>
+        <h3>Ne pas auto-charger l'iframe YouTube</h3>
+        <p>La façade charge quand même YouTube après 2,8 s (~1 Mo de JS tiers) → dégrade INP/TBT et annule une partie du bénéfice.</p>
+        <p class="reco">Charger l'iframe <b>au clic uniquement</b>, ou remplacer par la preview .mp4 locale.</p>
+      </article>
+
+      <article class="card" data-priority="moyenne" data-effort="faible" data-tags="qw">
+        <div class="top"><span class="ref">SEO · D</span><div class="badges"><span class="b qw">★ Quick win</span><span class="b p-moyenne">Moyenne</span></div></div>
+        <h3>Aligner mots-clés meta ↔ offre</h3>
+        <p>« Mariage » et « publicité » sont dans les descriptions meta mais <b>aucun contenu ne les couvre</b> → promesse non tenue.</p>
+        <p class="reco">Créer le contenu correspondant, ou aligner les descriptions sur l'offre réelle.</p>
+      </article>
+
+      <article class="card" data-priority="moyenne" data-effort="faible" data-tags="">
+        <div class="top"><span class="ref">SEO · G</span><div class="badges"><span class="b p-moyenne">Moyenne</span><span class="b e">Effort faible</span></div></div>
+        <h3>Compléter le JSON-LD studio</h3>
+        <p>Champs recommandés manquants pour LocalBusiness : <code>priceRange</code>, <code>openingHoursSpecification</code>.</p>
+        <p class="reco">Ajouter priceRange « €€ » + horaires, et l'URL Google Business dans sameAs (une fois créée).</p>
+      </article>
+
+      <article class="card" data-priority="basse" data-effort="moyen" data-tags="">
+        <div class="top"><span class="ref">SEO · J</span><div class="badges"><span class="b p-basse">Basse</span><span class="b e">Effort moyen</span></div></div>
+        <h3>Ajouter une FAQ (FAQPage)</h3>
+        <p>Aucune FAQ. Manque une porte d'entrée longue traîne (« combien coûte une vidéo d'entreprise à Bordeaux »).</p>
+        <p class="reco">Section FAQ balisée FAQPage : délais, tarifs, zone, droits d'usage.</p>
+      </article>
+
+      <article class="card" data-priority="basse" data-effort="faible" data-tags="">
+        <div class="top"><span class="ref">SEO · I</span><div class="badges"><span class="b p-basse">Basse</span><span class="b e">Effort faible</span></div></div>
+        <h3>H2 sur la grille d'accueil</h3>
+        <p>La section réalisations de l'accueil n'a <b>aucun titre de section</b> ; le H1 = la marque seule.</p>
+        <p class="reco">Ajouter un H2 « Réalisations — films & vidéos à Bordeaux ».</p>
+      </article>
+
+      <article class="card" data-priority="basse" data-effort="faible" data-tags="">
+        <div class="top"><span class="ref">SEO · H</span><div class="badges"><span class="b p-basse">Basse</span><span class="b e">Effort faible</span></div></div>
+        <h3>Enrichir le VideoObject</h3>
+        <p>Pas de <code>duration</code> ; <code>uploadDate</code> fabriqué (année-01-01). Duration est recommandé pour les rich results vidéo.</p>
+        <p class="reco">Ajouter duration + vraie date de publication dans les données projet.</p>
+      </article>
+    </div>
+
+    <div class="note">
+      <b>Hors-code — les vrais leviers de visibilité locale.</b> Le SEO technique est fait ; la suite se joue en dehors du site.
+      <ul class="offsite">
+        <li><span>Priorité n°1</span>Créer/revendiquer la <b style="color:var(--bone)">fiche Google Business</b> (94 quai des Chartrons, catégorie « Service de production vidéo », photos, avis). C'est la seule source d'étoiles dans Google.</li>
+        <li><span>Mesure</span>Activer <b style="color:var(--bone)">Google Search Console</b>, soumettre le sitemap, suivre indexation + requêtes.</li>
+        <li><span>Citations</span>NAP identique sur annuaires locaux (Pages Jaunes, Nouvelle-Aquitaine…).</li>
+        <li><span>Backlinks</span>Liens depuis les clients (Beauty Success, COB, Partedis…) et partenaires d'événements.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ BUGS ============ -->
+  <section class="block">
+    <div class="head"><span class="tag">Agent 2</span><h2>Bugs & robustesse</h2></div>
+    <p class="sub">Build <b style="color:var(--bone)">OK</b>, aucun crash, aucun bug critique. La logique du formulaire de devis et la gestion des animations sont solides. Les points marquants touchent une interaction desktop et l'accessibilité.</p>
+
+    <div class="cards">
+      <article class="card" data-priority="haute" data-effort="faible" data-tags="bug qw">
+        <div class="top"><span class="ref">BUG · M1</span><div class="badges"><span class="b qw">★ Quick win</span><span class="b s-majeur">Majeur</span></div></div>
+        <h3>Double-clic requis sur « Autres réalisations »</h3>
+        <p>Sur desktop, l'éventail s'ouvre au survol sans passer <code>deployed</code> à true → le 1er clic est bloqué par <code>preventDefault()</code>. <b>Il faut cliquer deux fois</b> pour ouvrir une réalisation.</p>
+        <p class="reco">Ne bloquer le clic que sur pointeur tactile (<code>hover:none</code>).</p>
+      </article>
+
+      <article class="card" data-priority="haute" data-effort="moyen" data-tags="bug">
+        <div class="top"><span class="ref">BUG · M2</span><div class="badges"><span class="b s-majeur">Majeur</span><span class="b e">A11y</span></div></div>
+        <h3>Modale devis non accessible</h3>
+        <p>Pas de <code>role="dialog"</code>, pas de piège de focus, le focus n'entre pas dans la modale et n'est pas rendu au bouton à la fermeture. Échap/clic/croix, eux, marchent.</p>
+        <p class="reco">Ajouter role/aria, focus au 1er champ, restauration + focus trap.</p>
+      </article>
+
+      <article class="card" data-priority="haute" data-effort="faible" data-tags="bug">
+        <div class="top"><span class="ref">BUG · M3</span><div class="badges"><span class="b s-majeur">Majeur</span><span class="b e">A11y</span></div></div>
+        <h3>Menu mobile fermé reste tabulable</h3>
+        <p>L'overlay masqué par <code>opacity-0</code> reste dans l'ordre de tabulation → le focus entre dans un menu invisible (pas d'<code>aria-hidden</code>).</p>
+        <p class="reco">Ajouter <code>aria-hidden</code> + <code>inert</code>/tabIndex conditionnel quand fermé.</p>
+      </article>
+
+      <article class="card" data-priority="haute" data-effort="faible" data-tags="bug qw">
+        <div class="top"><span class="ref">BUG · M4</span><div class="badges"><span class="b qw">★ Quick win</span><span class="b s-majeur">Majeur ?</span></div></div>
+        <h3>Faux succès possible du formulaire</h3>
+        <p>Tout <code>2xx</code> est traité comme succès — le code <b>ne lit jamais</b> <code>{ok:true}</code>. Si l'API répond 200 + <code>{ok:false}</code>, le visiteur voit « Merci ! » alors que rien n'est enregistré (lead perdu).</p>
+        <p class="reco">Vérifier le corps : <code>res.ok && body?.ok === true</code>. À confirmer contre ton API.</p>
+      </article>
+
+      <article class="card" data-priority="moyenne" data-effort="faible" data-tags="bug">
+        <div class="top"><span class="ref">BUG · m1</span><div class="badges"><span class="b s-mineur">Mineur</span><span class="b e">Effort faible</span></div></div>
+        <h3>Avis : reduced-motion ignoré</h3>
+        <p>Les cartes d'avis animent en JS inline sans détecter <code>prefers-reduced-motion</code> (contrairement au reste du site).</p>
+        <p class="reco">Forcer l'état visible sans transition si reduced-motion.</p>
+      </article>
+
+      <article class="card" data-priority="moyenne" data-effort="faible" data-tags="bug">
+        <div class="top"><span class="ref">BUG · m2</span><div class="badges"><span class="b s-mineur">Mineur</span><span class="b e">Effort faible</span></div></div>
+        <h3>Reveals sans filet de secours</h3>
+        <p>Le contenu reste à <code>opacity:0</code> tant que l'IntersectionObserver n'a pas déclenché. Sur écran très court, un élément pourrait rester invisible.</p>
+        <p class="reco">Seuil plus tolérant + fallback (visible après délai).</p>
+      </article>
+
+      <article class="card" data-priority="basse" data-effort="faible" data-tags="bug">
+        <div class="top"><span class="ref">BUG · m3-m12</span><div class="badges"><span class="b s-mineur">Mineurs</span><span class="b e">Divers</span></div></div>
+        <h3>Détails à nettoyer</h3>
+        <p>Année copyright figée au build · contraste <code>bone-faint</code> limite (WCAG AA) · erreurs de formulaire non reliées (aria-describedby) · doublon « Ils nous font confiance » sur /studio · composant <code>VideoTile</code> mort + CSS marquee inutilisé.</p>
+        <p class="reco">Nettoyages ponctuels, aucun bloquant.</p>
+      </article>
+
+      <article class="card" data-priority="basse" data-effort="faible" data-tags="">
+        <div class="top"><span class="ref">BUG · ✓</span><div class="badges"><span class="b p-basse">Robuste</span></div></div>
+        <h3>Ce qui est déjà bien fait</h3>
+        <p>Logique de <b>retry du formulaire correcte</b> (2 essais, jamais sur 4xx, backoff), payload propre, portail SSR sans mismatch, aucune fuite d'observer/timer, reduced-motion couvert partout ailleurs, façade vidéo économe.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ INSPIRATION ============ -->
+  <section class="block">
+    <div class="head"><span class="tag">Agent 3</span><h2>Pistes d'évolution</h2></div>
+    <p class="sub">Le site est déjà d'un niveau rare. Ces idées comblent des <b style="color:var(--bone)">manques structurels</b> — surtout l'absence de showreel et le fait que tes 5 services soient invisibles — sans jamais trahir le minimalisme premium. Garde-fous : un seul accent terracotta, l'image avant l'effet.</p>
+
+    <div class="cards">
+      <article class="card" data-priority="haute" data-effort="moyen" data-tags="haute">
+        <div class="top"><span class="ref">IDÉE · 1.1</span><div class="badges"><span class="b p-haute">Impact haut</span><span class="b e">Effort moyen</span></div></div>
+        <h3>Un showreel d'accueil</h3>
+        <p>Le hero est 100% typographique — <b>aucune image en mouvement</b> n'accueille le visiteur, alors que c'est la promesse d'un studio vidéo.</p>
+        <p class="reco">Bandeau reel plein cadre après le titre, ouvert avec ton animation <code>video-cinema</code> existante. Le point « REC » reprend tout son sens.</p>
+      </article>
+
+      <article class="card" data-priority="haute" data-effort="moyen" data-tags="haute">
+        <div class="top"><span class="ref">IDÉE · 4.1</span><div class="badges"><span class="b p-haute">Impact haut</span><span class="b e">Effort moyen</span></div></div>
+        <h3>Éditorialiser les 5 services</h3>
+        <p>Tes prestations ont des accroches déjà écrites et excellentes, mais <b>affichées nulle part</b>. Triple gain : narration, conversion, SEO local.</p>
+        <p class="reco">Liste numérotée 01-05 (grammaire déjà utilisée), accroche <code>font-wide</code>, lien vers un projet exemple.</p>
+      </article>
+
+      <article class="card" data-priority="haute" data-effort="moyen" data-tags="haute">
+        <div class="top"><span class="ref">IDÉE · 2.1</span><div class="badges"><span class="b p-haute">Impact haut</span><span class="b e">Effort moyen</span></div></div>
+        <h3>Filtres par service sur les réalisations</h3>
+        <p>Le prospect « je cherche un film corporate » ne peut pas trier. Gain conversion + SEO (ancres par prestation).</p>
+        <p class="reco">Filtres mono, soulignement terracotta animé (grammaire <code>.link-underline</code>), transition en fondu.</p>
+      </article>
+
+      <article class="card" data-priority="haute" data-effort="faible" data-tags="haute qw">
+        <div class="top"><span class="ref">IDÉE · 5.1</span><div class="badges"><span class="b qw">★ Quick win</span><span class="b p-haute">Impact haut</span></div></div>
+        <h3>CTA en fin de page projet</h3>
+        <p>La page projet finit sur « Autres réalisations » = <b>cul-de-sac</b>. Or le visiteur qui vient de voir un film est au pic d'intention.</p>
+        <p class="reco">Bande sobre « Un projet comme celui-ci ? » + bouton terracotta (bloc déjà stylé).</p>
+      </article>
+
+      <article class="card" data-priority="haute" data-effort="moyen" data-tags="haute">
+        <div class="top"><span class="ref">IDÉE · 3.1</span><div class="badges"><span class="b p-haute">Impact haut</span><span class="b e">Effort moyen</span></div></div>
+        <h3>Transitions de page</h3>
+        <p>La navigation est « dure » (rechargement). C'est le seul vrai accroc d'expérience — un clic vers un projet devrait ressembler à un cut, pas à un reload.</p>
+        <p class="reco">Overlay noir chaud qui balaie (ease-out-expo, ~400 ms), grain conservé. View Transitions API.</p>
+      </article>
+
+      <article class="card" data-priority="moyenne" data-effort="moyen" data-tags="">
+        <div class="top"><span class="ref">IDÉE · 2.2</span><div class="badges"><span class="b p-moyenne">Impact moyen</span><span class="b e">Effort moyen</span></div></div>
+        <h3>Curseur « VOIR » sur les cards</h3>
+        <p>Au survol d'une réalisation, un label qui suit le curseur — signature des sites de réalisateurs, augmente le taux de clic.</p>
+        <p class="reco">Curseur custom <b>local à la grille</b>, désactivé en tactile/reduced-motion.</p>
+      </article>
+
+      <article class="card" data-priority="moyenne" data-effort="faible" data-tags="">
+        <div class="top"><span class="ref">IDÉE · 2.3</span><div class="badges"><span class="b p-moyenne">Impact moyen</span><span class="b e">Effort faible</span></div></div>
+        <h3>Casser la grille uniforme</h3>
+        <p>3 colonnes de carrés identiques = un peu « catalogue ». Un format large intercalé donne un tempo cinéma et hiérarchise.</p>
+        <p class="reco">Ta réalisation phare en bandeau 16:9, le reste en grille. 1-2 formats larges max.</p>
+      </article>
+
+      <article class="card" data-priority="moyenne" data-effort="faible" data-tags="">
+        <div class="top"><span class="ref">IDÉE · 3.2</span><div class="badges"><span class="b p-moyenne">Impact moyen</span><span class="b e">Effort faible</span></div></div>
+        <h3>Hero projet habité par l'image</h3>
+        <p>Le hero d'une réalisation est un titre sur fond noir (zone morte). La preview .mp4 en fond assombri l'immerge dès l'arrivée.</p>
+        <p class="reco">preview.mp4 en fond (opacité basse + gradient), titre par-dessus.</p>
+      </article>
+
+      <article class="card" data-priority="moyenne" data-effort="moyen" data-tags="">
+        <div class="top"><span class="ref">IDÉE · 3.3</span><div class="badges"><span class="b p-moyenne">Impact moyen</span><span class="b e">Effort moyen</span></div></div>
+        <h3>Lightbox plein cadre pour les stills</h3>
+        <p>Tes images méritent d'être vues en grand — preuve de qualité d'étalonnage et de cadre.</p>
+        <p class="reco">Clic → lightbox (esthétique de ta DevisModal), compteur « 03/08 », nav clavier.</p>
+      </article>
+
+      <article class="card" data-priority="moyenne" data-effort="moyen" data-tags="">
+        <div class="top"><span class="ref">IDÉE · 4.2</span><div class="badges"><span class="b p-moyenne">Impact moyen</span><span class="b e">Effort moyen</span></div></div>
+        <h3>Frise « du repérage à l'étalonnage »</h3>
+        <p>Montrer le process rassure le client qui n'a jamais commandé de film — matérialise ta valeur « Fiabilité ».</p>
+        <p class="reco">Frise minimaliste, trait qui se trace au scroll, un seul point terracotta = étape active.</p>
+      </article>
+
+      <article class="card" data-priority="moyenne" data-effort="moyen" data-tags="">
+        <div class="top"><span class="ref">IDÉE · 5.2</span><div class="badges"><span class="b p-moyenne">Impact moyen</span><span class="b e">Effort moyen</span></div></div>
+        <h3>Devis en 2-3 étapes</h3>
+        <p>Un formulaire segmenté augmente la complétion et <b>pré-qualifie</b> (demandes exploitables).</p>
+        <p class="reco">Type de projet → timing/budget → coordonnées. Progression « 1/3 », ultra-court.</p>
+      </article>
+
+      <article class="card" data-priority="moyenne" data-effort="faible" data-tags="qw">
+        <div class="top"><span class="ref">IDÉE · 6.1</span><div class="badges"><span class="b qw">★ Quick win</span><span class="b p-moyenne">Impact moyen</span></div></div>
+        <h3>Preuve sociale chiffrée</h3>
+        <p>Tes avis 5★ Google réels sont sous-exploités. Une ligne de chiffres-clés est ce que scanne un décideur pressé.</p>
+        <p class="reco">Note Google · films livrés · depuis 2022 · « Bordeaux + partout en France ». Grands chiffres serif.</p>
+      </article>
+
+      <article class="card" data-priority="moyenne" data-effort="faible" data-tags="qw">
+        <div class="top"><span class="ref">IDÉE · 5.3</span><div class="badges"><span class="b qw">★ Quick win</span><span class="b p-moyenne">Impact moyen</span></div></div>
+        <h3>Signal de disponibilité</h3>
+        <p>« Disponible pour de nouveaux projets · réponse sous 24 h » crée une urgence douce et appuie « Fiabilité ».</p>
+        <p class="reco">Une ligne mono, point terracotta « en ligne » qui pulse discrètement (play-pulse atténué).</p>
+      </article>
+
+      <article class="card" data-priority="basse" data-effort="faible" data-tags="">
+        <div class="top"><span class="ref">IDÉE · 1.2 / 6.3</span><div class="badges"><span class="b p-basse">Impact bas</span><span class="b e">Effort faible</span></div></div>
+        <h3>Détails de finition</h3>
+        <p>Toggle son sur le reel · générique technique enrichi (« Tourné en Égypte · Sony FX ») quand pertinent · avis reliés à leur source Google.</p>
+        <p class="reco">Petites touches, zéro refonte.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ TOP 3 ============ -->
+  <section class="block">
+    <div class="head"><span class="tag">Synthèse</span><h2>Par où commencer</h2></div>
+    <p class="sub">Si tu ne devais lancer que trois chantiers d'évolution, l'agent créatif recommande ceux-ci — croisés avec les quick wins des trois analyses.</p>
+    <div class="picks">
+      <div class="pick"><div class="rank">1</div><h4>Le showreel d'accueil</h4><p>Le manque le plus visible : un studio vidéo doit accueillir par de l'image en mouvement. Tout le motion existe déjà.</p></div>
+      <div class="pick"><div class="rank">2</div><h4>Sortir les services de l'ombre</h4><p>Les éditorialiser + les rendre filtrables sert d'un coup narration, conversion et SEO local Bordeaux.</p></div>
+      <div class="pick"><div class="rank">3</div><h4>Transitions + CTA fin de projet</h4><p>Fait basculer de « très beau » à « premium » et capte le prospect à son pic d'intention. Effort faible à moyen.</p></div>
+    </div>
+    <div class="note" style="margin-top:22px">
+      <b>Quick wins immédiats (fort rapport impact/effort).</b> CTA fin de page projet · NAP visible footer · fix double-clic « Autres réalisations » · vérifier <code>{ok:true}</code> du formulaire · aggregateRating JSON-LD · reduced-motion sur les avis · H2 sur la grille d'accueil. → Utilise le filtre <b>« Quick wins ★ »</b> en haut pour ne voir que ceux-là.
+    </div>
+  </section>
+
+  <footer>
+    Audit généré par 3 agents en parallèle · SEO · Bugs · Inspiration <span class="dot">·</span> Mauvais Grain <span class="dot">·</span> aucun fichier modifié
+  </footer>
+
+</div>
+
+<script>
+  const chips = document.querySelectorAll('.chip');
+  const cards = document.querySelectorAll('.card');
+  chips.forEach(chip=>{
+    chip.addEventListener('click',()=>{
+      chips.forEach(c=>c.setAttribute('aria-pressed', c===chip ? 'true':'false'));
+      const f = chip.dataset.filter;
+      cards.forEach(card=>{
+        const tags = (card.dataset.tags||'') + ' ' + (card.dataset.priority||'');
+        const show = f==='all' || tags.split(/\s+/).includes(f);
+        card.classList.toggle('is-hidden', !show);
+      });
+    });
+  });
+</script>
