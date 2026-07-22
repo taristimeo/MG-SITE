@@ -48,13 +48,13 @@ export default function StudioPage() {
       {/* Hero — habité par une image du territoire du studio, très assombrie */}
       <section className="relative flex min-h-[80svh] flex-col justify-center overflow-hidden px-5 pt-20 sm:min-h-[88svh] sm:px-8 sm:pt-24 lg:px-10">
         <div aria-hidden className="absolute inset-0">
-          <div className="h-full w-full opacity-30">
+          <div className="h-full w-full opacity-55">
             <HeroZoom>
               <Still src="/projects/the-shape-of-vastness/1.jpg" alt="" />
             </HeroZoom>
           </div>
-          <div className="absolute inset-0 bg-[rgba(10,9,8,0.4)]" />
-          <div className="absolute inset-0 bg-gradient-to-b from-[rgba(10,9,8,0.85)] via-transparent to-[var(--color-ink)]" />
+          <div className="absolute inset-0 bg-[rgba(10,9,8,0.18)]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[rgba(10,9,8,0.65)] via-transparent to-[var(--color-ink)]" />
         </div>
         <HeroFade>
           <div className="relative mx-auto w-full max-w-[1100px] text-center">

@@ -5,23 +5,14 @@ import { LiveImages } from "@/components/LiveImages";
 import { HeroFade } from "@/components/HeroFade";
 import { WorksShowcase } from "@/components/WorksShowcase";
 import { Manifesto } from "@/components/Manifesto";
-import { FeatureReel } from "@/components/FeatureReel";
 import { Stats } from "@/components/Stats";
 import { ServicesStack } from "@/components/ServicesStack";
-import {
-  clients,
-  manifesto,
-  projects,
-  projectThumb,
-  projectPreview,
-  site,
-} from "@/lib/site";
+import { clients, manifesto, projects, site } from "@/lib/site";
 
-// Accueil « page produit » : écran-titre, manifeste révélé au scroll, film
-// vedette qui s'étire en plein cadre, réalisations, chiffres, prestations en
-// cartes empilées, puis l'appel à projet. Un récit qui se déroule.
+// Accueil « page produit » : écran-titre, manifeste révélé au scroll,
+// sélection éditoriale de films, chiffres, prestations en cartes empilées,
+// puis l'appel à projet. Un récit qui se déroule.
 export default function Home() {
-  const featured = projects[0];
   return (
     <>
       <Hero />
@@ -29,13 +20,6 @@ export default function Home() {
         kicker={manifesto.kicker}
         text={manifesto.text}
         accents={[...manifesto.accents]}
-      />
-      <FeatureReel
-        href={`/realisations/${featured.slug}`}
-        videoSrc={projectPreview(featured)}
-        poster={projectThumb(featured)}
-        title={featured.title}
-        category={featured.category}
       />
       <Works />
       <section className="px-5 py-24 sm:px-8 sm:py-32 lg:px-10">
@@ -107,9 +91,9 @@ function Hero() {
 /* ------------------------------------------------------------------ */
 
 function Works() {
-  // Sélection éditoriale : le film vedette (01) vit dans le FeatureReel ;
-  // ici les quatre suivants en grandes rangées cinéma, puis l'index complet.
-  const selection = projects.slice(1, 5);
+  // Sélection éditoriale : cinq films en grandes rangées cinéma (01-05),
+  // puis le lien vers l'index complet.
+  const selection = projects.slice(0, 5);
   return (
     <section
       id="realisations"
@@ -125,7 +109,7 @@ function Works() {
           </h2>
         </div>
 
-        <WorksShowcase items={selection} startIndex={2} />
+        <WorksShowcase items={selection} startIndex={1} />
 
         <div className="mt-16 flex justify-center sm:mt-24">
           <Link
