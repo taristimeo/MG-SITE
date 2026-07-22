@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 import { CardCursor } from "@/components/CardCursor";
 import { CardMedia } from "@/components/CardMedia";
 import { DevisModal } from "@/components/DevisModal";
 import { Parallax } from "@/components/Parallax";
-import { Reveal } from "@/components/Reveal";
 import { projects, projectThumb, projectPreview } from "@/lib/site";
 import type { Project } from "@/lib/site";
 
@@ -18,52 +18,143 @@ import type { Project } from "@/lib/site";
 // Cartouche toujours SOUS le média, jamais en overlay.
 
 const EASE_EXPO = "ease-[cubic-bezier(0.16,1,0.3,1)]";
+// Même courbe signature, côté JS (styles inline transitionnés).
+const EASE = "cubic-bezier(0.16,1,0.3,1)";
 
 type Entry = { project: Project; index: number };
 
 // Une carte : un seul <Link> (data-card → curseur « VOIR » via CardCursor),
-// média puis cartouche. Le hover est porté par `group` : zoom très lent du
-// média (CardMedia lance la preview mp4), titre qui glisse, numéro qui passe
-// du terracotta au crème. Aucun gradient overlay.
+// média puis cartouche.
+//
+// ENTRÉE (à l'entrée du viewport, orchestrée par une IO propre à la carte) :
+// le média se DÉVOILE — rideau clip-path de haut en bas + léger settle
+// d'échelle (1.06→1) — puis la cartouche monte SOUS lui, décalée en trois
+// temps (numéro → titre → catégorie). Uniquement transform / opacity / clip-path,
+// aucun layout shift : le cadre 16:9 réserve sa place, on ne fait que révéler
+// son contenu.
+//
+// HOVER (porté par `group`) : zoom très lent du média (CardMedia lance la
+// preview mp4), titre qui glisse, numéro qui passe du terracotta au crème.
+// Aucun gradient overlay.
+//
+// prefers-reduced-motion : l'IO n'installe aucun état masqué (tout est rendu
+// visible d'emblée, styles inline neutres) — repli statique complet.
 function MosaicCard({
   project: p,
   index,
   total,
+  delay = 0,
   className = "",
 }: {
   project: Project;
   index: number;
   total: number;
+  delay?: number;
   className?: string;
 }) {
+  const ref = useRef<HTMLAnchorElement | null>(null);
+  const [inView, setInView] = useState(false);
+  const [reduced, setReduced] = useState(false);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setReduced(true);
+      setInView(true);
+      return;
+    }
+    const node = ref.current;
+    if (!node) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.18, rootMargin: "0px 0px -8% 0px" },
+    );
+    io.observe(node);
+    return () => io.disconnect();
+  }, []);
+
+  const anim = !reduced;
+  const shown = inView;
+
+  // Repli mouvement réduit → objets vides = rien n'est masqué, aucun transition.
+  const mediaStyle: CSSProperties = anim
+    ? {
+        clipPath: shown ? "inset(0 0 0 0)" : "inset(0 0 100% 0)",
+        opacity: shown ? 1 : 0,
+        transition: `clip-path 1.15s ${EASE} ${delay}ms, opacity 0.85s ${EASE} ${delay}ms`,
+        willChange: "clip-path, opacity",
+      }
+    : {};
+
+  const mediaInnerStyle: CSSProperties = anim
+    ? {
+        transform: shown ? "scale(1)" : "scale(1.06)",
+        transition: `transform 1.3s ${EASE} ${delay}ms`,
+        willChange: "transform",
+      }
+    : {};
+
+  // Cartouche : montée + fondu décalés APRÈS le dévoilé du média.
+  const line = (offset: number, extra = ""): CSSProperties =>
+    anim
+      ? {
+          opacity: shown ? 1 : 0,
+          transform: shown ? "translateY(0)" : "translateY(16px)",
+          transition:
+            `opacity 0.85s ${EASE} ${delay + offset}ms, ` +
+            `transform 0.95s ${EASE} ${delay + offset}ms` +
+            (extra ? `, ${extra}` : ""),
+        }
+      : {};
+
   return (
     <Link
+      ref={ref}
       href={`/realisations/${p.slug}`}
       data-card
       className={`group block ${className}`}
     >
       {/* 16:9 — cadrage cinéma respecté, l'image entière sans recadrage */}
-      <div className="aspect-video overflow-hidden">
-        <CardMedia
-          src={projectThumb(p)}
-          videoSrc={projectPreview(p)}
-          alt={`${p.title} — ${p.category} · film Mauvais Grain, studio vidéo à Bordeaux`}
-          className={`transition-transform duration-[1200ms] ${EASE_EXPO} group-hover:scale-[1.03]`}
-        />
+      <div className="aspect-video overflow-hidden" style={mediaStyle}>
+        <div className="h-full w-full" style={mediaInnerStyle}>
+          <CardMedia
+            src={projectThumb(p)}
+            videoSrc={projectPreview(p)}
+            alt={`${p.title} — ${p.category} · film Mauvais Grain, studio vidéo à Bordeaux`}
+            className={`transition-transform duration-[1400ms] ${EASE_EXPO} group-hover:scale-[1.03]`}
+          />
+        </div>
       </div>
 
       {/* Cartouche sous le média */}
       <div className="mt-6">
-        <p className="font-cond text-xs tracking-[0.25em] text-[var(--color-terra)] transition-colors duration-500 group-hover:text-[var(--color-cream)]">
+        <p
+          style={line(200, `color 0.55s ${EASE}`)}
+          className="font-cond text-xs tracking-[0.25em] text-[var(--color-terra)] group-hover:text-[var(--color-cream)]"
+        >
           {String(index + 1).padStart(2, "0")} —{" "}
           {String(total).padStart(2, "0")}
         </p>
         <h2
-          className={`font-wide mt-4 text-[clamp(1.6rem,2.8vw,2.6rem)] leading-[1.05] text-[var(--color-cream)] transition-transform duration-500 ${EASE_EXPO} group-hover:translate-x-[6px]`}
+          style={line(280)}
+          className="font-wide mt-4 text-[clamp(1.6rem,2.8vw,2.6rem)] leading-[1.05] text-[var(--color-cream)]"
         >
-          {p.title}
+          {/* Le glissé de hover vit sur un span dédié : le transform inline de
+              révélation reste sur le <h2>, aucun conflit entre les deux. */}
+          <span
+            className={`inline-block transition-transform duration-[700ms] ${EASE_EXPO} group-hover:translate-x-[6px]`}
+          >
+            {p.title}
+          </span>
         </h2>
-        <p className="font-cond mt-3 text-[11px] tracking-[0.2em] text-[var(--color-bone-faint)]">
+        <p
+          style={line(360)}
+          className="font-cond mt-3 text-[11px] tracking-[0.2em] text-[var(--color-bone-faint)]"
+        >
           {p.category} · {p.year}
         </p>
       </div>
@@ -115,17 +206,17 @@ export function WorksMosaic() {
         <CardCursor>
           {/* Re-key au changement de filtre : la mosaïque refond en entier */}
           <div key={filter} className="grid-fade">
-            {/* Mobile : une colonne, toutes les vignettes en 16:9 pleine largeur */}
+            {/* Mobile : une colonne, toutes les vignettes en 16:9 pleine largeur.
+                Chaque carte s'orchestre elle-même à son entrée dans le viewport. */}
             <div className="flex flex-col gap-y-[4.5rem] lg:hidden">
               {entries.map(({ project, index }) => (
-                <Reveal key={project.slug}>
-                  <MosaicCard
-                    project={project}
-                    index={index}
-                    total={total}
-                    className="w-full"
-                  />
-                </Reveal>
+                <MosaicCard
+                  key={project.slug}
+                  project={project}
+                  index={index}
+                  total={total}
+                  className="w-full"
+                />
               ))}
             </div>
 
@@ -136,14 +227,13 @@ export function WorksMosaic() {
                 className="flex flex-col gap-y-[clamp(5rem,12vh,9rem)]"
               >
                 {leftCol.map(({ project, index }) => (
-                  <Reveal key={project.slug}>
-                    <MosaicCard
-                      project={project}
-                      index={index}
-                      total={total}
-                      className="w-full"
-                    />
-                  </Reveal>
+                  <MosaicCard
+                    key={project.slug}
+                    project={project}
+                    index={index}
+                    total={total}
+                    className="w-full"
+                  />
                 ))}
               </Parallax>
 
@@ -152,15 +242,16 @@ export function WorksMosaic() {
                 className="mt-[clamp(8rem,22vh,14rem)] flex flex-col gap-y-[clamp(5rem,12vh,9rem)]"
               >
                 {rightCol.map(({ project, index }, pos) => (
-                  // Léger différé sur la première carte droite (premier écran)
-                  <Reveal key={project.slug} delay={pos === 0 ? 90 : 0}>
-                    <MosaicCard
-                      project={project}
-                      index={index}
-                      total={total}
-                      className="w-full"
-                    />
-                  </Reveal>
+                  // Léger différé sur la première carte droite : au premier écran,
+                  // le dévoilé de la colonne droite suit celui de la gauche.
+                  <MosaicCard
+                    key={project.slug}
+                    project={project}
+                    index={index}
+                    total={total}
+                    delay={pos === 0 ? 110 : 0}
+                    className="w-full"
+                  />
                 ))}
               </Parallax>
             </div>

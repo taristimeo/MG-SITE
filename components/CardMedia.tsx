@@ -17,6 +17,9 @@ type CardMediaProps = {
 export function CardMedia({ src, alt, videoSrc, className = "" }: CardMediaProps) {
   const ref = useRef<HTMLVideoElement | null>(null);
   const [saveData, setSaveData] = useState(false);
+  // Passe à true dès que la vidéo affiche sa première image : on la fond alors
+  // par-dessus le still. Reste vrai ensuite (pas de re-fondu aux pauses/reprises).
+  const [ready, setReady] = useState(false);
 
   // Économiseur de données actif (ou connexion qui le demande) : on s'en tient
   // à l'image — aucune vidéo téléchargée ni décodée.
@@ -59,18 +62,33 @@ export function CardMedia({ src, alt, videoSrc, className = "" }: CardMediaProps
     );
   }
 
+  // Still affiché d'emblée, vidéo fondue par-dessus dès qu'elle a une image.
+  // Le conteneur porte `className` (transitions/hover de scale) pour scaler
+  // l'ensemble ; les deux médias restent en object-cover, superposés.
   return (
-    <video
-      ref={ref}
-      className={`h-full w-full object-cover ${className}`}
-      poster={src}
-      muted
-      loop
-      playsInline
-      preload="none"
-      aria-label={alt}
-    >
-      <source src={videoSrc} type="video/mp4" />
-    </video>
+    <div className={`relative h-full w-full overflow-hidden ${className}`}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        decoding="async"
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+      <video
+        ref={ref}
+        className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[opacity]"
+        style={ready ? { opacity: 1 } : undefined}
+        poster={src}
+        muted
+        loop
+        playsInline
+        preload="none"
+        aria-hidden
+        onPlaying={() => setReady(true)}
+      >
+        <source src={videoSrc} type="video/mp4" />
+      </video>
+    </div>
   );
 }

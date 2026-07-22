@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
-import { Still } from "@/components/Poster";
+import { CardMedia } from "@/components/CardMedia";
 import { DevisModal } from "@/components/DevisModal";
 import { Parallax } from "@/components/Parallax";
+import { Reveal } from "@/components/Reveal";
 
 // Section « Donner vie à vos images » : titre révélé ligne par ligne (masque
 // qui monte) et photo qui s'ouvre en se dézoomant, avec léger parallax.
@@ -48,9 +49,10 @@ export function LiveImages() {
                   className="img-open h-full w-full"
                   style={{ "--mask-delay": "220ms" } as CSSProperties}
                 >
-                  <Still
-                    src="/projects/delaurentis-gone-colors/4.jpg"
-                    alt="Gros plan — mains sur un contrôleur, tournage du clip DeLaurentis par Mauvais Grain"
+                  <CardMedia
+                    src="/projects/the-sound-of-discovery/1.jpg"
+                    videoSrc="/projects/the-sound-of-discovery/preview.mp4"
+                    alt="The Sound of Discovery — film tourné en Égypte par Mauvais Grain"
                   />
                 </div>
               </div>
@@ -58,11 +60,18 @@ export function LiveImages() {
           </div>
         </div>
 
+        {/* Bloc CTA — monte en fondu, échelonné, quand il entre dans le champ
+            (observer propre à chaque Reveal, indépendant du reveal du titre). */}
         <div className="mt-16 flex flex-col items-center gap-5">
-          <p className="font-cond text-center text-xs tracking-[0.2em] text-[var(--color-bone-faint)]">
+          <Reveal
+            as="p"
+            className="font-cond text-center text-xs tracking-[0.2em] text-[var(--color-bone-faint)]"
+          >
             Un projet en tête ?
-          </p>
-          <DevisModal label="Démarrer un projet" />
+          </Reveal>
+          <Reveal delay={140}>
+            <DevisModal label="Démarrer un projet" />
+          </Reveal>
         </div>
       </div>
     </section>

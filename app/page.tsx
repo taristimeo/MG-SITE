@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import { Reveal } from "@/components/Reveal";
 import { RevealTitle } from "@/components/RevealTitle";
@@ -66,7 +67,10 @@ function Hero() {
           <Reveal delay={900}>
             <p className="font-cond pb-[0.3em] text-center text-xs leading-relaxed tracking-wide text-[var(--color-bone-dim)] sm:text-left">
               Studio de{" "}
-              <span className="kw" style={{ color: "inherit" }}>
+              <span
+                className="kw"
+                style={{ color: "inherit", "--kw-delay": "1.85s" } as CSSProperties}
+              >
                 production vidéo
               </span>
             </p>
@@ -75,7 +79,10 @@ function Hero() {
             <p className="font-cond pb-[0.3em] text-center text-xs leading-relaxed tracking-wide text-[var(--color-bone-dim)] sm:text-right">
               L&apos;image au service de
               <br className="hidden sm:block" />{" "}
-              <span className="kw" style={{ color: "inherit" }}>
+              <span
+                className="kw"
+                style={{ color: "inherit", "--kw-delay": "2.05s" } as CSSProperties}
+              >
                 votre histoire
               </span>
               .

@@ -43,22 +43,60 @@ export function CardCursor({
     const disc = discRef.current;
     if (!disc) return;
 
+    // Cible = position réelle du pointeur ; rendu = position lissée du disque.
+    // Le disque « rattrape » le pointeur via une interpolation (lerp) sur une
+    // boucle rAF continue, pour un suivi soyeux plutôt qu'un accrochage sec.
+    let tx = -100;
+    let ty = -100;
     let x = -100;
     let y = -100;
+    let scale = 0.7;
+    let first = true;
+    let running = false;
 
-    const paint = () => {
-      rafRef.current = 0;
-      const scale = activeRef.current ? 1 : 0.7;
+    // Facteurs de lissage : la position glisse, l'échelle réagit un peu plus vif.
+    const FOLLOW = 0.16;
+    const SCALE_FOLLOW = 0.2;
+
+    const frame = () => {
+      const tScale = activeRef.current ? 1 : 0.7;
+      x += (tx - x) * FOLLOW;
+      y += (ty - y) * FOLLOW;
+      scale += (tScale - scale) * SCALE_FOLLOW;
       disc.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%) scale(${scale})`;
+
+      const settled =
+        Math.abs(tx - x) < 0.1 &&
+        Math.abs(ty - y) < 0.1 &&
+        Math.abs(tScale - scale) < 0.002;
+
+      // On laisse tourner tant que le disque est visible (le pointeur peut
+      // s'arrêter) ; une fois masqué ET posé, on rend la main au navigateur.
+      if (!visibleRef.current && settled) {
+        running = false;
+        rafRef.current = 0;
+        return;
+      }
+      rafRef.current = requestAnimationFrame(frame);
     };
-    const schedule = () => {
-      if (!rafRef.current) rafRef.current = requestAnimationFrame(paint);
+    const start = () => {
+      if (!running) {
+        running = true;
+        rafRef.current = requestAnimationFrame(frame);
+      }
     };
 
     const onMove = (e: PointerEvent) => {
       if (e.pointerType !== "mouse") return;
-      x = e.clientX;
-      y = e.clientY;
+      tx = e.clientX;
+      ty = e.clientY;
+      // Première apparition : on colle le disque au pointeur pour éviter un
+      // long vol depuis le coin de l'écran.
+      if (first) {
+        first = false;
+        x = tx;
+        y = ty;
+      }
       const over = !!(e.target as Element).closest?.("[data-card]");
       if (over !== activeRef.current) {
         activeRef.current = over;
@@ -68,7 +106,7 @@ export function CardCursor({
         visibleRef.current = true;
         disc.classList.add("is-visible");
       }
-      schedule();
+      start();
     };
     const hide = () => {
       if (visibleRef.current) {

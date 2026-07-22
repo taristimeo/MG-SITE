@@ -19,10 +19,18 @@ export function HeroZoom({ children }: { children: React.ReactNode }) {
       return;
     }
     let raf = 0;
+    let last = "";
     const render = () => {
       raf = 0;
       const p = clamp01(window.scrollY / window.innerHeight);
-      el.style.transform = `scale(${(1.12 - 0.12 * p).toFixed(4)})`;
+      // Ease-out : l'image se pose vite puis se calme — un « poids » plus
+      // filmique qu'un couplage linéaire au scroll.
+      const eased = 1 - (1 - p) * (1 - p);
+      const next = `scale(${(1.12 - 0.12 * eased).toFixed(4)})`;
+      if (next !== last) {
+        el.style.transform = next;
+        last = next;
+      }
     };
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(render);

@@ -33,6 +33,11 @@ function StoryBlock({
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
+    // Repli statique : on affiche sans observer ni animer.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setVisible(true);
+      return;
+    }
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -40,7 +45,9 @@ function StoryBlock({
           observer.disconnect();
         }
       },
-      { threshold: 0.3, rootMargin: "0px 0px -12% 0px" },
+      // Seuil modéré + marge basse : le récit s'amorce dès qu'il remonte dans
+      // le cadre, sans dépendre d'un bloc de texte plus haut que le viewport.
+      { threshold: 0.2, rootMargin: "0px 0px -10% 0px" },
     );
     observer.observe(node);
     return () => observer.disconnect();

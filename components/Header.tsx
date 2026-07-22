@@ -6,6 +6,7 @@ import { navLinks, site } from "@/lib/site";
 
 export function Header() {
   const [open, setOpen] = useState(false);
+  const [reduced, setReduced] = useState(false);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -13,6 +14,16 @@ export function Header() {
       document.body.style.overflow = "";
     };
   }, [open]);
+
+  // Mouvement réduit : l'overlay et son stagger deviennent instantanés
+  // (apparition/disparition en fondu simple, sans glissement ni délais).
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => setReduced(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   const menuItems = [...navLinks, { label: "On en parle", href: "/contact" }];
 
@@ -24,7 +35,7 @@ export function Header() {
             <Link
               key={l.href}
               href={l.href}
-              className="font-cond text-[14px] text-[var(--color-bone)] transition-colors hover:text-[var(--color-terra)]"
+              className="link-underline font-cond text-[14px] text-[var(--color-bone)] transition-colors hover:text-[var(--color-terra)]"
             >
               {l.label}
             </Link>
@@ -59,14 +70,14 @@ export function Header() {
         className="absolute right-5 top-5 z-[60] flex h-8 w-8 items-center justify-center sm:right-8 lg:right-10 md:hidden"
       >
         <span
-          className={`absolute inset-0 m-auto h-px w-6 bg-[var(--color-bone)] transition-all duration-300 ease-in-out ${
-            open ? "rotate-45" : "-translate-y-[4px]"
-          }`}
+          className={`absolute inset-0 m-auto h-px w-6 bg-[var(--color-bone)] ${
+            reduced ? "transition-none" : "transition-all duration-300 ease-in-out"
+          } ${open ? "rotate-45" : "-translate-y-[4px]"}`}
         />
         <span
-          className={`absolute inset-0 m-auto h-px w-6 bg-[var(--color-bone)] transition-all duration-300 ease-in-out ${
-            open ? "-rotate-45" : "translate-y-[4px]"
-          }`}
+          className={`absolute inset-0 m-auto h-px w-6 bg-[var(--color-bone)] ${
+            reduced ? "transition-none" : "transition-all duration-300 ease-in-out"
+          } ${open ? "-rotate-45" : "translate-y-[4px]"}`}
         />
       </button>
 
@@ -74,22 +85,30 @@ export function Header() {
       <div
         inert={!open}
         aria-hidden={!open}
-        className={`fixed inset-0 flex flex-col justify-center overflow-hidden bg-[var(--color-ink)] px-8 transition-opacity duration-500 md:hidden ${
+        className={`fixed inset-0 flex flex-col justify-center overflow-hidden bg-[var(--color-ink)] px-8 md:hidden ${
+          reduced ? "transition-none" : "transition-opacity duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        } ${
           open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         }`}
       >
         {/* Halo terracotta diffus — profondeur discrète */}
         <div
-          className={`pointer-events-none absolute -right-24 -top-16 h-80 w-80 rounded-full bg-[var(--color-terra)] blur-[100px] transition-opacity duration-1000 ${
-            open ? "opacity-[0.09]" : "opacity-0"
-          }`}
+          className={`pointer-events-none absolute -right-24 -top-16 h-80 w-80 rounded-full bg-[var(--color-terra)] blur-[100px] ${
+            reduced ? "transition-none" : "transition-opacity duration-1000"
+          } ${open ? "opacity-[0.09]" : "opacity-0"}`}
         />
 
         {/* Intitulé de section */}
         <div
-          style={{ transitionDelay: open ? "80ms" : "0ms" }}
-          className={`mb-8 flex items-center gap-2 font-cond text-[12px] text-[var(--color-bone-faint)] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-            open ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+          style={{ transitionDelay: !reduced && open ? "80ms" : "0ms" }}
+          className={`mb-8 flex items-center gap-2 font-cond text-[12px] text-[var(--color-bone-faint)] ${
+            reduced
+              ? "transition-none"
+              : "transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          } ${
+            open
+              ? "translate-y-0 opacity-100"
+              : `${reduced ? "" : "translate-y-6"} opacity-0`
           }`}
         >
           <span className="h-px w-8 bg-[var(--color-terra)]" />
@@ -102,9 +121,17 @@ export function Header() {
               key={l.href}
               href={l.href}
               onClick={() => setOpen(false)}
-              style={{ transitionDelay: open ? `${160 + i * 90}ms` : "0ms" }}
-              className={`group flex items-center gap-4 border-b border-[var(--color-line-soft)] py-4 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                open ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+              style={{
+                transitionDelay: !reduced && open ? `${160 + i * 90}ms` : "0ms",
+              }}
+              className={`group flex items-center gap-4 border-b border-[var(--color-line-soft)] py-4 ${
+                reduced
+                  ? "transition-none"
+                  : "transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+              } ${
+                open
+                  ? "translate-y-0 opacity-100"
+                  : `${reduced ? "" : "translate-y-8"} opacity-0`
               }`}
             >
               <span className="font-cond text-[13px] text-[var(--color-terra)]">
@@ -124,9 +151,18 @@ export function Header() {
         </nav>
 
         <div
-          style={{ transitionDelay: open ? `${160 + menuItems.length * 90 + 80}ms` : "0ms" }}
-          className={`mt-12 space-y-4 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-            open ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+          style={{
+            transitionDelay:
+              !reduced && open ? `${160 + menuItems.length * 90 + 80}ms` : "0ms",
+          }}
+          className={`mt-12 space-y-4 ${
+            reduced
+              ? "transition-none"
+              : "transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          } ${
+            open
+              ? "translate-y-0 opacity-100"
+              : `${reduced ? "" : "translate-y-8"} opacity-0`
           }`}
         >
           <div className="space-y-1 font-cond text-sm text-[var(--color-bone-dim)]">

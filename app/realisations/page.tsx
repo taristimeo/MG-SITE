@@ -18,9 +18,13 @@ export default function RealisationsPage() {
     <>
       <section className="px-5 pb-10 pt-24 sm:px-8 sm:pt-32">
         <div className="mx-auto max-w-[1100px] text-center">
-          <p className="font-cond text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
-            Le travail
-          </p>
+          {/* Entrée en trois temps : surtitre, puis le mot (RevealTitle), puis
+              le compteur — chacun légèrement décalé pour une pose feutrée. */}
+          <Reveal>
+            <p className="font-cond text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
+              Le travail
+            </p>
+          </Reveal>
           <RevealTitle
             text="Réalisations"
             className="mt-3 text-[clamp(2.4rem,7vw,6rem)] text-[var(--color-cream)]"
@@ -28,10 +32,26 @@ export default function RealisationsPage() {
           <Reveal delay={300}>
             <p className="font-cond mt-6 text-[11px] tracking-[0.3em] text-[var(--color-bone-faint)]">
               ({String(projects.length).padStart(2, "0")} films) · Défiler{" "}
-              <span aria-hidden>↓</span>
+              {/* Indice de défilement : dérive verticale très douce, courbe de
+                  pulse (pas expo), coupée en mouvement réduit. */}
+              <span aria-hidden className="scroll-hint inline-block">
+                ↓
+              </span>
             </p>
           </Reveal>
         </div>
+        <style>{`
+          .scroll-hint {
+            animation: mg-scroll-hint 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+          }
+          @keyframes mg-scroll-hint {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(3px); }
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .scroll-hint { animation: none; }
+          }
+        `}</style>
       </section>
 
       <WorksMosaic />

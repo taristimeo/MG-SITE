@@ -44,7 +44,10 @@ export function Process() {
     const setProgress = (p: number) => {
       if (hFillRef.current) hFillRef.current.style.transform = `scaleX(${p})`;
       if (vFillRef.current) vFillRef.current.style.transform = `scaleY(${p})`;
-      const active = Math.min(n - 1, Math.round(p * (n - 1)));
+      // Frontière (floor) : la tête de lecture se pose sur l'étape qu'elle vient
+      // d'atteindre et l'y garde jusqu'à la suivante — un seul point actif qui
+      // avance franchement, les précédents en « done ».
+      const active = Math.min(n - 1, Math.floor(p * (n - 1) + 1e-4));
       paintDots(active, (i) => p >= i / (n - 1) - 0.02);
     };
 
@@ -59,7 +62,7 @@ export function Process() {
     const ease = (t: number) => -(Math.cos(Math.PI * t) - 1) / 2;
     // Durée calée sur le nombre d'étapes (~0,5 s par étape) pour qu'on voie
     // chaque étape s'allumer tour à tour.
-    const duration = Math.max(2400, n * 500);
+    const duration = Math.max(2600, n * 560);
 
     let raf = 0;
     let startTs = 0;

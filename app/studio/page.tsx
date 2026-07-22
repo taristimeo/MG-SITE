@@ -72,9 +72,27 @@ export default function StudioPage() {
             />
             <Reveal delay={700}>
               <p className="font-cond mt-12 text-[0.7rem] tracking-[0.25em] text-[var(--color-bone-faint)]">
-                Défiler <span aria-hidden>↓</span>
+                Défiler{" "}
+                <span aria-hidden className="studio-scroll-hint inline-block">
+                  ↓
+                </span>
               </p>
             </Reveal>
+            {/* Indice de défilement : la flèche respire vers le bas, lentement,
+                puis se retire. Repli statique en prefers-reduced-motion. */}
+            <style>{`
+              @keyframes studioScrollHint {
+                0%, 100% { transform: translateY(0); opacity: .55; }
+                50% { transform: translateY(5px); opacity: 1; }
+              }
+              .studio-scroll-hint {
+                animation: studioScrollHint 2.4s var(--ease-out-soft, ease-in-out) 1.6s infinite;
+                will-change: transform, opacity;
+              }
+              @media (prefers-reduced-motion: reduce) {
+                .studio-scroll-hint { animation: none; }
+              }
+            `}</style>
           </div>
         </HeroFade>
       </section>

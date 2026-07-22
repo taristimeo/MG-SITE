@@ -15,7 +15,7 @@ const TYPES = [
 type Status = "idle" | "sending" | "success" | "error";
 
 const fieldClass =
-  "w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-ink-2)] px-4 py-3 font-sans text-[15px] text-[var(--color-bone)] placeholder:text-[var(--color-bone-faint)] outline-none transition-colors duration-300 focus:border-[var(--color-terra)]";
+  "w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-ink-2)] px-4 py-3 font-sans text-[15px] text-[var(--color-bone)] placeholder:text-[var(--color-bone-faint)] outline-none transition-[color,border-color,box-shadow] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] focus:border-[var(--color-terra)] focus:shadow-[0_0_0_3px_rgba(183,110,78,0.14)]";
 const labelClass =
   "font-cond mb-2 flex items-center gap-1 text-[11px] tracking-[0.18em] text-[var(--color-bone-dim)]";
 

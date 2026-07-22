@@ -16,15 +16,45 @@ export function DevisModal({
 }) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  // `render` garde le portail monté pendant l'animation de sortie ; `shown`
+  // pilote l'état d'entrée/sortie (opacité + translation) via transition CSS.
+  const [render, setRender] = useState(false);
+  const [shown, setShown] = useState(false);
+  const [reduced, setReduced] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   // Élément déclencheur mémorisé pour restaurer le focus à la fermeture.
   const triggerRef = useRef<HTMLElement | null>(null);
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setMounted(true);
+    setReduced(
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    );
+  }, []);
+
+  // Montage/démontage différé pour laisser jouer l'entrée puis la sortie.
+  useEffect(() => {
+    if (open) {
+      setRender(true);
+      return;
+    }
+    if (!render) return;
+    setShown(false);
+    const t = setTimeout(() => setRender(false), reduced ? 0 : 480);
+    return () => clearTimeout(t);
+  }, [open, render, reduced]);
+
+  // Une fois monté, on bascule à l'état « entré » à la frame suivante pour
+  // déclencher la transition (backdrop en fondu, panneau qui monte et se pose).
+  useEffect(() => {
+    if (!render || !open) return;
+    const r = requestAnimationFrame(() => setShown(true));
+    return () => cancelAnimationFrame(r);
+  }, [render, open]);
 
   // Verrou du scroll + fermeture clavier (Échap) + gestion du focus (a11y).
   useEffect(() => {
-    if (!open) return;
+    if (!open || !render) return;
     document.body.style.overflow = "hidden";
 
     // Mémorise l'élément qui avait le focus avant l'ouverture.
@@ -75,7 +105,7 @@ export function DevisModal({
       // Restaure le focus sur l'élément déclencheur.
       triggerRef.current?.focus?.();
     };
-  }, [open]);
+  }, [open, render]);
 
   const overlay = (
     <div
@@ -86,7 +116,11 @@ export function DevisModal({
     >
       {/* Fond assombri — couvre tout l'écran, ferme au clic */}
       <div
-        className="modal-backdrop fixed inset-0 bg-[rgba(6,5,4,0.78)] backdrop-blur-sm"
+        className="fixed inset-0 bg-[rgba(6,5,4,0.78)] backdrop-blur-sm"
+        style={{
+          opacity: shown ? 1 : 0,
+          transition: reduced ? "none" : "opacity 0.34s var(--ease-out-expo)",
+        }}
         onClick={() => setOpen(false)}
       />
 
@@ -95,7 +129,19 @@ export function DevisModal({
         <div
           ref={panelRef}
           tabIndex={-1}
-          className="modal-panel relative w-full max-w-[600px] rounded-2xl border border-[var(--color-line-soft)] bg-[var(--color-ink)] p-6 shadow-2xl outline-none sm:p-9"
+          style={{
+            opacity: shown ? 1 : 0,
+            transform: reduced
+              ? "none"
+              : shown
+                ? "translateY(0) scale(1)"
+                : "translateY(16px) scale(0.985)",
+            transition: reduced
+              ? "none"
+              : "opacity 0.42s var(--ease-out-expo), transform 0.48s var(--ease-out-expo)",
+            willChange: "opacity, transform",
+          }}
+          className="relative w-full max-w-[600px] rounded-2xl border border-[var(--color-line-soft)] bg-[var(--color-ink)] p-6 shadow-2xl outline-none sm:p-9"
         >
           <div className="mb-7 flex items-start justify-between gap-4">
             <div>
@@ -141,7 +187,7 @@ export function DevisModal({
         {label}
       </button>
 
-      {mounted && open ? createPortal(overlay, document.body) : null}
+      {mounted && render ? createPortal(overlay, document.body) : null}
     </>
   );
 }

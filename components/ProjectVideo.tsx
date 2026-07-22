@@ -16,12 +16,14 @@ export function ProjectVideo({
 }) {
   const frameRef = useRef<HTMLDivElement>(null);
   const [playing, setPlaying] = useState(false);
+  const [reduced, setReduced] = useState(false);
 
   useEffect(() => {
     const node = frameRef.current;
     if (!node) return;
     // En reduced-motion : pas d'animation, on garde le clic.
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setReduced(true);
       node.classList.add("is-in");
       return;
     }
@@ -69,8 +71,19 @@ export function ProjectVideo({
             className="group absolute inset-0 h-full w-full"
           >
             <div className="video-cinema-inner absolute inset-0">
-              <Still src={posterSrc} alt={title} />
-              <div className="absolute inset-0 bg-gradient-to-t from-[rgba(10,9,8,0.5)] via-transparent to-[rgba(10,9,8,0.12)]" />
+              {/* Ken Burns discret au survol : l'affiche « respire » sans jamais
+                  bouger la mise en page. Propriété `scale` (composée par-dessus
+                  le transform d'ouverture géré en CSS). Neutre en reduced-motion. */}
+              <div
+                className={
+                  reduced
+                    ? "h-full w-full"
+                    : "h-full w-full transition-[scale] duration-[1300ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.045]"
+                }
+              >
+                <Still src={posterSrc} alt={title} />
+                <div className="absolute inset-0 bg-gradient-to-t from-[rgba(10,9,8,0.5)] via-transparent to-[rgba(10,9,8,0.12)]" />
+              </div>
             </div>
             <span className="video-cinema-play absolute left-1/2 top-1/2 flex h-16 w-16 items-center justify-center sm:h-20 sm:w-20">
               <span className="play-pulse flex h-16 w-16 items-center justify-center rounded-full border border-white/50 bg-black/25 backdrop-blur-[2px] transition-all duration-500 group-hover:scale-110 group-hover:border-[var(--color-terra)] sm:h-20 sm:w-20">

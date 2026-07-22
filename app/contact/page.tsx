@@ -66,7 +66,7 @@ export default function ContactPage() {
             </MaskTitle>
           </div>
           <div>
-            <Reveal>
+            <Reveal delay={120}>
               <p className="font-cond text-[11px] tracking-[0.25em] text-[var(--color-bone-faint)]">
                 Appelez-nous
               </p>
@@ -82,12 +82,14 @@ export default function ContactPage() {
           </div>
         </div>
 
-        {/* Générique de fin : le lieu + les réseaux */}
-        <Reveal delay={280}>
-          <div className="mt-16 flex flex-col items-center gap-4 text-center sm:mt-20">
+        {/* Générique de fin : le lieu puis les réseaux, en cascade */}
+        <div className="mt-16 flex flex-col items-center gap-4 text-center sm:mt-20">
+          <Reveal delay={200}>
             <address className="font-cond text-[11px] not-italic leading-relaxed tracking-[0.2em] text-[var(--color-bone-dim)]">
               {site.street} · {site.postalCode} {site.city}
             </address>
+          </Reveal>
+          <Reveal delay={320}>
             <div className="flex gap-6 font-cond text-[11px] tracking-[0.2em] text-[var(--color-bone-faint)]">
               {site.socials.map((s) => (
                 <a
@@ -101,8 +103,8 @@ export default function ContactPage() {
                 </a>
               ))}
             </div>
-          </div>
-        </Reveal>
+          </Reveal>
+        </div>
       </div>
     </section>
   );

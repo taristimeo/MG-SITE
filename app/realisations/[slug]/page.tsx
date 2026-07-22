@@ -7,6 +7,7 @@ import { OtherWorks } from "@/components/OtherWorks";
 import { ProjectStory } from "@/components/ProjectStory";
 import { ProjectVideo } from "@/components/ProjectVideo";
 import { Reveal } from "@/components/Reveal";
+import { MaskTitle } from "@/components/MaskTitle";
 import { HeroZoom } from "@/components/HeroZoom";
 import {
   projectCredits,
@@ -141,15 +142,17 @@ export default async function ProjectPage({
         </div>
 
         <div className="relative">
+          {/* Titre : révélation par masque (la ligne monte de sous un cache),
+              puis catégorie et générique montent en cascade. */}
           <h1 className="font-wide mx-auto max-w-[16ch] text-[clamp(3rem,13vw,12rem)] leading-[0.95] text-[var(--color-cream)]">
-            {project.title}
+            <MaskTitle>{project.title}</MaskTitle>
           </h1>
-          <p className="font-cond mt-6 text-sm tracking-[0.3em] text-[var(--color-terra)]">
+          <Reveal delay={260} as="p" className="font-cond mt-6 text-sm tracking-[0.3em] text-[var(--color-terra)]">
             {project.category}
-          </p>
-          <p className="font-cond mt-3 text-[11px] tracking-[0.25em] text-[var(--color-bone-dim)]">
+          </Reveal>
+          <Reveal delay={360} as="p" className="font-cond mt-3 text-[11px] tracking-[0.25em] text-[var(--color-bone-dim)]">
             {project.client} · {project.year}
-          </p>
+          </Reveal>
         </div>
       </header>
 
@@ -176,7 +179,7 @@ export default async function ProjectPage({
       <section className="px-5 py-14 sm:px-8 sm:py-20 lg:py-24">
         <dl className="mx-auto flex max-w-[420px] flex-col items-center gap-6 text-center">
           {credits.map((c, i) => (
-            <Reveal key={c.role} delay={i * 70}>
+            <Reveal key={c.role} delay={i * 90}>
               <dt className="font-cond text-xs tracking-[0.2em] text-[var(--color-terra)]">
                 {c.role}
               </dt>
@@ -204,7 +207,8 @@ export default async function ProjectPage({
       {/* Navigation film précédent / suivant — la continuité « à l'affiche » */}
       <nav className="mt-24 border-t border-[var(--color-line-soft)] px-5 pt-10 sm:mt-32 sm:px-8 lg:px-10">
         <div className="mx-auto flex max-w-[1100px] items-center justify-between gap-6">
-          <Link href={`/realisations/${prev.slug}`} className="group max-w-[45%]">
+          <Reveal className="max-w-[45%]">
+          <Link href={`/realisations/${prev.slug}`} className="group block">
             <p className="font-cond text-[11px] tracking-[0.2em] text-[var(--color-bone-faint)]">
               <span
                 aria-hidden
@@ -218,17 +222,21 @@ export default async function ProjectPage({
               {prev.title}
             </p>
           </Link>
+          </Reveal>
 
+          <Reveal delay={90} className="hidden shrink-0 sm:block">
           <Link
             href="/realisations"
-            className="hidden shrink-0 font-cond text-[11px] tracking-[0.2em] text-[var(--color-bone-faint)] transition-colors duration-300 hover:text-[var(--color-terra)] sm:block"
+            className="font-cond text-[11px] tracking-[0.2em] text-[var(--color-bone-faint)] transition-colors duration-300 hover:text-[var(--color-terra)]"
           >
             Tous les films
           </Link>
+          </Reveal>
 
+          <Reveal delay={170} className="max-w-[45%]">
           <Link
             href={`/realisations/${next.slug}`}
-            className="group max-w-[45%] text-right"
+            className="group block text-right"
           >
             <p className="font-cond text-[11px] tracking-[0.2em] text-[var(--color-bone-faint)]">
               Film suivant
@@ -243,6 +251,7 @@ export default async function ProjectPage({
               {next.title}
             </p>
           </Link>
+          </Reveal>
         </div>
       </nav>
 

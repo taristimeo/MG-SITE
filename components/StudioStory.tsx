@@ -39,6 +39,7 @@ export function StudioStory({ chapters, imageSrc, imageAlt }: Props) {
   const innerRef = useRef<HTMLDivElement | null>(null);
   const layerRefs = useRef<(HTMLDivElement | null)[]>([]);
   const articleRefs = useRef<(HTMLElement | null)[]>([]);
+  const ghostRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const tickRefs = useRef<(HTMLSpanElement | null)[]>([]);
 
   const steps = chapters.length;
@@ -77,21 +78,25 @@ export function StudioStory({ chapters, imageSrc, imageAlt }: Props) {
         innerRef.current.style.transform = `scale(${breathScale})`;
       }
 
-      // Textes : plateau lisible au centre, sortie en fondu + glissement +
-      // scale (pas de blur par frame : filter force des repaints coûteux).
+      // Textes : plateau lisible large au centre, sortie en fondu + glissement
+      // + scale (pas de blur par frame : filter force des repaints coûteux).
+      // Le grand chiffre fantôme dérive un peu plus que le texte → profondeur.
       for (let i = 0; i < steps; i++) {
         const center = introFrac + (i + 0.5) * textSeg;
         const t = (p - center) / textSeg;
         const a = Math.abs(t);
-        const fade = smooth((a - 0.16) / (0.66 - 0.16));
+        // Plateau élargi (|t|<0.19) : le bloc reste posé plus longtemps avant
+        // de s'effacer — lecture plus calme, moins de va-et-vient.
+        const fade = smooth((a - 0.19) / (0.68 - 0.19));
         const opacity = clamp01(1 - fade);
         const tc = clamp(t, -0.5, 0.5);
-        const y = -tc * 140;
-        const x = tc * (i % 2 === 0 ? 24 : -24);
-        const scale = 1 - a * 0.06;
+        const y = -tc * 118;
+        const x = tc * (i % 2 === 0 ? 20 : -20);
+        const scale = 1 - a * 0.05;
 
         const layer = layerRefs.current[i];
         const art = articleRefs.current[i];
+        const ghost = ghostRefs.current[i];
         const tick = tickRefs.current[i];
         if (layer) {
           layer.style.opacity = String(opacity);
@@ -99,6 +104,11 @@ export function StudioStory({ chapters, imageSrc, imageAlt }: Props) {
         }
         if (art) {
           art.style.transform = `translate3d(${x}px,${y}px,0) scale(${scale})`;
+        }
+        // Parallaxe : dérive additionnelle du chiffre (composée à celle de
+        // l'article) pour un léger décollement en Z.
+        if (ghost) {
+          ghost.style.transform = `translate3d(${tc * (i % 2 === 0 ? 14 : -14)}px,${-tc * 34}px,0)`;
         }
         if (tick) tick.style.transform = `scaleX(${opacity})`;
       }
@@ -118,7 +128,7 @@ export function StudioStory({ chapters, imageSrc, imageAlt }: Props) {
     // gomme les à-coups du scroll. S'arrête une fois stabilisée.
     const loop = () => {
       const target = readTarget();
-      current += (target - current) * 0.16;
+      current += (target - current) * 0.15;
       if (Math.abs(target - current) < 0.0004) {
         current = target;
         render(current);
@@ -231,8 +241,11 @@ export function StudioStory({ chapters, imageSrc, imageAlt }: Props) {
                   className={`${colClass} relative rounded-2xl bg-[rgba(10,9,8,0.6)] p-5 backdrop-blur-sm will-change-transform sm:bg-transparent sm:p-0 sm:backdrop-blur-none`}
                 >
                   <span
+                    ref={(el) => {
+                      ghostRefs.current[i] = el;
+                    }}
                     aria-hidden
-                    className={`pointer-events-none absolute -top-[0.5em] -z-10 hidden select-none font-wide text-[clamp(6rem,11vw,11rem)] leading-none text-[rgba(183,110,78,0.08)] sm:block ${side === "left" ? "-left-3" : "-right-3"}`}
+                    className={`pointer-events-none absolute -top-[0.5em] -z-10 hidden select-none font-wide text-[clamp(6rem,11vw,11rem)] leading-none text-[rgba(183,110,78,0.08)] will-change-transform sm:block ${side === "left" ? "-left-3" : "-right-3"}`}
                   >
                     {num}
                   </span>

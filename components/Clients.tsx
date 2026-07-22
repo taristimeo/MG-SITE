@@ -47,8 +47,11 @@ export function Clients() {
       </div>
 
       <Reveal delay={220}>
-        <div className="marquee-wrap mt-14 overflow-hidden">
-          <div className="marquee-x flex w-max">
+        {/* Fondus latéraux : les logos naissent et s'effacent dans l'encre aux
+            deux bords — le générique n'a ni début ni fin visible. Pause au
+            survol : on peut s'arrêter sur un nom. */}
+        <div className="group marquee-wrap mt-14 overflow-hidden [-webkit-mask-image:linear-gradient(to_right,transparent,#000_9%,#000_91%,transparent)] [mask-image:linear-gradient(to_right,transparent,#000_9%,#000_91%,transparent)]">
+          <div className="marquee-x flex w-max [animation-play-state:running] group-hover:[animation-play-state:paused]">
             <LogoRow />
             <LogoRow decorative />
           </div>

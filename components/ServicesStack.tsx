@@ -1,11 +1,72 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useRef } from "react";
+import type { CSSProperties } from "react";
+import { Reveal } from "@/components/Reveal";
 import { services } from "@/lib/site";
+
+const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
 
 // « Ce qu'on fait » : les 5 prestations en cartes empilées. Chaque carte est
 // sticky avec un décalage croissant : au scroll, la suivante vient recouvrir la
-// précédente (pur CSS, aucun JS — se dégrade naturellement en simple liste).
-// Enfin visibles : ces accroches n'existaient jusqu'ici que dans le SEO.
+// précédente. Le CSS sticky fait le gros œuvre (et se dégrade en simple liste) ;
+// un rAF ajoute la PROFONDEUR : la carte recouverte recule légèrement (scale +
+// remontée) et se voile, comme une pile de cartes physiques qui s'enfonce. Le
+// contenu de chaque carte monte en fondu staggeré à sa première apparition.
+// Tout est écrit directement dans le DOM (aucun re-render au scroll).
+// prefers-reduced-motion : aucun rAF, pile CSS pure, contenu statique.
 export function ServicesStack() {
+  const listRef = useRef<HTMLOListElement | null>(null);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const list = listRef.current;
+    if (!list) return;
+    const cards = Array.from(
+      list.querySelectorAll<HTMLLIElement>("[data-card]"),
+    );
+    const inners = cards.map((c) => c.querySelector<HTMLElement>("[data-inner]"));
+    const veils = cards.map((c) => c.querySelector<HTMLElement>("[data-veil]"));
+
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      for (let i = 0; i < cards.length; i++) {
+        const inner = inners[i];
+        if (!inner) continue;
+        const veil = veils[i];
+        const next = cards[i + 1];
+        if (!next) {
+          inner.style.transform = "none";
+          if (veil) veil.style.opacity = "0";
+          continue;
+        }
+        const r = cards[i].getBoundingClientRect();
+        const nr = next.getBoundingClientRect();
+        // p : 0 quand la carte suivante affleure le bas de celle-ci, 1 quand
+        // elle l'a entièrement recouverte.
+        const p = clamp01((r.bottom - nr.top) / r.height);
+        const e = p * p * (3 - 2 * p); // smoothstep
+        const scale = (1 - 0.05 * e).toFixed(4);
+        const ty = (-10 * e).toFixed(1);
+        inner.style.transform = `translateY(${ty}px) scale(${scale})`;
+        if (veil) veil.style.opacity = (0.5 * e).toFixed(3);
+      }
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
+
   return (
     <section className="px-5 py-24 sm:px-8 sm:py-32 lg:px-10">
       <div className="mx-auto max-w-[1100px]">
@@ -18,41 +79,64 @@ export function ServicesStack() {
           </h2>
         </div>
 
-        <ol className="mt-16 flex flex-col gap-6 sm:mt-20">
+        <ol ref={listRef} className="mt-16 flex flex-col gap-6 sm:mt-20">
           {services.map((s, i) => (
             <li
               key={s.id}
+              data-card
               className="sticky"
               style={{ top: `calc(84px + ${i * 18}px)` }}
             >
               <div
-                className="flex min-h-[38vh] flex-col justify-between rounded-3xl border border-[var(--color-line-soft)] p-8 shadow-2xl sm:min-h-[42vh] sm:p-12"
-                style={{
-                  background:
-                    i % 2 ? "var(--color-ink-3)" : "var(--color-ink-2)",
-                }}
+                data-inner
+                className="relative flex min-h-[38vh] flex-col justify-between rounded-3xl border border-[var(--color-line-soft)] p-8 shadow-2xl sm:min-h-[42vh] sm:p-12"
+                style={
+                  {
+                    background:
+                      i % 2 ? "var(--color-ink-3)" : "var(--color-ink-2)",
+                    transformOrigin: "center top",
+                    willChange: "transform",
+                  } as CSSProperties
+                }
               >
-                <div className="flex items-baseline justify-between">
+                <Reveal
+                  as="div"
+                  delay={40}
+                  className="flex items-baseline justify-between"
+                >
                   <span className="font-cond text-sm tracking-[0.2em] text-[var(--color-terra)]">
                     {s.index}
                   </span>
                   <span className="font-cond text-[11px] tracking-[0.2em] text-[var(--color-bone-faint)]">
                     {s.title}
                   </span>
-                </div>
+                </Reveal>
 
-                <p className="font-wide max-w-[18ch] text-[clamp(1.7rem,4.6vw,3.6rem)] leading-[1.12] text-[var(--color-cream)]">
+                <Reveal
+                  as="p"
+                  delay={140}
+                  className="font-wide max-w-[18ch] text-[clamp(1.7rem,4.6vw,3.6rem)] leading-[1.12] text-[var(--color-cream)]"
+                >
                   {s.line}
-                </p>
+                </Reveal>
 
-                <div>
+                <Reveal as="div" delay={240}>
                   <Link
                     href="/realisations"
                     className="link-underline font-cond text-[11px] tracking-[0.2em] text-[var(--color-bone-dim)] transition-colors hover:text-[var(--color-terra)]"
                   >
                     Voir les films <span aria-hidden>→</span>
                   </Link>
-                </div>
+                </Reveal>
+
+                {/* Voile de profondeur : s'assombrit sur la portion encore
+                    visible à mesure que la carte suivante la recouvre. */}
+                <div
+                  data-veil
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 rounded-3xl bg-[var(--color-ink)]"
+                  style={{ opacity: 0 }}
+                />
               </div>
             </li>
           ))}

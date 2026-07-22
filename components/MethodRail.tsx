@@ -35,30 +35,56 @@ export function MethodRail() {
       shift = Math.max(0, track.scrollWidth - viewport);
     };
 
-    let raf = 0;
-    const render = () => {
-      raf = 0;
+    // Cible = progression brute du scroll ; affiché = valeur lissée. On glisse
+    // vers la cible frame après frame → le rail garde un peu d'élan et se pose
+    // en douceur (feel « Locomotive »), au lieu de coller au pixel du scroll.
+    const readTarget = () => {
       const rect = outer.getBoundingClientRect();
       const span = rect.height - window.innerHeight;
-      const p = span > 0 ? clamp01(-rect.top / span) : 1;
-      track.style.transform = `translate3d(${(-p * shift).toFixed(1)}px, 0, 0)`;
+      return span > 0 ? clamp01(-rect.top / span) : 1;
+    };
+
+    const paint = (p: number) => {
+      track.style.transform = `translate3d(${(-p * shift).toFixed(2)}px, 0, 0)`;
       if (fillRef.current)
         fillRef.current.style.transform = `scaleX(${p.toFixed(4)})`;
     };
-    const onScroll = () => {
-      if (!raf) raf = requestAnimationFrame(render);
+
+    let raf = 0;
+    let running = false;
+    let current = readTarget();
+
+    const loop = () => {
+      const target = readTarget();
+      current += (target - current) * 0.13;
+      if (Math.abs(target - current) < 0.0002) {
+        current = target;
+        paint(current);
+        running = false;
+        raf = 0;
+        return;
+      }
+      paint(current);
+      raf = requestAnimationFrame(loop);
+    };
+    const kick = () => {
+      if (!running) {
+        running = true;
+        raf = requestAnimationFrame(loop);
+      }
     };
     const onResize = () => {
       measure();
-      onScroll();
+      kick();
     };
 
     measure();
-    render();
-    window.addEventListener("scroll", onScroll, { passive: true });
+    paint(current);
+    kick();
+    window.addEventListener("scroll", kick, { passive: true });
     window.addEventListener("resize", onResize);
     return () => {
-      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("scroll", kick);
       window.removeEventListener("resize", onResize);
       if (raf) cancelAnimationFrame(raf);
     };

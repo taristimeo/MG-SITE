@@ -59,7 +59,15 @@ function Card({ t, index }: { t: Testimonial; index: number }) {
   return (
     <figure
       ref={ref}
-      className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--color-line-soft)] bg-[var(--color-ink-2)] p-8 sm:p-9"
+      className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--color-line-soft)] bg-[var(--color-ink-2)] p-8 will-change-[transform,opacity] sm:p-9"
+      style={{
+        transition: reduced
+          ? "none"
+          : `opacity 900ms ${EASE}, transform 900ms ${EASE}`,
+        transitionDelay: on ? `${base}ms` : "0ms",
+        opacity: on ? 1 : 0,
+        transform: on ? "translateY(0)" : "translateY(22px)",
+      }}
     >
       {/* Étoiles — remplissage séquentiel */}
       <div
@@ -75,10 +83,13 @@ function Card({ t, index }: { t: Testimonial; index: number }) {
               style={{
                 transition: reduced
                   ? "none"
-                  : `opacity 340ms ${EASE}, transform 340ms ${EASE}`,
+                  : `opacity 360ms ${EASE}, transform 420ms ${EASE}`,
                 transitionDelay: on ? `${starsStart + s * 90}ms` : "0ms",
                 opacity: on ? 1 : 0,
-                transform: on ? "scale(1)" : "scale(0.3)",
+                transformOrigin: "bottom center",
+                transform: on
+                  ? "scale(1) translateY(0)"
+                  : "scale(0.55) translateY(3px)",
               }}
             >
               <Star />
@@ -93,10 +104,11 @@ function Card({ t, index }: { t: Testimonial; index: number }) {
         style={{
           transition: reduced
             ? "none"
-            : `opacity 700ms ${EASE}, transform 700ms ${EASE}`,
-          transitionDelay: on ? `${base}ms` : "0ms",
+            : `opacity 760ms ${EASE}, transform 760ms ${EASE}, filter 640ms ${EASE}`,
+          transitionDelay: on ? `${base + 120}ms` : "0ms",
           opacity: on ? 1 : 0,
-          transform: on ? "translateY(0)" : "translateY(12px)",
+          filter: on || reduced ? "blur(0)" : "blur(6px)",
+          transform: on ? "translateY(0)" : "translateY(8px)",
         }}
       >
         <span
