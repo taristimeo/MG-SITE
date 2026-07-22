@@ -16,6 +16,8 @@ export function Process() {
   const vFillRef = useRef<HTMLSpanElement | null>(null);
   const dotsH = useRef<(HTMLSpanElement | null)[]>([]);
   const dotsV = useRef<(HTMLSpanElement | null)[]>([]);
+  const textH = useRef<(HTMLDivElement | null)[]>([]);
+  const textV = useRef<(HTMLDivElement | null)[]>([]);
   const n = processSteps.length;
   // Inset des traits horizontaux : ils partent du 1er point et finissent au
   // dernier (chaque colonne fait 1/n de large, le point est en son centre).
@@ -30,6 +32,10 @@ export function Process() {
         const state = i === active ? "active" : done(i) ? "done" : "todo";
         if (dotsH.current[i]) dotsH.current[i]!.dataset.state = state;
         if (dotsV.current[i]) dotsV.current[i]!.dataset.state = state;
+        // Le texte se révèle dès que la tête de lecture a atteint l'étape.
+        const revealed = state === "todo" ? "false" : "true";
+        if (textH.current[i]) textH.current[i]!.dataset.in = revealed;
+        if (textV.current[i]) textV.current[i]!.dataset.in = revealed;
       }
     };
 
@@ -113,12 +119,20 @@ export function Process() {
                 data-state="todo"
                 className="process-dot h-3 w-3 rounded-full"
               />
-              <p className="font-cond mt-6 text-xs tracking-[0.18em] text-[var(--color-bone)]">
-                {s.label}
-              </p>
-              <p className="font-sans mt-3 max-w-[20ch] text-xs leading-relaxed text-[var(--color-bone-dim)]">
-                {s.text}
-              </p>
+              <div
+                ref={(el) => {
+                  textH.current[i] = el;
+                }}
+                data-in="false"
+                className="process-text flex flex-col items-center"
+              >
+                <p className="font-cond mt-6 text-xs tracking-[0.18em] text-[var(--color-bone)]">
+                  {s.label}
+                </p>
+                <p className="font-sans mt-3 max-w-[20ch] text-xs leading-relaxed text-[var(--color-bone-dim)]">
+                  {s.text}
+                </p>
+              </div>
             </li>
           ))}
         </ol>
@@ -145,12 +159,20 @@ export function Process() {
                 data-state="todo"
                 className="process-dot absolute left-0 top-[5px] h-3 w-3 rounded-full"
               />
-              <p className="font-cond text-xs tracking-[0.18em] text-[var(--color-bone)]">
-                {s.label}
-              </p>
-              <p className="font-sans mt-2 max-w-[42ch] text-sm leading-relaxed text-[var(--color-bone-dim)]">
-                {s.text}
-              </p>
+              <div
+                ref={(el) => {
+                  textV.current[i] = el;
+                }}
+                data-in="false"
+                className="process-text"
+              >
+                <p className="font-cond text-xs tracking-[0.18em] text-[var(--color-bone)]">
+                  {s.label}
+                </p>
+                <p className="font-sans mt-2 max-w-[42ch] text-sm leading-relaxed text-[var(--color-bone-dim)]">
+                  {s.text}
+                </p>
+              </div>
             </li>
           ))}
         </ol>
