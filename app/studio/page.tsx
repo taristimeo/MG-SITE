@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { Reveal } from "@/components/Reveal";
 import { RevealTitle } from "@/components/RevealTitle";
 import { MaskTitle } from "@/components/MaskTitle";
-import { StudioStory } from "@/components/StudioStory";
+import { Still } from "@/components/Poster";
+import { ScrollText } from "@/components/ScrollText";
+import { MethodFrise } from "@/components/MethodFrise";
 import { Process } from "@/components/Process";
 import { Clients } from "@/components/Clients";
 import { Testimonials } from "@/components/Testimonials";
@@ -59,12 +61,50 @@ export default function StudioPage() {
         </div>
       </section>
 
-      {/* Scroll narratif */}
-      <StudioStory
-        chapters={chapters}
-        imageSrc="/photo-studio.jpg"
-        imageAlt={`${site.founder} — ${site.name}`}
-      />
+      {/* Photo du studio — sous le hero */}
+      <section className="px-5 sm:px-8 lg:px-10">
+        <Reveal>
+          <div className="relative mx-auto aspect-[16/10] w-full max-w-[1100px] overflow-hidden rounded-2xl bg-[var(--color-ink-2)] shadow-[0_40px_120px_-50px_rgba(0,0,0,0.8)] ring-1 ring-[var(--color-line-soft)] sm:aspect-[21/9]">
+            <Still
+              src="/photo-studio.jpg"
+              alt={`${site.founder} — ${site.name}`}
+            />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(10,9,8,0.5)] via-transparent to-transparent" />
+          </div>
+        </Reveal>
+      </section>
+
+      {/* Notre approche — récit en trois temps, corps animé au scroll */}
+      <section
+        aria-label="Le studio en trois temps"
+        className="mx-auto max-w-[640px] px-5 py-24 sm:px-8 sm:py-32 lg:px-10"
+      >
+        <div className="flex flex-col gap-[16vh] sm:gap-[20vh]">
+          {chapters.map((c, i) => (
+            <article key={c.index} className="max-w-[46ch]">
+              <Reveal>
+                <span
+                  aria-hidden
+                  className="block h-px w-14 bg-[var(--color-terra)]"
+                />
+              </Reveal>
+              <p className="font-cond mt-6 text-xs uppercase tracking-[0.2em] text-[var(--color-terra)]">
+                {c.index}{" "}
+                <span className="text-[var(--color-bone-faint)]">
+                  / {c.kicker}
+                </span>
+              </p>
+              <h2 className="font-wide mt-4 text-[clamp(1.9rem,3.4vw,2.9rem)] leading-[1.08] text-[var(--color-bone)]">
+                <MaskTitle delay={i === 0 ? 120 : 90}>{c.title}</MaskTitle>
+              </h2>
+              <ScrollText
+                text={c.text}
+                className="font-sans mt-6 text-[1.15rem] leading-[1.75]"
+              />
+            </article>
+          ))}
+        </div>
+      </section>
 
       {/* Clients */}
       <Clients />
@@ -91,29 +131,8 @@ export default function StudioPage() {
           </h2>
         </div>
 
-        {/* 4 étapes en grille */}
-        <div className="grid grid-cols-1 gap-px bg-[var(--color-line-soft)] sm:grid-cols-2">
-          {values.map((v, i) => (
-            <Reveal key={v.title} delay={i * 80}>
-              <div className="group bg-[var(--color-ink)] p-8 transition-colors duration-500 hover:bg-[var(--color-ink-2)] sm:p-10">
-                <div className="flex items-start justify-between">
-                  <span className="font-cond text-xs tracking-[0.2em] text-[var(--color-terra)]">
-                    0{i + 1}
-                  </span>
-                  <span className="font-cond text-[10px] tracking-[0.15em] text-[var(--color-bone-faint)] opacity-0 transition-opacity duration-500 group-hover:opacity-100">
-                    ↗
-                  </span>
-                </div>
-                <h3 className="font-wide mt-6 text-2xl text-[var(--color-bone)] transition-colors duration-300 group-hover:text-[var(--color-terra)]">
-                  {v.title}
-                </h3>
-                <p className="font-sans mt-4 text-sm leading-relaxed text-[var(--color-bone-dim)]">
-                  {v.text}
-                </p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
+        {/* 4 étapes en frise */}
+        <MethodFrise steps={values} />
       </section>
 
       {/* ── Le process : du repérage à l'étalonnage ───────────────────── */}

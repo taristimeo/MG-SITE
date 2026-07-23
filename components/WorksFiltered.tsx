@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { WorksApple } from "@/components/WorksApple";
+import { StackedWorks } from "@/components/StackedWorks";
 import { projects } from "@/lib/site";
 
 // Vitrine des réalisations avec filtre par catégorie. Les puces (« Tout » +
@@ -43,7 +43,7 @@ export function WorksFiltered() {
 
       {/* Re-key au changement de filtre : la vitrine refond en entier */}
       <div key={filter} className="grid-fade">
-        <WorksApple items={items} />
+        <StackedWorks items={items} />
       </div>
     </div>
   );
