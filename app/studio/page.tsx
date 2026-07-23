@@ -1,6 +1,23 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { clients, founder, site, testimonials, values } from "@/lib/site";
+import { Reveal } from "@/components/Reveal";
+import { RevealTitle } from "@/components/RevealTitle";
+import { WordReveal } from "@/components/WordReveal";
+import { MaskTitle } from "@/components/MaskTitle";
+import { Parallax } from "@/components/Parallax";
+import { CardMedia } from "@/components/CardMedia";
+import { Stats } from "@/components/Stats";
+import { Testimonials } from "@/components/Testimonials";
+import { Clients } from "@/components/Clients";
+import {
+  clients,
+  founder,
+  projectPreview,
+  projectThumb,
+  projects,
+  site,
+  values,
+} from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Studio — Vidéaste & réalisateur à Bordeaux",
@@ -8,159 +25,284 @@ export const metadata: Metadata = {
   alternates: { canonical: "/studio" },
 };
 
-// Page Studio — version sobre. Essentiellement du texte, une seule colonne,
-// lisible et calme. Aucune animation d'entrée ni effet au scroll : seul le
-// survol des liens change légèrement d'opacité. Le contenu vient de lib/site.
+// Page Studio — version VISUELLE & ANIMÉE. L'image et le mouvement portent la
+// page ; le texte se réduit à l'essentiel. Ouverture immersive plein écran,
+// bandes-médias en parallaxe, valeurs en mots-clés, chiffres animés, avis,
+// puis l'appel à projet. Toutes les animations proviennent des primitives
+// existantes ; le seul CSS custom (zoom lent du portrait) est neutralisé en
+// prefers-reduced-motion. Contraintes iOS respectées : autour des <video>
+// (CardMedia), uniquement transform / opacity / overflow / background.
 export default function StudioPage() {
+  // Deux films au repère pour rythmer la page en grands médias.
+  const silhouette = projects.find((p) => p.slug === "silhouette") ?? projects[0];
+  const egypte =
+    projects.find((p) => p.slug === "the-sound-of-discovery") ?? projects[1];
+
   return (
-    <div className="px-5 py-20 sm:px-8 sm:py-28 lg:px-10">
-      <div className="mx-auto max-w-[680px]">
-        {/* ── En-tête ──────────────────────────────────────────────────── */}
-        <header>
-          <p className="font-cond text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
-            Le studio · {site.city} · depuis {site.founded}
-          </p>
-          <h1 className="font-wide mt-5 text-[clamp(2.6rem,10vw,4rem)] leading-[1] text-[var(--color-cream)]">
-            Studio<span className="dot">.</span>
-          </h1>
-          <p className="font-sans mt-6 text-[1.05rem] leading-[1.7] text-[var(--color-bone-dim)]">
-            {site.name} est un studio de production vidéo basé à {site.city},
-            actif depuis {site.founded}. On écrit et on réalise des films pour
-            les entreprises, les événements et les projets créatifs.
-          </p>
-        </header>
+    <>
+      {/* ── HERO — portrait plein écran ──────────────────────────────── */}
+      <section className="studio-hero relative flex min-h-[92svh] items-end overflow-hidden">
+        <div className="studio-hero-media absolute inset-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/photo-studio.jpg"
+            alt={`${site.founder}, réalisateur — ${site.name}`}
+            className="studio-hero-img h-full w-full object-cover object-center"
+          />
+        </div>
+        <div className="studio-hero-veil absolute inset-0" aria-hidden />
 
-        {/* ── L'approche ───────────────────────────────────────────────── */}
-        <section className="mt-16 border-t border-[var(--color-line)] pt-12">
-          <p className="font-cond text-xs tracking-[0.25em] text-[var(--color-terra)]">
-            Notre approche
-          </p>
-          <h2 className="font-wide mt-5 text-[clamp(1.7rem,6vw,2.4rem)] leading-[1.1] text-[var(--color-cream)]">
-            Observer avant de filmer<span className="dot">.</span>
+        <div className="relative z-10 w-full px-5 pb-16 sm:px-8 sm:pb-20 lg:px-10">
+          <div className="mx-auto max-w-[1200px]">
+            <Reveal delay={200}>
+              <p className="font-cond text-xs tracking-[0.28em] text-[var(--color-bone-dim)]">
+                Le studio · {site.city} · depuis {site.founded}
+              </p>
+            </Reveal>
+            <RevealTitle
+              text="Studio"
+              className="mt-4 text-[clamp(3.4rem,18vw,9rem)] leading-[0.9] text-[var(--color-cream)]"
+            />
+            <Reveal delay={900}>
+              <p className="font-cond mt-8 text-[0.7rem] tracking-[0.28em] text-[var(--color-bone-faint)]">
+                Défiler <span aria-hidden>↓</span>
+              </p>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ── L'APPROCHE — une phrase forte ────────────────────────────── */}
+      <section className="px-5 py-28 sm:px-8 sm:py-40 lg:px-10">
+        <div className="mx-auto max-w-[1100px]">
+          <Reveal>
+            <p className="font-cond text-xs tracking-[0.28em] text-[var(--color-terra)]">
+              Notre regard
+            </p>
+          </Reveal>
+          <WordReveal
+            text="Observer avant de filmer"
+            dot
+            className="font-wide mt-6 text-[clamp(2.4rem,9vw,6rem)] leading-[0.98] text-[var(--color-cream)]"
+          />
+        </div>
+      </section>
+
+      {/* ── MÉDIA 1 — grand aperçu en parallaxe ──────────────────────── */}
+      <MediaBand
+        src={projectThumb(silhouette)}
+        video={projectPreview(silhouette)}
+        eyebrow={silhouette.category}
+        title={silhouette.title}
+      />
+
+      {/* ── VALEURS — mots-clés, aucun pavé ──────────────────────────── */}
+      <section className="px-5 py-28 sm:px-8 sm:py-40 lg:px-10">
+        <div className="mx-auto max-w-[1100px]">
+          <Reveal>
+            <p className="font-cond text-xs tracking-[0.28em] text-[var(--color-bone-faint)]">
+              Ce qui nous tient
+            </p>
+          </Reveal>
+          <h2 className="font-wide mt-4 text-[clamp(1.8rem,5vw,3rem)] leading-[1.05] text-[var(--color-bone)]">
+            <MaskTitle delay={120}>
+              Quatre exigences<span className="dot">.</span>
+            </MaskTitle>
           </h2>
-          <p className="font-sans mt-6 text-[1.05rem] leading-[1.8] text-[var(--color-bone-dim)]">
-            {site.name} démarre à {site.city} en {site.founded}{" "}
-            avec une idée simple : chaque commande mérite une vraie écriture.
-          </p>
-          <p className="font-sans mt-5 text-[1.05rem] leading-[1.8] text-[var(--color-bone-dim)]">
-            Avant de toucher une caméra, on pose des questions — ce que vous
-            faites, pourquoi, à qui vous parlez. C&apos;est de là que vient le
-            film, pas d&apos;un template. On observe, on écoute, et seulement
-            après on cadre.
-          </p>
-        </section>
 
-        {/* ── Le parti pris ────────────────────────────────────────────── */}
-        <section className="mt-16 border-t border-[var(--color-line)] pt-12">
-          <p className="font-cond text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
-            Le parti pris
-          </p>
-          <ul className="mt-6 flex flex-col gap-4">
-            {founder.lines.map((line) => (
-              <li
-                key={line}
-                className="font-wide text-[clamp(1.25rem,5vw,1.6rem)] leading-[1.25] text-[var(--color-bone)]"
+          <ul className="mt-16 grid grid-cols-1 gap-x-10 gap-y-12 sm:grid-cols-2">
+            {values.map((v, i) => (
+              <Reveal
+                key={v.title}
+                as="li"
+                delay={i * 120}
+                className="flex items-baseline gap-5 border-t border-[var(--color-line)] pt-6"
               >
-                {line}
-              </li>
+                <span className="font-cond text-[11px] tracking-[0.2em] text-[var(--color-terra)]">
+                  0{i + 1}
+                </span>
+                <span className="font-wide text-[clamp(1.8rem,7vw,3rem)] leading-none text-[var(--color-cream)]">
+                  {v.title}
+                </span>
+              </Reveal>
             ))}
           </ul>
-          <p className="font-cond mt-8 text-[11px] tracking-[0.22em] text-[var(--color-bone-dim)]">
-            {founder.name} · {founder.role}
-          </p>
-        </section>
+        </div>
+      </section>
 
-        {/* ── La méthode ───────────────────────────────────────────────── */}
-        <section className="mt-16 border-t border-[var(--color-line)] pt-12">
-          <p className="font-cond text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
-            Notre méthode
-          </p>
-          <h2 className="font-wide mt-5 text-[clamp(1.7rem,6vw,2.4rem)] leading-[1.1] text-[var(--color-cream)]">
-            Quatre temps, une exigence<span className="dot">.</span>
+      {/* ── MÉDIA 2 — grand aperçu en parallaxe ──────────────────────── */}
+      <MediaBand
+        src={projectThumb(egypte)}
+        video={projectPreview(egypte)}
+        eyebrow={egypte.category}
+        title={egypte.title}
+      />
+
+      {/* ── CHIFFRES — compteurs animés ──────────────────────────────── */}
+      <section className="px-5 py-28 sm:px-8 sm:py-36 lg:px-10">
+        <div className="mx-auto max-w-[1200px]">
+          <Stats
+            items={[
+              {
+                display: site.founded,
+                label: `naissance du studio à ${site.city}`,
+              },
+              { value: projects.length, label: "films au portfolio" },
+              {
+                value: 5,
+                decimals: 1,
+                label: "note des avis Google",
+                accent: "★",
+              },
+              { value: clients.length, label: "clients accompagnés" },
+            ]}
+          />
+        </div>
+      </section>
+
+      {/* ── LE PARTI PRIS — lignes du fondateur ──────────────────────── */}
+      <section className="px-5 py-28 sm:px-8 sm:py-40 lg:px-10">
+        <div className="mx-auto max-w-[1100px]">
+          <Reveal>
+            <p className="font-cond text-xs tracking-[0.28em] text-[var(--color-bone-faint)]">
+              Le parti pris
+            </p>
+          </Reveal>
+          <ul className="mt-10 flex flex-col gap-6">
+            {founder.lines.map((line, i) => (
+              <Reveal key={line} delay={i * 140}>
+                <p className="font-wide text-[clamp(1.5rem,6vw,2.6rem)] leading-[1.15] text-[var(--color-bone)]">
+                  {line}
+                </p>
+              </Reveal>
+            ))}
+          </ul>
+          <Reveal delay={founder.lines.length * 140}>
+            <p className="font-cond mt-12 text-[11px] tracking-[0.24em] text-[var(--color-bone-dim)]">
+              {founder.name} · {founder.role}
+            </p>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ── CLIENTS — grille animée (réutilisée) ─────────────────────── */}
+      <Clients />
+
+      {/* ── AVIS — cartes animées (réutilisées) ──────────────────────── */}
+      <Testimonials />
+
+      {/* ── CTA — court ──────────────────────────────────────────────── */}
+      <section className="px-5 py-28 text-center sm:px-8 sm:py-40 lg:px-10">
+        <div className="mx-auto max-w-[900px]">
+          <h2 className="font-wide text-[clamp(2rem,7vw,4.4rem)] leading-[1] text-[var(--color-cream)]">
+            <MaskTitle className="text-center">
+              Écrivons votre histoire<span className="dot">.</span>
+            </MaskTitle>
           </h2>
-          <ol className="mt-8 flex flex-col gap-8">
-            {values.map((v, i) => (
-              <li key={v.title}>
-                <div className="flex items-baseline gap-3">
-                  <span className="font-cond text-[11px] tracking-[0.2em] text-[var(--color-terra)]">
-                    0{i + 1}
-                  </span>
-                  <h3 className="font-wide text-xl text-[var(--color-bone)] sm:text-2xl">
-                    {v.title}
-                  </h3>
-                </div>
-                <p className="font-sans mt-3 text-[15px] leading-[1.7] text-[var(--color-bone-dim)]">
-                  {v.text}
-                </p>
-              </li>
-            ))}
-          </ol>
-        </section>
+          <Reveal delay={200}>
+            <div className="mt-12 flex flex-col items-center gap-6">
+              <Link
+                href="/contact"
+                className="font-cond rounded-full border border-[var(--color-line)] px-8 py-3.5 text-sm text-[var(--color-bone)] transition-colors hover:border-[var(--color-terra)] hover:text-[var(--color-terra)]"
+              >
+                Démarrer un projet
+              </Link>
+              <p className="font-cond text-[11px] tracking-[0.2em] text-[var(--color-bone-dim)]">
+                <a
+                  href={`mailto:${site.email}`}
+                  className="hover:text-[var(--color-cream)]"
+                >
+                  {site.email}
+                </a>
+                <span className="mx-2 text-[var(--color-bone-faint)]">·</span>
+                <a
+                  href={`tel:${site.phoneHref}`}
+                  className="hover:text-[var(--color-cream)]"
+                >
+                  {site.phone}
+                </a>
+              </p>
+            </div>
+          </Reveal>
+        </div>
+      </section>
 
-        {/* ── Les clients ──────────────────────────────────────────────── */}
-        <section className="mt-16 border-t border-[var(--color-line)] pt-12">
-          <p className="font-cond text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
-            Ils nous font confiance
-          </p>
-          <p className="font-sans mt-6 text-[1.05rem] leading-[1.8] text-[var(--color-bone-dim)]">
-            {clients.map((c) => c.name).join(", ")}.
-          </p>
-        </section>
+      {/* Zoom lent du portrait — transform/opacity only (iOS safe),
+          neutralisé en mouvement réduit. */}
+      <style>{`
+        .studio-hero-img {
+          transform: scale(1.12);
+          animation: studio-hero-zoom 3s var(--ease-out-expo) both;
+        }
+        @keyframes studio-hero-zoom {
+          to { transform: scale(1); }
+        }
+        .studio-hero-veil {
+          background:
+            linear-gradient(
+              to top,
+              var(--color-ink) 2%,
+              rgba(10, 9, 8, 0.55) 32%,
+              rgba(10, 9, 8, 0.1) 62%,
+              rgba(10, 9, 8, 0.35) 100%
+            );
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .studio-hero-img {
+            transform: none;
+            animation: none;
+          }
+        }
+      `}</style>
+    </>
+  );
+}
 
-        {/* ── Les avis ─────────────────────────────────────────────────── */}
-        <section className="mt-16 border-t border-[var(--color-line)] pt-12">
-          <p className="font-cond text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
-            Ce qu&apos;ils en disent
-          </p>
-          <div className="mt-8 flex flex-col gap-10">
-            {testimonials.map((t) => (
-              <blockquote key={t.name}>
-                <p className="font-sans text-[1.05rem] leading-[1.7] text-[var(--color-bone)]">
-                  « {t.quote} »
-                </p>
-                <cite className="font-cond mt-4 block text-[11px] not-italic tracking-[0.22em] text-[var(--color-bone-faint)]">
-                  {t.name}
-                </cite>
-              </blockquote>
-            ))}
+/* ------------------------------------------------------------------ */
+
+// Grande bande-média : aperçu vidéo (CardMedia) en léger parallaxe, avec une
+// légende minimale posée sur un dégradé. Aucun filter / clip-path près de la
+// vidéo — seulement transform (Parallax), overflow et background (dégradé).
+function MediaBand({
+  src,
+  video,
+  eyebrow,
+  title,
+}: {
+  src: string;
+  video?: string;
+  eyebrow: string;
+  title: string;
+}) {
+  return (
+    <section className="px-5 sm:px-8 lg:px-10">
+      <div className="mx-auto max-w-[1400px]">
+        <Reveal>
+          <div className="relative aspect-[4/5] overflow-hidden rounded-3xl sm:aspect-[16/9]">
+            <Parallax amount={48} className="absolute inset-0">
+              <div className="h-[112%] w-full -translate-y-[6%]">
+                <CardMedia src={src} alt={title} videoSrc={video} />
+              </div>
+            </Parallax>
+            <div
+              aria-hidden
+              className="absolute inset-x-0 bottom-0 h-1/2"
+              style={{
+                background:
+                  "linear-gradient(to top, rgba(10,9,8,0.85), rgba(10,9,8,0))",
+              }}
+            />
+            <div className="absolute inset-x-0 bottom-0 p-6 sm:p-10">
+              <p className="font-cond text-[11px] tracking-[0.28em] text-[var(--color-terra)]">
+                {eyebrow}
+              </p>
+              <p className="font-wide mt-2 text-[clamp(1.6rem,5vw,3rem)] leading-none text-[var(--color-cream)]">
+                {title}
+              </p>
+            </div>
           </div>
-        </section>
-
-        {/* ── Contact ──────────────────────────────────────────────────── */}
-        <section className="mt-16 border-t border-[var(--color-line)] pt-12">
-          <p className="font-cond text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
-            Et maintenant ?
-          </p>
-          <h2 className="font-wide mt-5 text-[clamp(1.7rem,6vw,2.4rem)] leading-[1.1] text-[var(--color-cream)]">
-            Écrivons votre histoire<span className="dot">.</span>
-          </h2>
-          <p className="font-sans mt-6 text-[1.05rem] leading-[1.8] text-[var(--color-bone-dim)]">
-            Un projet, une idée, une question ?{" "}
-            <Link
-              href="/contact"
-              className="text-[var(--color-terra)] underline underline-offset-4 hover:opacity-70"
-            >
-              Écrivez-nous
-            </Link>
-            .
-          </p>
-          <p className="font-sans mt-4 text-[15px] leading-[1.8] text-[var(--color-bone-dim)]">
-            <a
-              href={`mailto:${site.email}`}
-              className="hover:text-[var(--color-cream)]"
-            >
-              {site.email}
-            </a>
-            <span className="mx-2 text-[var(--color-bone-faint)]">·</span>
-            <a
-              href={`tel:${site.phoneHref}`}
-              className="hover:text-[var(--color-cream)]"
-            >
-              {site.phone}
-            </a>
-          </p>
-        </section>
+        </Reveal>
       </div>
-    </div>
+    </section>
   );
 }
