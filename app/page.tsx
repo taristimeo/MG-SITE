@@ -1,139 +1,201 @@
-import type { CSSProperties } from "react";
 import Link from "next/link";
 import { Reveal } from "@/components/Reveal";
 import { RevealTitle } from "@/components/RevealTitle";
-import { LiveImages } from "@/components/LiveImages";
-import { HeroFade } from "@/components/HeroFade";
-import { WorksShowcase } from "@/components/WorksShowcase";
-import { Manifesto } from "@/components/Manifesto";
-import { Stats } from "@/components/Stats";
-import { ServicesStack } from "@/components/ServicesStack";
-import { clients, manifesto, projects, site } from "@/lib/site";
+import { CardMedia } from "@/components/CardMedia";
+import { CardCursor } from "@/components/CardCursor";
+import { DevisModal } from "@/components/DevisModal";
+import { Still } from "@/components/Poster";
+import { projects, projectThumb, projectPreview, site } from "@/lib/site";
 
-// Accueil « page produit » : écran-titre, manifeste révélé au scroll,
-// sélection éditoriale de films, chiffres, prestations en cartes empilées,
-// puis l'appel à projet. Un récit qui se déroule.
+// Accueil « page produit Apple » — canvas clair et aéré, une idée par écran,
+// énormes titres, beaucoup de vide, apparitions nettes au scroll. Les films
+// (visuels sombres) éclatent sur le fond clair. Contenu repris de la prod.
+// Thème clair porté localement ; le header s'adapte sur "/" (usePathname).
+
 export default function Home() {
   return (
-    <>
+    <main className="bg-[#f2efe8] text-[#17120e]">
       <Hero />
-      <Manifesto
-        kicker={manifesto.kicker}
-        text={manifesto.text}
-        accents={[...manifesto.accents]}
-      />
+      <Statement />
       <Works />
-      <section className="px-5 py-24 sm:px-8 sm:py-32 lg:px-10">
-        <div className="mx-auto max-w-[1200px]">
-          <Stats
-            items={[
-              { display: site.founded, label: `naissance du studio à ${site.city}` },
-              { value: projects.length, label: "films phares au portfolio" },
-              {
-                value: 5,
-                decimals: 1,
-                label: "note des avis Google",
-                accent: "★",
-              },
-              { value: clients.length, label: "clients accompagnés" },
-            ]}
-          />
-        </div>
-      </section>
-      <ServicesStack />
-      <LiveImages />
-    </>
+      <LiveImage />
+      <Closing />
+    </main>
   );
 }
 
-/* ------------------------------------------------------------------ */
-
+/* ── 1. Hero — plein écran, aéré ──────────────────────────────────────── */
 function Hero() {
   return (
-    <section className="flex min-h-[100svh] flex-col justify-center px-5 py-24 sm:px-8 lg:px-10">
-      {/* Conteneur calé sur la largeur exacte du logotype (w-fit) : les deux
-          légendes s'ancrent ainsi sur les bords du logo — la gauche sous le
-          « M », la droite sous le point. Le tout s'estompe au premier scroll. */}
-      <HeroFade>
-      <div className="mx-auto w-full max-w-[1600px] sm:w-fit sm:max-w-none">
-        {/* Logotype animé : fondu puis point terracotta « REC » */}
-        <RevealTitle
-          text={site.name}
-          className="whitespace-nowrap text-center text-[clamp(2.3rem,10.2vw,10.2rem)] text-[var(--color-cream)]"
-        />
-
-        {/* Deux colonnes de légendes — enchaînées après l'intro */}
-        <div className="mt-10 flex flex-col items-center gap-6 sm:mt-14 sm:w-full sm:flex-row sm:items-start sm:justify-between">
-          <Reveal delay={900}>
-            <p className="font-cond pb-[0.3em] text-center text-xs leading-relaxed tracking-wide text-[var(--color-bone-dim)] sm:text-left">
-              Studio de{" "}
-              <span
-                className="kw"
-                style={{ color: "inherit", "--kw-delay": "1.85s" } as CSSProperties}
-              >
-                production vidéo
-              </span>
-            </p>
-          </Reveal>
-          <Reveal delay={1050}>
-            <p className="font-cond pb-[0.3em] text-center text-xs leading-relaxed tracking-wide text-[var(--color-bone-dim)] sm:text-right">
-              L&apos;image au service de
-              <br className="hidden sm:block" />{" "}
-              <span
-                className="kw"
-                style={{ color: "inherit", "--kw-delay": "2.05s" } as CSSProperties}
-              >
-                votre histoire
-              </span>
-              .
-            </p>
-          </Reveal>
+    <section className="flex min-h-[100svh] flex-col items-center justify-center px-6 pt-24 text-center">
+      <Reveal>
+        <p className="font-cond text-[11px] tracking-[0.28em] text-[#8a8072]">
+          Studio de production vidéo · {site.city}
+        </p>
+      </Reveal>
+      <RevealTitle
+        text={site.name}
+        className="mt-7 whitespace-nowrap text-[clamp(2.6rem,11vw,10rem)] leading-[0.95] text-[#17120e]"
+      />
+      <Reveal delay={900}>
+        <p className="font-wide mx-auto mt-8 max-w-[20ch] text-[clamp(1.3rem,3.2vw,2.1rem)] leading-[1.25] text-[#4a4136]">
+          L&apos;image au service de votre histoire<span className="dot">.</span>
+        </p>
+      </Reveal>
+      <Reveal delay={1100}>
+        <div className="mt-12 flex flex-col items-center gap-4 sm:flex-row sm:gap-5">
+          <Link
+            href="/realisations"
+            className="rounded-full bg-[#17120e] px-8 py-3.5 font-cond text-[13px] tracking-[0.05em] text-[#f2efe8] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5"
+          >
+            Voir les réalisations
+          </Link>
+          <Link
+            href="/studio"
+            className="link-underline font-cond text-[13px] tracking-[0.05em] text-[#4a4136]"
+          >
+            Découvrir le studio →
+          </Link>
         </div>
-
-        {/* Indication de scroll — même traitement que la page studio */}
-        <Reveal delay={1200}>
-          <p className="font-cond mt-12 text-center text-[0.7rem] tracking-[0.25em] text-[var(--color-bone-faint)]">
-            Défiler <span aria-hidden>↓</span>
-          </p>
-        </Reveal>
-      </div>
-      </HeroFade>
+      </Reveal>
     </section>
   );
 }
 
-/* ------------------------------------------------------------------ */
-
-function Works() {
-  // Sélection éditoriale : cinq films en grandes rangées cinéma (01-05),
-  // puis le lien vers l'index complet.
-  const selection = projects.slice(0, 5);
+/* ── 2. Statement — une phrase, plein écran ──────────────────────────── */
+function Statement() {
   return (
-    <section
-      id="realisations"
-      className="px-5 pt-14 sm:px-8 sm:pt-20 lg:px-10"
-    >
-      <div className="mx-auto max-w-[1400px]">
-        <div className="mb-14 text-center sm:mb-20">
-          <p className="font-cond text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
-            Réalisations
+    <section className="flex min-h-[80svh] items-center justify-center px-6 py-32 text-center">
+      <div className="mx-auto max-w-[16ch]">
+        <Reveal>
+          <p className="font-cond text-[11px] tracking-[0.28em] text-[#8a8072]">
+            Notre parti pris
           </p>
-          <h2 className="font-wide mt-4 text-[clamp(1.9rem,5vw,3.6rem)] leading-[1] text-[var(--color-bone)]">
+        </Reveal>
+        <Reveal delay={120}>
+          <h2 className="font-wide mt-8 text-[clamp(2.4rem,7vw,6rem)] leading-[1.02] text-[#17120e]">
             Des films, pas des vidéos<span className="dot">.</span>
           </h2>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+/* ── 3. Réalisations — vitrine aérée, les films éclatent sur le clair ── */
+function Works() {
+  return (
+    <section id="realisations" className="px-6 pb-32 sm:px-8 lg:px-10">
+      <div className="mx-auto max-w-[1240px]">
+        <div className="mb-16 flex flex-col gap-4 sm:mb-24 sm:flex-row sm:items-end sm:justify-between">
+          <Reveal>
+            <h2 className="font-wide text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.02] text-[#17120e]">
+              Les réalisations
+            </h2>
+          </Reveal>
+          <Reveal delay={120}>
+            <Link
+              href="/realisations"
+              className="link-underline font-cond text-[13px] tracking-[0.05em] text-[#4a4136]"
+            >
+              Tous les films →
+            </Link>
+          </Reveal>
         </div>
 
-        <WorksShowcase items={selection} startIndex={1} />
+        <CardCursor>
+          <div className="grid grid-cols-1 gap-x-8 gap-y-16 sm:grid-cols-2 sm:gap-y-24">
+            {projects.map((p, i) => (
+              <Reveal key={p.slug} delay={(i % 2) * 90}>
+                <Link href={`/realisations/${p.slug}`} data-card className="group block">
+                  <div className="overflow-hidden rounded-[20px] bg-[#e6e1d7] shadow-[0_24px_60px_-30px_rgba(23,18,14,0.35)]">
+                    <div className="aspect-[4/3] transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]">
+                      <CardMedia
+                        src={projectThumb(p)}
+                        videoSrc={projectPreview(p)}
+                        alt={`${p.title} — ${p.category} · film Mauvais Grain, studio vidéo à Bordeaux`}
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-5 flex items-baseline justify-between gap-4">
+                    <h3 className="font-wide text-[clamp(1.4rem,2.6vw,2.1rem)] leading-tight text-[#17120e]">
+                      {p.title}
+                    </h3>
+                    <span className="font-cond shrink-0 text-[11px] tracking-[0.16em] text-[#8a8072]">
+                      {p.category} · {p.year}
+                    </span>
+                  </div>
+                </Link>
+              </Reveal>
+            ))}
+          </div>
+        </CardCursor>
+      </div>
+    </section>
+  );
+}
 
-        <div className="mt-16 flex justify-center sm:mt-24">
-          <Link
-            href="/realisations"
-            className="font-cond rounded-full border border-[var(--color-line)] px-7 py-3 text-sm text-[var(--color-bone)] transition-colors hover:border-[var(--color-terra)] hover:text-[var(--color-terra)]"
-          >
-            Toutes les réalisations
-          </Link>
+/* ── 4. Donner vie à vos images — image + appel ──────────────────────── */
+function LiveImage() {
+  return (
+    <section className="border-t border-[#dcd6ca] px-6 py-28 sm:py-40">
+      <div className="mx-auto grid max-w-[1100px] grid-cols-1 items-center gap-14 lg:grid-cols-2 lg:gap-20">
+        <Reveal>
+          <div className="aspect-[4/5] overflow-hidden rounded-[20px] bg-[#e6e1d7]">
+            <Still
+              src="/photo-studio.jpg"
+              alt="Timéo Taris — Mauvais Grain, caméra en main au coucher de soleil"
+            />
+          </div>
+        </Reveal>
+        <div>
+          <Reveal>
+            <p className="font-cond text-[11px] tracking-[0.28em] text-[#8a8072]">
+              Le studio
+            </p>
+          </Reveal>
+          <Reveal delay={100}>
+            <h2 className="font-wide mt-6 text-[clamp(2rem,4.5vw,3.6rem)] leading-[1.05] text-[#17120e]">
+              Donner vie à vos images<span className="dot">.</span>
+            </h2>
+          </Reveal>
+          <Reveal delay={180}>
+            <p className="font-sans mt-6 max-w-[42ch] text-[1.05rem] leading-[1.75] text-[#5a5044]">
+              De l&apos;écriture à l&apos;étalonnage, {site.name} transforme une
+              intention en histoire visuelle — avec la même exigence, du premier
+              repérage à la dernière image.
+            </p>
+          </Reveal>
+          <Reveal delay={260}>
+            <div className="mt-9">
+              <DevisModal label="Démarrer un projet" />
+            </div>
+          </Reveal>
         </div>
       </div>
+    </section>
+  );
+}
+
+/* ── 5. Closing — invitation ─────────────────────────────────────────── */
+function Closing() {
+  return (
+    <section className="px-6 py-32 text-center sm:py-44">
+      <Reveal>
+        <p className="font-cond text-[11px] tracking-[0.28em] text-[#8a8072]">
+          Un projet en tête ?
+        </p>
+      </Reveal>
+      <Reveal delay={120}>
+        <p className="font-wide mx-auto mt-6 max-w-[14ch] text-[clamp(2.2rem,6vw,4.6rem)] leading-[1.04] text-[#17120e]">
+          Écrivons votre histoire<span className="dot">.</span>
+        </p>
+      </Reveal>
+      <Reveal delay={220}>
+        <div className="mt-11 flex justify-center">
+          <DevisModal label="Demander un devis" />
+        </div>
+      </Reveal>
     </section>
   );
 }

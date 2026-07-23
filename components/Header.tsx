@@ -1,12 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { navLinks, site } from "@/lib/site";
 
 export function Header() {
   const [open, setOpen] = useState(false);
   const [reduced, setReduced] = useState(false);
+  // L'accueil est en thème clair (page produit Apple) : le chrome du haut
+  // s'inverse en encre sur clair. Le reste du site reste sombre.
+  const pathname = usePathname();
+  const light = pathname === "/" && !open;
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -35,7 +40,9 @@ export function Header() {
             <Link
               key={l.href}
               href={l.href}
-              className="link-underline font-cond text-[14px] text-[var(--color-bone)] transition-colors hover:text-[var(--color-terra)]"
+              className={`link-underline font-cond text-[14px] transition-colors hover:text-[var(--color-terra)] ${
+                light ? "text-[#17120e]" : "text-[var(--color-bone)]"
+              }`}
             >
               {l.label}
             </Link>
@@ -46,7 +53,9 @@ export function Header() {
         <Link
           href="/"
           onClick={() => setOpen(false)}
-          className="font-wide text-[1.3rem] leading-none text-[var(--color-cream)] md:absolute md:left-1/2 md:-translate-x-1/2"
+          className={`font-wide text-[1.3rem] leading-none md:absolute md:left-1/2 md:-translate-x-1/2 ${
+            light ? "text-[#17120e]" : "text-[var(--color-cream)]"
+          }`}
         >
           {site.name}
           <span className="dot">.</span>
@@ -54,7 +63,11 @@ export function Header() {
 
         <Link
           href="/contact"
-          className="hidden rounded-full border border-[var(--color-line)] px-5 py-2 font-cond text-[13px] text-[var(--color-bone)] transition-colors hover:border-[var(--color-terra)] hover:bg-[var(--color-terra)] hover:text-[var(--color-ink)] md:block"
+          className={`hidden rounded-full border px-5 py-2 font-cond text-[13px] transition-colors hover:border-[var(--color-terra)] hover:bg-[var(--color-terra)] hover:text-[var(--color-ink)] md:block ${
+            light
+              ? "border-[#cfc7b8] text-[#17120e]"
+              : "border-[var(--color-line)] text-[var(--color-bone)]"
+          }`}
         >
           On en parle
         </Link>
@@ -70,12 +83,12 @@ export function Header() {
         className="absolute right-5 top-5 z-[60] flex h-8 w-8 items-center justify-center sm:right-8 lg:right-10 md:hidden"
       >
         <span
-          className={`absolute inset-0 m-auto h-px w-6 bg-[var(--color-bone)] ${
+          className={`absolute inset-0 m-auto h-px w-6 ${light ? "bg-[#17120e]" : "bg-[var(--color-bone)]"} ${
             reduced ? "transition-none" : "transition-all duration-300 ease-in-out"
           } ${open ? "rotate-45" : "-translate-y-[4px]"}`}
         />
         <span
-          className={`absolute inset-0 m-auto h-px w-6 bg-[var(--color-bone)] ${
+          className={`absolute inset-0 m-auto h-px w-6 ${light ? "bg-[#17120e]" : "bg-[var(--color-bone)]"} ${
             reduced ? "transition-none" : "transition-all duration-300 ease-in-out"
           } ${open ? "-rotate-45" : "translate-y-[4px]"}`}
         />
