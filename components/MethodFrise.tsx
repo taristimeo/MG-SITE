@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 export type FriseStep = { title: string; text: string };
 
@@ -8,148 +8,295 @@ type Props = {
   steps: FriseStep[];
 };
 
-// « Notre méthode » en frise façon Apple : une ligne de connexion, des nœuds
-// numérotés (pastille terracotta), chaque étape avec son titre Gloock + un
-// texte court. Mobile : défilement horizontal avec scroll-snap et une
-// indication discrète. iOS-safe : transform/opacity/overflow/background
-// uniquement. prefers-reduced-motion : entrée neutralisée.
+// « Notre méthode » — timeline VERTICALE façon Apple.
+// Un rail descend le long de la colonne ; une ligne terracotta se TRACE de haut
+// en bas au fil du scroll (scaleY piloté en requestAnimationFrame, écriture
+// directe dans le DOM). Chaque étape se révèle à son entrée (opacity+translateY)
+// et son nœud s'active quand le tracé l'atteint.
+// iOS-safe STRICT : transform (scaleY/translateY/scale) + opacity + background
+// uniquement. Aucun filter, aucun clip-path.
+// prefers-reduced-motion : rail tracé, étapes visibles, nœuds actifs, 0 listener.
 export function MethodFrise({ steps }: Props) {
-  const sectionRef = useRef<HTMLDivElement | null>(null);
-  const trackRef = useRef<HTMLDivElement | null>(null);
-  const [inView, setInView] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const listRef = useRef<HTMLOListElement | null>(null);
+  const railRef = useRef<HTMLSpanElement | null>(null);
+  const fillRef = useRef<HTMLSpanElement | null>(null);
+  const nodeRefs = useRef<Array<HTMLSpanElement | null>>([]);
+  const stepRefs = useRef<Array<HTMLLIElement | null>>([]);
 
   useEffect(() => {
+    const root = rootRef.current;
+    const list = listRef.current;
+    const rail = railRef.current;
+    const fill = fillRef.current;
+    if (!root || !list || !rail || !fill) return;
+
+    const nodes = nodeRefs.current;
+    const stepEls = stepRefs.current;
+
+    // ── prefers-reduced-motion : état final, aucun listener ────────────────
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setInView(true);
-      setScrolled(true);
+      root.classList.add("mv-static");
       return;
     }
-    const el = sectionRef.current;
-    if (!el) return;
+
+    // Fractions (0→1) de chaque nœud le long du rail — recalculées au layout.
+    let nodeFracs: number[] = [];
+    // Suivi des nœuds actifs pour n'écrire dans le DOM qu'au changement.
+    const activeState: boolean[] = nodes.map(() => false);
+
+    // Positionne le rail entre le centre du 1er et du dernier nœud, puis
+    // mesure les fractions. À exécuter au montage et à chaque resize.
+    const layout = () => {
+      const first = nodes[0];
+      const last = nodes[nodes.length - 1];
+      if (!first || !last) return;
+      const listTop = list.getBoundingClientRect().top;
+      const centerOf = (el: HTMLElement) => {
+        const r = el.getBoundingClientRect();
+        return r.top + r.height / 2 - listTop;
+      };
+      const firstC = centerOf(first);
+      const lastC = centerOf(last);
+      const span = Math.max(1, lastC - firstC);
+      rail.style.top = `${firstC}px`;
+      rail.style.height = `${span}px`;
+      nodeFracs = nodes.map((n) => (n ? (centerOf(n) - firstC) / span : 0));
+    };
+
+    // Boucle de tracé : lit la position du rail dans le viewport, en déduit la
+    // progression, écrit directement scaleY + l'état des nœuds. Pas de re-render.
+    let ticking = false;
+    const frame = () => {
+      ticking = false;
+      const railRect = rail.getBoundingClientRect();
+      const railH = railRect.height || 1;
+      // Ligne de lecture à ~62% de la hauteur du viewport.
+      const readLine = window.innerHeight * 0.62;
+      let p = (readLine - railRect.top) / railH;
+      if (p < 0) p = 0;
+      else if (p > 1) p = 1;
+
+      fill.style.transform = `scaleY(${p})`;
+
+      for (let i = 0; i < nodes.length; i++) {
+        const on = p >= (nodeFracs[i] ?? 1) - 0.0001;
+        if (on !== activeState[i]) {
+          activeState[i] = on;
+          nodes[i]?.classList.toggle("is-active", on);
+        }
+      }
+    };
+    const requestFrame = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(frame);
+    };
+
+    // Révélation en cascade des étapes à leur entrée dans le champ.
     const io = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting) {
-          setInView(true);
-          io.disconnect();
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            e.target.classList.add("is-in");
+            io.unobserve(e.target);
+          }
         }
       },
-      { threshold: 0.2, rootMargin: "0px 0px -8% 0px" },
+      { threshold: 0.25, rootMargin: "0px 0px -12% 0px" },
     );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
+    for (const el of stepEls) if (el) io.observe(el);
 
-  // Masque l'indication de défilement dès que l'utilisateur fait défiler la frise.
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    const onScroll = () => {
-      if (track.scrollLeft > 8) setScrolled(true);
+    const onResize = () => {
+      layout();
+      requestFrame();
     };
-    track.addEventListener("scroll", onScroll, { passive: true });
-    return () => track.removeEventListener("scroll", onScroll);
-  }, []);
+
+    layout();
+    requestFrame();
+    window.addEventListener("scroll", requestFrame, { passive: true });
+    window.addEventListener("resize", onResize);
+
+    return () => {
+      window.removeEventListener("scroll", requestFrame);
+      window.removeEventListener("resize", onResize);
+      io.disconnect();
+    };
+  }, [steps.length]);
 
   return (
-    <div ref={sectionRef} className={`frise ${inView ? "frise-in" : ""}`}>
-      <div
-        ref={trackRef}
-        className="frise-track flex snap-x snap-mandatory gap-0 overflow-x-auto pb-2 sm:grid sm:grid-cols-4 sm:overflow-visible"
-      >
+    <div ref={rootRef} className="mv">
+      <ol ref={listRef} className="mv-steps">
+        {/* Rail vertical : base discrète + tracé terracotta (scaleY au scroll) */}
+        <span ref={railRef} aria-hidden className="mv-rail">
+          <span className="mv-rail-base" />
+          <span ref={fillRef} className="mv-rail-fill" />
+        </span>
+
         {steps.map((s, i) => (
-          <div
+          <li
             key={s.title}
-            className="frise-step relative w-[78vw] max-w-[19rem] shrink-0 snap-start pr-8 sm:w-auto sm:max-w-none sm:pr-8"
-            style={{ transitionDelay: `${i * 90}ms` }}
+            ref={(el) => {
+              stepRefs.current[i] = el;
+            }}
+            className="mv-step"
+            style={{ transitionDelay: `${i * 70}ms` }}
           >
-            {/* Ligne de connexion vers le nœud suivant (sauf le dernier) */}
-            {i < steps.length - 1 && (
-              <span aria-hidden className="frise-line" />
-            )}
-            {/* Nœud numéroté — pastille terracotta */}
-            <span className="frise-node font-cond">
+            <span
+              ref={(el) => {
+                nodeRefs.current[i] = el;
+              }}
+              className="mv-node font-cond"
+            >
               {String(i + 1).padStart(2, "0")}
             </span>
-            <h3 className="font-wide mt-6 text-2xl leading-[1.1] text-[var(--color-bone)]">
-              {s.title}
-            </h3>
-            <p className="font-sans mt-3 text-sm leading-relaxed text-[var(--color-bone-dim)]">
-              {s.text}
-            </p>
-          </div>
+            <div className="mv-body">
+              <h3 className="font-wide mv-title">{s.title}</h3>
+              <p className="font-sans mv-text">{s.text}</p>
+            </div>
+          </li>
         ))}
-      </div>
-
-      {/* Indication de défilement — mobile uniquement */}
-      <p
-        className={`frise-hint font-cond mt-5 flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-[var(--color-bone-faint)] sm:hidden ${
-          scrolled ? "frise-hint-off" : ""
-        }`}
-      >
-        Faites défiler <span aria-hidden>→</span>
-      </p>
+      </ol>
 
       <style>{`
-        .frise-track {
-          -webkit-overflow-scrolling: touch;
-          scrollbar-width: none;
+        .mv {
+          margin-inline: auto;
+          width: 100%;
+          max-width: 740px;
         }
-        .frise-track::-webkit-scrollbar { display: none; }
 
-        .frise-node {
+        .mv-steps {
+          position: relative;
+          list-style: none;
+          margin: 0;
+          padding: 0;
+        }
+
+        /* Rail : positionné en JS entre le centre du 1er et du dernier nœud.
+           Colonne de gauche = 2.75rem, centre du nœud à 1.375rem. */
+        .mv-rail {
+          position: absolute;
+          left: 1.375rem;
+          width: 2px;
+          transform: translateX(-50%);
+          z-index: 0;
+          pointer-events: none;
+        }
+        .mv-rail-base {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          background: var(--color-line);
+        }
+        .mv-rail-fill {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          background: var(--color-terra);
+          transform: scaleY(0);
+          transform-origin: top center;
+          will-change: transform;
+        }
+
+        .mv-step {
+          position: relative;
+          display: grid;
+          grid-template-columns: 2.75rem 1fr;
+          gap: 1.25rem;
+          align-items: start;
+          opacity: 0;
+          transform: translateY(22px);
+          transition:
+            opacity 0.8s var(--ease-out-soft),
+            transform 0.9s var(--ease-out-expo);
+        }
+        .mv-step.is-in {
+          opacity: 1;
+          transform: none;
+        }
+        .mv-step + .mv-step {
+          margin-top: clamp(3rem, 7vw, 4.5rem);
+        }
+
+        /* Nœud : pastille discrète au repos, se remplit en terracotta + léger
+           scale quand le tracé l'atteint (classe .is-active écrite en JS). */
+        .mv-node {
           position: relative;
           z-index: 1;
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          width: 2.5rem;
-          height: 2.5rem;
+          width: 2.75rem;
+          height: 2.75rem;
           border-radius: 9999px;
-          background: var(--color-terra);
-          color: var(--color-ink);
+          background: var(--color-ink);
+          box-shadow: inset 0 0 0 1px var(--color-line);
+          color: var(--color-bone-dim);
           font-size: 0.7rem;
           letter-spacing: 0.12em;
-        }
-
-        /* Ligne de connexion : part du centre du nœud et rejoint le nœud
-           suivant. Largeur 100% = une colonne d'étape (les colonnes sont de
-           largeur égale, en scroll mobile comme en grille desktop). */
-        .frise-line {
-          position: absolute;
-          top: 1.25rem;            /* centre vertical du nœud (2.5rem / 2) */
-          left: 1.25rem;           /* centre horizontal du nœud */
-          width: 100%;
-          height: 1px;
-          background: var(--color-line-soft);
-          transform: scaleX(0);
-          transform-origin: left;
-          transition: transform 1s var(--ease-out-expo);
-        }
-        .frise-in .frise-line { transform: scaleX(1); }
-
-        .frise-step {
-          opacity: 0;
-          transform: translateY(16px);
           transition:
-            opacity 0.8s var(--ease-out-soft),
-            transform 0.9s var(--ease-out-expo);
+            background 0.5s var(--ease-out-soft),
+            color 0.5s var(--ease-out-soft),
+            box-shadow 0.5s var(--ease-out-soft),
+            transform 0.5s var(--ease-out-expo);
         }
-        .frise-in .frise-step { opacity: 1; transform: none; }
+        .mv-node.is-active {
+          background: var(--color-terra);
+          color: var(--color-ink);
+          box-shadow: inset 0 0 0 1px var(--color-terra);
+          transform: scale(1.06);
+        }
 
-        .frise-hint {
-          opacity: 1;
-          transition: opacity 0.5s var(--ease-out-soft);
+        .mv-body {
+          padding-top: 0.35rem;
+          max-width: 46ch;
         }
-        .frise-hint-off { opacity: 0; }
+        .mv-title {
+          font-size: clamp(1.5rem, 3.4vw, 2rem);
+          line-height: 1.1;
+          color: var(--color-bone);
+        }
+        .mv-text {
+          margin-top: 0.75rem;
+          font-size: 0.98rem;
+          line-height: 1.7;
+          color: var(--color-bone-dim);
+        }
+
+        /* prefers-reduced-motion / fallback statique : tout à l'état final. */
+        .mv-static .mv-step {
+          opacity: 1;
+          transform: none;
+          transition: none;
+        }
+        .mv-static .mv-rail {
+          top: 1.375rem;
+          bottom: 1.375rem;
+          height: auto;
+        }
+        .mv-static .mv-rail-fill {
+          transform: scaleY(1);
+        }
+        .mv-static .mv-node {
+          background: var(--color-terra);
+          color: var(--color-ink);
+          box-shadow: inset 0 0 0 1px var(--color-terra);
+          transform: none;
+          transition: none;
+        }
 
         @media (prefers-reduced-motion: reduce) {
-          .frise-step, .frise-line, .frise-hint {
+          .mv-step {
             opacity: 1 !important;
             transform: none !important;
             transition: none !important;
           }
-          .frise-line { transform: scaleX(1) !important; }
+          .mv-rail-fill {
+            transform: scaleY(1) !important;
+          }
+          .mv-node {
+            transition: none !important;
+          }
         }
       `}</style>
     </div>
