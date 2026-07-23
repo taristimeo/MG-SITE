@@ -97,8 +97,9 @@ export default function StudioPage() {
         </HeroFade>
       </section>
 
-      {/* Scroll narratif — image intérim : la silhouette du studio (en attente
-          de la vraie photo de Timéo, à intégrer ici dès réception). */}
+      {/* Récit du studio en trois temps — progression verticale au scroll
+          libre, l'image accompagne les chapitres (image intérim : la silhouette
+          du studio, en attente de la vraie photo de Timéo). */}
       <StudioStory
         chapters={chapters}
         imageSrc="/photo-studio.jpg"
@@ -147,7 +148,8 @@ export default function StudioPage() {
         pinned={false}
       />
 
-      {/* ── Notre méthode — rail horizontal piloté par le scroll ───────── */}
+      {/* ── Notre méthode — séquence verticale, ligne terracotta qui se
+          trace au scroll (aucun scroll capturé) ───────────────────────── */}
       <MethodRail />
 
       {/* ── Le process : du repérage à l'étalonnage ───────────────────── */}

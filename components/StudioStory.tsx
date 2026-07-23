@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Reveal } from "@/components/Reveal";
+import { MaskTitle } from "@/components/MaskTitle";
 import { Still } from "@/components/Poster";
 
 export type StoryChapter = {
@@ -17,127 +17,87 @@ type Props = {
   imageAlt: string;
 };
 
-// Course de scroll (en svh) : intro = révélation de l'image seule, puis un
-// palier par chapitre.
-const SVH_INTRO = 70;
-const SVH_PER_CHAPTER = 110;
-
 const clamp01 = (n: number) => (n < 0 ? 0 : n > 1 ? 1 : n);
-const clamp = (n: number, lo: number, hi: number) =>
-  n < lo ? lo : n > hi ? hi : n;
-// smoothstep — fondu doux plutôt que linéaire
-const smooth = (n: number) => {
-  const x = clamp01(n);
-  return x * x * (3 - 2 * x);
-};
 
-export function StudioStory({ chapters, imageSrc, imageAlt }: Props) {
-  const [reduced, setReduced] = useState(false);
-
-  const sectionRef = useRef<HTMLDivElement | null>(null);
-  const frameRef = useRef<HTMLDivElement | null>(null);
-  const innerRef = useRef<HTMLDivElement | null>(null);
-  const layerRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const articleRefs = useRef<(HTMLElement | null)[]>([]);
-  const ghostRefs = useRef<(HTMLSpanElement | null)[]>([]);
-  const tickRefs = useRef<(HTMLSpanElement | null)[]>([]);
-
-  const steps = chapters.length;
-  const totalScroll = SVH_INTRO + steps * SVH_PER_CHAPTER;
-  const introFrac = SVH_INTRO / totalScroll;
-  const textSpan = 1 - introFrac;
-  const textSeg = textSpan / steps;
+// Un chapitre du récit — révélé à l'entrée dans le champ selon la grammaire
+// unifiée : filet terracotta qui se trace, label mono qui se resserre, titre
+// Gloock en masque ligne-à-ligne, corps qui monte en fondu.
+function Chapter({ c, i }: { c: StoryChapter; i: number }) {
+  const ref = useRef<HTMLElement | null>(null);
+  const [inView, setInView] = useState(false);
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setReduced(true);
-      return;
-    }
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          setInView(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.35, rootMargin: "0px 0px -12% 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <article
+      ref={ref}
+      className={`ss-block ${inView ? "ss-in" : ""} relative max-w-[46ch]`}
+    >
+      {/* 1 — filet terracotta qui se trace */}
+      <span aria-hidden className="ss-rule block h-px w-14 bg-[var(--color-terra)]" />
+      {/* 2 — label mono majuscules, letter-spacing qui se resserre */}
+      <p className="ss-label font-cond mt-6 text-xs uppercase text-[var(--color-terra)]">
+        {c.index}{" "}
+        <span className="text-[var(--color-bone-faint)]">/ {c.kicker}</span>
+      </p>
+      {/* 3 — titre Gloock en révélation par masque */}
+      <h2 className="font-wide mt-4 text-[clamp(1.9rem,3.4vw,2.9rem)] leading-[1.08] text-[var(--color-bone)]">
+        <MaskTitle delay={i === 0 ? 120 : 90}>{c.title}</MaskTitle>
+      </h2>
+      {/* 4 — corps qui monte en fondu */}
+      <p className="ss-body font-sans mt-5 text-[1rem] leading-[1.7] text-[var(--color-bone-dim)]">
+        {c.text}
+      </p>
+    </article>
+  );
+}
+
+// Récit du studio en trois temps. Progression VERTICALE fluide, scroll libre :
+// l'image accompagne les chapitres (sticky éditorial, parallaxe douce +
+// léger scale piloté en rAF, écriture DOM directe), aucun pin qui retient le
+// scroll. Repli statique complet en prefers-reduced-motion.
+export function StudioStory({ chapters, imageSrc, imageAlt }: Props) {
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const innerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const section = sectionRef.current;
-    if (!section) return;
+    const inner = innerRef.current;
+    if (!section || !inner) return;
 
-    // Écrit l'état pour une progression p — directement sur le DOM (pas de
-    // re-render React), donc fluide même à 60fps.
-    const render = (p: number) => {
-      // Image : révélation à l'intro (fondu + montée + léger zoom), puis
-      // « breathing » lent. Tout en transform/opacity → composité GPU.
-      const ip = clamp01(p / introFrac);
-      const rev = smooth(ip);
-      const imgOpacity = smooth(clamp01(ip / 0.55));
-      const imgY = (1 - rev) * 56;
-      const revealScale = 0.94 + 0.06 * rev;
-      const afterIntro = clamp01((p - introFrac) / textSpan);
-      const breathScale = 1 + 0.05 * afterIntro;
-
-      const frame = frameRef.current;
-      if (frame) {
-        frame.style.opacity = String(imgOpacity);
-        frame.style.transform = `translate3d(0,${imgY}px,0) scale(${revealScale})`;
-      }
-      if (innerRef.current) {
-        innerRef.current.style.transform = `scale(${breathScale})`;
-      }
-
-      // Textes : plateau lisible large au centre, sortie en fondu + glissement
-      // + scale (pas de blur par frame : filter force des repaints coûteux).
-      // Le grand chiffre fantôme dérive un peu plus que le texte → profondeur.
-      for (let i = 0; i < steps; i++) {
-        const center = introFrac + (i + 0.5) * textSeg;
-        const t = (p - center) / textSeg;
-        const a = Math.abs(t);
-        // Plateau élargi (|t|<0.19) : le bloc reste posé plus longtemps avant
-        // de s'effacer — lecture plus calme, moins de va-et-vient.
-        const fade = smooth((a - 0.19) / (0.68 - 0.19));
-        const opacity = clamp01(1 - fade);
-        const tc = clamp(t, -0.5, 0.5);
-        const y = -tc * 118;
-        const x = tc * (i % 2 === 0 ? 20 : -20);
-        const scale = 1 - a * 0.05;
-
-        const layer = layerRefs.current[i];
-        const art = articleRefs.current[i];
-        const ghost = ghostRefs.current[i];
-        const tick = tickRefs.current[i];
-        if (layer) {
-          layer.style.opacity = String(opacity);
-          layer.style.pointerEvents = opacity < 0.05 ? "none" : "auto";
-        }
-        if (art) {
-          art.style.transform = `translate3d(${x}px,${y}px,0) scale(${scale})`;
-        }
-        // Parallaxe : dérive additionnelle du chiffre (composée à celle de
-        // l'article) pour un léger décollement en Z.
-        if (ghost) {
-          ghost.style.transform = `translate3d(${tc * (i % 2 === 0 ? 14 : -14)}px,${-tc * 34}px,0)`;
-        }
-        if (tick) tick.style.transform = `scaleX(${opacity})`;
-      }
-    };
-
-    const readTarget = () => {
+    // Parallaxe : dérive verticale douce + léger scale de l'image intérieure,
+    // en fonction de l'avancée du récit dans le viewport. Transform seul → GPU.
+    const render = () => {
       const rect = section.getBoundingClientRect();
-      const total = section.offsetHeight - window.innerHeight;
-      return clamp01(total > 0 ? -rect.top / total : 0);
+      const span = rect.height + window.innerHeight;
+      const p = clamp01((window.innerHeight - rect.top) / span);
+      const y = (p - 0.5) * 7; // ±3.5% de dérive
+      const scale = 1.04 + p * 0.05;
+      inner.style.transform = `translate3d(0,${y.toFixed(2)}%,0) scale(${scale.toFixed(4)})`;
     };
 
     let raf = 0;
     let running = false;
-    let current = readTarget();
-
-    // Boucle de lissage : on interpole la valeur affichée vers la cible, ce qui
-    // gomme les à-coups du scroll. S'arrête une fois stabilisée.
     const loop = () => {
-      const target = readTarget();
-      current += (target - current) * 0.15;
-      if (Math.abs(target - current) < 0.0004) {
-        current = target;
-        render(current);
-        running = false;
-        raf = 0;
-        return;
-      }
-      render(current);
-      raf = requestAnimationFrame(loop);
+      render();
+      running = false;
+      raf = 0;
     };
     const kick = () => {
       if (!running) {
@@ -146,8 +106,7 @@ export function StudioStory({ chapters, imageSrc, imageAlt }: Props) {
       }
     };
 
-    render(current);
-    kick();
+    render();
     window.addEventListener("scroll", kick, { passive: true });
     window.addEventListener("resize", kick);
     return () => {
@@ -155,134 +114,72 @@ export function StudioStory({ chapters, imageSrc, imageAlt }: Props) {
       window.removeEventListener("resize", kick);
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [introFrac, steps, textSeg, textSpan]);
+  }, []);
 
-  // --- Repli sans animation (prefers-reduced-motion) ----------------------
-  if (reduced) {
-    return (
-      <section className="px-5 pb-24 sm:px-8 lg:px-10">
-        <div className="mx-auto grid max-w-[1300px] items-start gap-x-16 gap-y-12 lg:grid-cols-2">
-          <div className="lg:sticky lg:top-[12vh]">
-            <div className="aspect-[3/4] overflow-hidden rounded-2xl bg-[var(--color-ink-2)]">
-              <Still src={imageSrc} alt={imageAlt} />
-            </div>
-          </div>
-          <div className="flex flex-col gap-16">
-            {chapters.map((c) => (
-              <Reveal key={c.index}>
-                <article className="max-w-[46ch]">
-                  <p className="font-cond text-xs tracking-[0.18em] text-[var(--color-terra)]">
-                    {c.index}{" "}
-                    <span className="text-[var(--color-bone-faint)]">/ {c.kicker}</span>
-                  </p>
-                  <h2 className="font-wide mt-4 text-[clamp(1.8rem,3.4vw,2.8rem)] leading-tight text-[var(--color-bone)]">
-                    {c.title}
-                  </h2>
-                  <p className="font-sans mt-5 text-[1rem] leading-[1.7] text-[var(--color-bone-dim)]">
-                    {c.text}
-                  </p>
-                </article>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  // --- Version animée : intro image, puis textes en fondu -----------------
   return (
     <section
       ref={sectionRef}
       aria-label="Le studio en trois temps"
-      style={{ height: `${totalScroll + 40}svh` }}
-      className="relative"
+      className="px-5 pb-24 sm:px-8 lg:px-10"
     >
-      <div className="sticky top-0 flex h-[100svh] items-center overflow-hidden">
-        {/* Image centrée — se révèle à l'intro, puis reste fixe */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div
-            ref={frameRef}
-            className="relative aspect-[3/4] w-[74vw] max-w-[19rem] shadow-[0_40px_120px_-40px_rgba(0,0,0,0.8)] will-change-[transform,opacity] sm:w-[46vw] sm:max-w-[23rem] lg:w-[31vw] lg:max-w-[26rem]"
-            style={{ opacity: 0 }}
-          >
-            <div className="absolute inset-0 overflow-hidden rounded-2xl bg-[var(--color-ink-2)] ring-1 ring-[var(--color-line-soft)]">
-              <div ref={innerRef} className="h-full w-full will-change-transform">
-                <Still src={imageSrc} alt={imageAlt} />
-              </div>
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(10,9,8,0.55)] via-transparent to-[rgba(10,9,8,0.18)]" />
+      <div className="mx-auto grid max-w-[1300px] items-start gap-x-16 gap-y-14 lg:grid-cols-2">
+        {/* Image — sticky éditoriale (le scroll reste libre, l'image suit) */}
+        <div className="lg:sticky lg:top-[14vh]">
+          <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-[var(--color-ink-2)] shadow-[0_40px_120px_-50px_rgba(0,0,0,0.8)] ring-1 ring-[var(--color-line-soft)]">
+            <div
+              ref={innerRef}
+              className="h-full w-full will-change-transform"
+              style={{ transform: "translate3d(0,0,0) scale(1.06)" }}
+            >
+              <Still src={imageSrc} alt={imageAlt} />
             </div>
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(10,9,8,0.55)] via-transparent to-[rgba(10,9,8,0.18)]" />
           </div>
         </div>
 
-        {/* Textes : gauche → droite → gauche, fondu + glissement + scale */}
-        {chapters.map((c, i) => {
-          const side = i % 2 === 0 ? "left" : "right";
-          const colClass =
-            side === "left"
-              ? "col-span-12 sm:col-span-6 lg:col-span-4"
-              : "col-span-12 sm:col-span-6 sm:col-start-7 lg:col-span-4 lg:col-start-9";
-          const num = String(i + 1).padStart(2, "0");
-          return (
-            <div
-              key={c.index}
-              ref={(el) => {
-                layerRefs.current[i] = el;
-              }}
-              className="absolute inset-0 flex items-center"
-              style={{ opacity: 0 }}
-              aria-hidden
-            >
-              <div className="mx-auto grid w-full max-w-[1400px] grid-cols-12 gap-x-6 px-5 sm:px-8 lg:px-12">
-                <article
-                  ref={(el) => {
-                    articleRefs.current[i] = el;
-                  }}
-                  className={`${colClass} relative rounded-2xl bg-[rgba(10,9,8,0.6)] p-5 backdrop-blur-sm will-change-transform sm:bg-transparent sm:p-0 sm:backdrop-blur-none`}
-                >
-                  <span
-                    ref={(el) => {
-                      ghostRefs.current[i] = el;
-                    }}
-                    aria-hidden
-                    className={`pointer-events-none absolute -top-[0.5em] -z-10 hidden select-none font-wide text-[clamp(6rem,11vw,11rem)] leading-none text-[rgba(183,110,78,0.08)] will-change-transform sm:block ${side === "left" ? "-left-3" : "-right-3"}`}
-                  >
-                    {num}
-                  </span>
-                  <p className="font-cond text-xs tracking-[0.18em] text-[var(--color-terra)]">
-                    {c.index}{" "}
-                    <span className="text-[var(--color-bone-faint)]">/ {c.kicker}</span>
-                  </p>
-                  <h2 className="font-wide mt-4 text-[clamp(1.9rem,3.4vw,2.9rem)] leading-[1.08] text-[var(--color-bone)]">
-                    {c.title}
-                  </h2>
-                  <p className="font-sans mt-5 max-w-[44ch] text-[1rem] leading-[1.7] text-[var(--color-bone-dim)]">
-                    {c.text}
-                  </p>
-                </article>
-              </div>
-            </div>
-          );
-        })}
-
-        {/* Indicateur de progression : trois traits, l'actif en terracotta */}
-        <div className="pointer-events-none absolute bottom-[6vh] left-1/2 flex -translate-x-1/2 gap-2">
+        {/* Chapitres — révélés l'un après l'autre au scroll naturel */}
+        <div className="flex flex-col gap-[16vh] py-[6vh] lg:gap-[26vh] lg:py-[12vh]">
           {chapters.map((c, i) => (
-            <span
-              key={c.index}
-              className="block h-[2px] w-8 overflow-hidden rounded-full bg-[rgba(110,104,92,0.3)]"
-            >
-              <span
-                ref={(el) => {
-                  tickRefs.current[i] = el;
-                }}
-                className="block h-full origin-left rounded-full bg-[var(--color-terra)]"
-                style={{ transform: "scaleX(0)" }}
-              />
-            </span>
+            <Chapter key={c.index} c={c} i={i} />
           ))}
         </div>
       </div>
+
+      <style>{`
+        .ss-rule {
+          transform: scaleX(0);
+          transform-origin: left;
+          transition: transform 1.1s var(--ease-out-expo);
+        }
+        .ss-in .ss-rule { transform: scaleX(1); }
+        .ss-label {
+          opacity: 0;
+          letter-spacing: 0.42em;
+          transition:
+            opacity 0.9s var(--ease-out-soft) 0.14s,
+            letter-spacing 1.1s var(--ease-out-expo) 0.14s;
+        }
+        .ss-in .ss-label { opacity: 1; letter-spacing: 0.2em; }
+        .ss-body {
+          opacity: 0;
+          transform: translateY(22px);
+          filter: blur(6px);
+          transition:
+            opacity 1s var(--ease-out-soft) 0.32s,
+            transform 1.1s var(--ease-out-expo) 0.32s,
+            filter 0.9s var(--ease-out-soft) 0.32s;
+        }
+        .ss-in .ss-body { opacity: 1; transform: none; filter: blur(0); }
+        @media (prefers-reduced-motion: reduce) {
+          .ss-rule, .ss-label, .ss-body {
+            opacity: 1 !important;
+            transform: none !important;
+            filter: none !important;
+            letter-spacing: 0.2em !important;
+            transition: none !important;
+          }
+        }
+      `}</style>
     </section>
   );
 }

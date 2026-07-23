@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Reveal } from "@/components/Reveal";
+import { MaskTitle } from "@/components/MaskTitle";
 import { testimonials, type Testimonial } from "@/lib/site";
 
 const EASE = "cubic-bezier(0.16, 1, 0.3, 1)";
@@ -155,20 +155,53 @@ function Card({ t, index }: { t: Testimonial; index: number }) {
 }
 
 // Section preuve sociale : avis clients (Google) en cartes éditoriales.
+// En-tête aligné sur la grammaire unifiée (filet terracotta qui se trace, label
+// mono qui se resserre, titre Gloock en masque), cartes conservées avec leur
+// remplissage d'étoiles séquentiel.
 export function Testimonials() {
+  const headRef = useRef<HTMLDivElement | null>(null);
+  const [headIn, setHeadIn] = useState(false);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setHeadIn(true);
+      return;
+    }
+    const el = headRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          setHeadIn(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.4 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   return (
     <section className="px-5 py-20 sm:px-8 sm:py-28 lg:px-10 lg:py-36">
       <div className="mx-auto max-w-[1600px]">
-        <Reveal>
-          <p className="font-cond text-center text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
+        <div
+          ref={headRef}
+          className={`${headIn ? "tm-head-in" : ""} flex flex-col items-center text-center`}
+        >
+          <span
+            aria-hidden
+            className="tm-head-rule block h-px w-14 bg-[var(--color-terra)]"
+          />
+          <p className="tm-head-label font-cond mt-6 text-xs uppercase text-[var(--color-bone-faint)]">
             Ils nous font confiance
           </p>
-        </Reveal>
-        <Reveal delay={120}>
-          <h2 className="font-wide mt-4 text-center text-[clamp(2rem,6vw,4rem)] leading-[1] text-[var(--color-bone)]">
-            Ce qu&apos;ils en disent<span className="dot">.</span>
+          <h2 className="font-wide mt-4 text-[clamp(2rem,6vw,4rem)] leading-[1] text-[var(--color-bone)]">
+            <MaskTitle delay={120} className="text-center">
+              Ce qu&apos;ils en disent<span className="dot">.</span>
+            </MaskTitle>
           </h2>
-        </Reveal>
+        </div>
 
         <div className="mt-14 grid grid-cols-1 gap-5 sm:mt-20 md:grid-cols-3">
           {testimonials.map((t, i) => (
@@ -176,6 +209,30 @@ export function Testimonials() {
           ))}
         </div>
       </div>
+
+      <style>{`
+        .tm-head-rule {
+          transform: scaleX(0);
+          transition: transform 1.1s var(--ease-out-expo);
+        }
+        .tm-head-in .tm-head-rule { transform: scaleX(1); }
+        .tm-head-label {
+          opacity: 0;
+          letter-spacing: 0.42em;
+          transition:
+            opacity 0.9s var(--ease-out-soft) 0.14s,
+            letter-spacing 1.1s var(--ease-out-expo) 0.14s;
+        }
+        .tm-head-in .tm-head-label { opacity: 1; letter-spacing: 0.2em; }
+        @media (prefers-reduced-motion: reduce) {
+          .tm-head-rule { transform: scaleX(1) !important; transition: none !important; }
+          .tm-head-label {
+            opacity: 1 !important;
+            letter-spacing: 0.2em !important;
+            transition: none !important;
+          }
+        }
+      `}</style>
     </section>
   );
 }
