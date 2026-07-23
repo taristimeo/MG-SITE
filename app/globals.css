@@ -1,22 +1,23 @@
 @import "tailwindcss";
 
 @theme {
-  /* Noir chaud de la charte — jamais #000, légèrement bruni */
-  --color-ink: #0a0908;
-  --color-ink-2: #15120f;
-  --color-ink-3: #1e1a15;
-  --color-line: #393229;
-  --color-line-soft: #221d17;
+  /* Version claire (« blanc ») — blanc chaud de la charte comme fond,
+     jamais #fff pur : légèrement crémeux pour rester premium. */
+  --color-ink: #f6f3ec;
+  --color-ink-2: #efeadf;
+  --color-ink-3: #e6e0d2;
+  --color-line: #d6cfbf;
+  --color-line-soft: #e7e1d4;
 
-  /* Crème / os de la charte (logotype Mauvais Grain) */
-  --color-fog: #d7d2c5;
-  --color-cream: #e8e4d8;
-  --color-bone: #ece8dc;
-  --color-bone-dim: #9b9384;
-  --color-bone-faint: #6e685c;
+  /* Encres chaudes de la charte (texte sur fond clair) */
+  --color-fog: #4a4339;
+  --color-cream: #14100b;
+  --color-bone: #201a12;
+  --color-bone-dim: #574f43;
+  --color-bone-faint: #877e6f;
 
   /* Accent terracotta — le point signature, parcimonieux (valeur charte DA) */
-  --color-terra: #b76e4e;
+  --color-terra: #a85f3c;
   --color-terra-dim: #8f5439;
 
   /* Typo : Gloock (logotype/titres), mono (labels/méta), Saira (texte) */
@@ -35,8 +36,8 @@
 @layer base {
   :root {
     /* défini explicitement pour garantir l'émission (dev + prod) */
-    --color-cream: #e8e4d8;
-    --color-terra: #b76e4e;
+    --color-cream: #14100b;
+    --color-terra: #a85f3c;
   }
 
   html {
