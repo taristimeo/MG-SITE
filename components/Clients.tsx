@@ -1,39 +1,15 @@
 import { Reveal } from "@/components/Reveal";
 import { clients } from "@/lib/site";
 
-// Rangée de logos dupliquée pour un défilement parfaitement continu (la piste
-// translate de -50 %). La seconde copie est purement décorative.
-function LogoRow({ decorative = false }: { decorative?: boolean }) {
-  return (
-    <ul
-      aria-hidden={decorative || undefined}
-      className="flex shrink-0 items-center gap-4 pr-4"
-    >
-      {clients.map((c) => (
-        <li
-          key={c.name}
-          className="group flex h-28 w-44 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#241a13] to-[#16110d] p-6 ring-1 ring-[rgba(183,110,78,0.22)] transition-all duration-500 hover:ring-[var(--color-terra)] sm:h-32 sm:w-52"
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={c.logo}
-            alt={decorative ? "" : c.name}
-            loading="lazy"
-            className="max-h-[56%] w-auto max-w-[72%] object-contain opacity-80 transition-opacity duration-500 group-hover:opacity-100"
-          />
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-// « Ils nous font confiance » : les logos défilent en continu, lentement,
-// comme un générique horizontal. En prefers-reduced-motion le défilement
-// s'arrête et la rangée devient défilable au doigt (voir globals.css).
+// « Nos clients » — mur de logos épuré. Les logotypes (clairs, sur fond
+// transparent) reposent directement sur l'encre, en teinte discrète, et se
+// ravivent au survol. Pas de cadres, pas de défilement automatique : une grille
+// centrée qui s'enroule, révélée en cascade à l'entrée dans le champ.
+// prefers-reduced-motion : géré par la classe .reveal (globals.css).
 export function Clients() {
   return (
-    <section className="overflow-hidden px-0 pb-20 pt-8">
-      <div className="px-5 sm:px-8 lg:px-10">
+    <section className="px-5 pb-20 pt-8 sm:px-8 lg:px-10">
+      <div className="mx-auto max-w-[1100px]">
         <Reveal>
           <p className="font-cond text-center text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
             Nos clients
@@ -44,19 +20,21 @@ export function Clients() {
             Pourquoi pas vous&nbsp;?
           </h2>
         </Reveal>
-      </div>
 
-      <Reveal delay={220}>
-        {/* Fondus latéraux : les logos naissent et s'effacent dans l'encre aux
-            deux bords — le générique n'a ni début ni fin visible. Pause au
-            survol : on peut s'arrêter sur un nom. */}
-        <div className="group marquee-wrap mt-14 overflow-hidden [-webkit-mask-image:linear-gradient(to_right,transparent,#000_9%,#000_91%,transparent)] [mask-image:linear-gradient(to_right,transparent,#000_9%,#000_91%,transparent)]">
-          <div className="marquee-x flex w-max [animation-play-state:running] group-hover:[animation-play-state:paused]">
-            <LogoRow />
-            <LogoRow decorative />
-          </div>
-        </div>
-      </Reveal>
+        <ul className="mx-auto mt-16 flex max-w-[900px] flex-wrap items-center justify-center gap-x-[clamp(2.75rem,6vw,5rem)] gap-y-14 sm:mt-20">
+          {clients.map((c, i) => (
+            <Reveal key={c.name} as="li" delay={90 + i * 55}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={c.logo}
+                alt={c.name}
+                loading="lazy"
+                className="h-8 w-auto opacity-65 transition-opacity duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:opacity-100 sm:h-9"
+              />
+            </Reveal>
+          ))}
+        </ul>
+      </div>
     </section>
   );
 }

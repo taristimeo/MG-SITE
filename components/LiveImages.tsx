@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
-import { CardMedia } from "@/components/CardMedia";
+import { Still } from "@/components/Poster";
 import { DevisModal } from "@/components/DevisModal";
 import { Parallax } from "@/components/Parallax";
 import { Reveal } from "@/components/Reveal";
@@ -49,10 +49,9 @@ export function LiveImages() {
                   className="img-open h-full w-full"
                   style={{ "--mask-delay": "220ms" } as CSSProperties}
                 >
-                  <CardMedia
-                    src="/projects/the-sound-of-discovery/1.jpg"
-                    videoSrc="/projects/the-sound-of-discovery/preview.mp4"
-                    alt="The Sound of Discovery — film tourné en Égypte par Mauvais Grain"
+                  <Still
+                    src="/projects/the-sound-of-discovery/7.jpg"
+                    alt="Portrait sur le Nil — film The Sound of Discovery, tourné en Égypte par Mauvais Grain"
                   />
                 </div>
               </div>
