@@ -5,7 +5,7 @@ import { RevealTitle } from "@/components/RevealTitle";
 import { WordReveal } from "@/components/WordReveal";
 import { LiveImages } from "@/components/LiveImages";
 import { HeroFade } from "@/components/HeroFade";
-import { WorksShowcase } from "@/components/WorksShowcase";
+import { FilmStrip } from "@/components/FilmStrip";
 import { Manifesto } from "@/components/Manifesto";
 import { Stats } from "@/components/Stats";
 import { ServicesStack } from "@/components/ServicesStack";
@@ -106,9 +106,8 @@ function Hero() {
 /* ------------------------------------------------------------------ */
 
 function Works() {
-  // Sélection éditoriale : cinq films en grandes rangées cinéma (01-05),
-  // puis le lien vers l'index complet.
-  const selection = projects.slice(0, 5);
+  // La pellicule : tous les films dans une bande de film qui se déroule vers
+  // le bas, puis le lien vers l'index complet.
   return (
     <section
       id="realisations"
@@ -126,7 +125,7 @@ function Works() {
           />
         </div>
 
-        <WorksShowcase items={selection} startIndex={1} />
+        <FilmStrip items={projects} />
 
         <div className="mt-16 flex justify-center sm:mt-24">
           <Link

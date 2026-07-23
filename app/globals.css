@@ -821,3 +821,92 @@ html {
     transition: none;
   }
 }
+
+/* ═══ Pellicule — vitrine des réalisations en bande de film ═══════════════ */
+/* Une bande de film verticale : base brune, deux lanes de perforations, chaque
+   film dans un photogramme. Que du background/transform → robuste iOS. */
+.film-strip {
+  position: relative;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 20px 32px;
+  background: #1c150c;
+  border-radius: 6px;
+  box-shadow: 0 44px 120px -55px rgba(0, 0, 0, 0.95);
+}
+.film-strip::before,
+.film-strip::after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  width: 32px;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    #1c150c 0 11px,
+    #080604 11px 25px,
+    #1c150c 25px 35px
+  );
+  background-size: 14px 35px;
+  background-position: center top;
+  background-repeat: repeat-y;
+}
+.film-strip::before { left: 0; }
+.film-strip::after { right: 0; }
+
+.film-cell {
+  margin-bottom: 20px;
+}
+.film-cell:last-child {
+  margin-bottom: 0;
+}
+.film-frame {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: 2px;
+  background: #0a0806;
+  box-shadow: inset 0 0 0 1px rgba(232, 228, 216, 0.07);
+}
+.film-edgecode {
+  position: absolute;
+  z-index: 2;
+  left: 9px;
+  top: 8px;
+  font-family: var(--font-cond);
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(232, 228, 216, 0.55);
+  pointer-events: none;
+}
+.film-caption {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 12px 2px 2px;
+}
+.film-caption .fc-num {
+  font-family: var(--font-cond);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--color-terra);
+}
+.film-caption .fc-ttl {
+  flex: 1;
+  font-family: var(--font-wide);
+  font-size: clamp(1.05rem, 3.6vw, 1.6rem);
+  line-height: 1.04;
+  color: var(--color-bone);
+  transition: color 0.4s var(--ease-out-expo);
+}
+.group:hover .film-caption .fc-ttl {
+  color: var(--color-cream);
+}
+.film-caption .fc-meta {
+  font-family: var(--font-cond);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--color-bone-faint);
+  white-space: nowrap;
+}
