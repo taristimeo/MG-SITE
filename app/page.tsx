@@ -5,7 +5,7 @@ import { RevealTitle } from "@/components/RevealTitle";
 import { WordReveal } from "@/components/WordReveal";
 import { LiveImages } from "@/components/LiveImages";
 import { HeroFade } from "@/components/HeroFade";
-import { FilmStrip } from "@/components/FilmStrip";
+import { WorksApple } from "@/components/WorksApple";
 import { Manifesto } from "@/components/Manifesto";
 import { Stats } from "@/components/Stats";
 import { ServicesStack } from "@/components/ServicesStack";
@@ -106,8 +106,8 @@ function Hero() {
 /* ------------------------------------------------------------------ */
 
 function Works() {
-  // La pellicule : tous les films dans une bande de film qui se déroule vers
-  // le bas, puis le lien vers l'index complet.
+  // Sélection de films en grandes dalles immersives « façon Apple », puis le
+  // lien vers l'index complet.
   return (
     <section
       id="realisations"
@@ -125,7 +125,7 @@ function Works() {
           />
         </div>
 
-        <FilmStrip items={projects} />
+        <WorksApple items={projects} />
 
         <div className="mt-16 flex justify-center sm:mt-24">
           <Link
