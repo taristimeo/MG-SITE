@@ -235,18 +235,15 @@ html {
 .reveal {
   opacity: 0;
   transform: translateY(22px);
-  filter: blur(4px);
   transition:
     opacity 1.05s var(--ease-out-soft),
-    transform 1.1s var(--ease-out-expo),
-    filter 0.9s var(--ease-out-soft);
+    transform 1.1s var(--ease-out-expo);
   transition-delay: var(--reveal-delay, 0ms);
-  will-change: opacity, transform, filter;
+  will-change: opacity, transform;
 }
 .reveal.is-visible {
   opacity: 1;
   transform: none;
-  filter: blur(0);
 }
 
 /* ---- Récit d'une réalisation : révélation premium en trois temps ---- */
@@ -783,35 +780,28 @@ html {
 }
 .word-reveal-mask > span {
   display: inline-block;
-  transform: translateY(112%);
-  filter: blur(10px);
-  opacity: 0;
-  transition:
-    transform 1s var(--ease-out-expo),
-    filter 1s var(--ease-out-expo),
-    opacity 1s var(--ease-out-expo);
-  will-change: transform, filter, opacity;
+  transform: translateY(110%);
+  transition: transform 0.95s var(--ease-out-expo);
+  will-change: transform;
 }
 .word-reveal.is-in .word-reveal-mask > span {
   transform: none;
-  filter: none;
-  opacity: 1;
 }
 
-/* « Développement argentique » : le film entre flou + désaturé (noir & blanc
-   granuleux, sous-exposé) puis se révèle net et en couleur — comme une image
-   qui se développe. Motif signature de Mauvais Grain. */
+/* Apparition des films — transform + opacité UNIQUEMENT (robuste sur iOS
+   Safari, contrairement aux filtres/clip-path posés sur une vidéo). Le film
+   monte et se pose en douceur. */
 .film-reveal {
-  filter: blur(16px) grayscale(1) brightness(0.78) contrast(0.9);
-  opacity: 0.4;
+  opacity: 0;
+  transform: translateY(30px) scale(0.985);
   transition:
-    filter 1.5s var(--ease-out-expo),
-    opacity 1.1s var(--ease-out-expo);
-  will-change: filter, opacity;
+    opacity 0.95s var(--ease-out-expo),
+    transform 1.1s var(--ease-out-expo);
+  will-change: opacity, transform;
 }
 .film-reveal.is-in {
-  filter: blur(0) grayscale(0) brightness(1) contrast(1);
   opacity: 1;
+  transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -823,13 +813,11 @@ html {
   }
   .word-reveal-mask > span {
     transform: none;
-    filter: none;
-    opacity: 1;
     transition: none;
   }
   .film-reveal {
-    filter: none;
     opacity: 1;
+    transform: none;
     transition: none;
   }
 }
