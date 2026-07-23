@@ -2,6 +2,8 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 import { Reveal } from "@/components/Reveal";
 import { RevealTitle } from "@/components/RevealTitle";
+import { WordReveal } from "@/components/WordReveal";
+import { Timecode } from "@/components/Timecode";
 import { LiveImages } from "@/components/LiveImages";
 import { HeroFade } from "@/components/HeroFade";
 import { WorksShowcase } from "@/components/WorksShowcase";
@@ -56,6 +58,10 @@ function Hero() {
           « M », la droite sous le point. Le tout s'estompe au premier scroll. */}
       <HeroFade>
       <div className="mx-auto w-full max-w-[1600px] sm:w-fit sm:max-w-none">
+        {/* Signature viewfinder : point REC + timecode qui défile */}
+        <Reveal delay={600} className="mb-6 flex justify-center sm:mb-8">
+          <Timecode />
+        </Reveal>
         {/* Logotype animé : fondu puis point terracotta « REC » */}
         <RevealTitle
           text={site.name}
@@ -118,9 +124,11 @@ function Works() {
           <p className="font-cond text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
             Réalisations
           </p>
-          <h2 className="font-wide mt-4 text-[clamp(1.9rem,5vw,3.6rem)] leading-[1] text-[var(--color-bone)]">
-            Des films, pas des vidéos<span className="dot">.</span>
-          </h2>
+          <WordReveal
+            text="Des films, pas des vidéos"
+            dot
+            className="font-wide mt-4 text-[clamp(1.9rem,5vw,3.6rem)] leading-[1] text-[var(--color-bone)]"
+          />
         </div>
 
         <WorksShowcase items={selection} startIndex={1} />

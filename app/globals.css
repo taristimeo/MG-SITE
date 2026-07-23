@@ -760,3 +760,75 @@ html {
     transform: none !important;
   }
 }
+
+/* ═══ Signatures premium — cinéma ═══════════════════════════════════════ */
+
+/* Point « REC » qui pulse (viewfinder). Le timecode défile en JS. */
+@keyframes rec-blink {
+  0%, 45% { opacity: 1; }
+  55%, 100% { opacity: 0.15; }
+}
+.rec-blink {
+  animation: rec-blink 1.4s steps(1, end) infinite;
+}
+
+/* « Titres qui se composent » : chaque mot monte derrière un masque, léger
+   flou qui se dissipe, en cascade (le retard est posé en inline par mot). */
+.word-reveal-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  margin-right: 0.26em;
+  padding-bottom: 0.16em; /* garde les jambages */
+}
+.word-reveal-mask > span {
+  display: inline-block;
+  transform: translateY(112%);
+  filter: blur(10px);
+  opacity: 0;
+  transition:
+    transform 1s var(--ease-out-expo),
+    filter 1s var(--ease-out-expo),
+    opacity 1s var(--ease-out-expo);
+  will-change: transform, filter, opacity;
+}
+.word-reveal.is-in .word-reveal-mask > span {
+  transform: none;
+  filter: none;
+  opacity: 1;
+}
+
+/* « Projection cinéma » : le média s'ouvre en letterbox (les bandes haut/bas
+   se rétractent), comme un projecteur. */
+.film-reveal {
+  clip-path: inset(46% 0 46% 0 round 16px);
+  opacity: 0.55;
+  transition:
+    clip-path 1.25s var(--ease-out-expo),
+    opacity 0.9s var(--ease-out-expo);
+  will-change: clip-path, opacity;
+}
+.film-reveal.is-in {
+  clip-path: inset(0 0 0 0 round 16px);
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rec-blink {
+    animation: none;
+  }
+  .word-reveal-mask {
+    overflow: visible;
+  }
+  .word-reveal-mask > span {
+    transform: none;
+    filter: none;
+    opacity: 1;
+    transition: none;
+  }
+  .film-reveal {
+    clip-path: none;
+    opacity: 1;
+    transition: none;
+  }
+}

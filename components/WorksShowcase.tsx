@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { Reveal } from "@/components/Reveal";
+import { WordReveal } from "@/components/WordReveal";
+import { FilmReveal } from "@/components/FilmReveal";
 import { Parallax } from "@/components/Parallax";
 import { CardMedia } from "@/components/CardMedia";
 import { CardCursor } from "@/components/CardCursor";
@@ -38,15 +40,16 @@ export function WorksShowcase({
               data-card
               className="group grid grid-cols-1 items-center gap-6 sm:gap-8 lg:grid-cols-12 lg:gap-12"
             >
-              {/* Média — large, cinéma. Entre en premier ; le Reveal EST la
-                  cellule de grille pour ne pas casser le layout. */}
-              <Reveal
+              {/* Média — large, cinéma. « Projection » : s'ouvre en letterbox
+                  (FilmReveal) ; parallaxe accentuée au scroll pour la profondeur.
+                  Le FilmReveal EST la cellule de grille (layout intact). */}
+              <FilmReveal
                 className={`relative aspect-[16/10] overflow-hidden rounded-2xl bg-[var(--color-ink-2)] lg:col-span-8 ${
                   flipped ? "lg:order-2" : ""
                 }`}
               >
-                <Parallax amount={14} className="h-full w-full">
-                  <div className="h-full w-full scale-[1.06] transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.1]">
+                <Parallax amount={26} className="h-full w-full">
+                  <div className="h-full w-full scale-[1.08] transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.12]">
                     <CardMedia
                       src={projectThumb(p)}
                       videoSrc={projectPreview(p)}
@@ -58,7 +61,7 @@ export function WorksShowcase({
                   aria-hidden
                   className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"
                 />
-              </Reveal>
+              </FilmReveal>
 
               {/* Bloc titre — numéroté, aligné sur le bord du média ; entre en
                   cascade échelonnée après le média. */}
@@ -74,14 +77,13 @@ export function WorksShowcase({
                 >
                   {String(startIndex + i).padStart(2, "0")}
                 </Reveal>
-                {/* Le hover (transition-colors) reste sur l'enfant : ne pas le
-                    poser sur l'élément .reveal, dont il écraserait la transition
-                    d'entrée (opacity/transform/filter). */}
-                <Reveal delay={230} className="mt-4">
-                  <h3 className="font-wide text-[clamp(1.8rem,4.5vw,3.3rem)] leading-[1.02] text-[var(--color-bone)] transition-colors duration-300 group-hover:text-[var(--color-cream)]">
-                    {p.title}
-                  </h3>
-                </Reveal>
+                {/* Titre qui se compose mot à mot (masque + flou qui se dissipe). */}
+                <WordReveal
+                  as="h3"
+                  text={p.title}
+                  delay={120}
+                  className="font-wide mt-4 text-[clamp(1.8rem,4.5vw,3.3rem)] leading-[1.02] text-[var(--color-bone)] transition-colors duration-300 group-hover:text-[var(--color-cream)]"
+                />
                 <Reveal
                   as="p"
                   delay={340}
