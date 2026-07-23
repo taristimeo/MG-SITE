@@ -50,8 +50,8 @@ export function LiveImages() {
                   style={{ "--mask-delay": "220ms" } as CSSProperties}
                 >
                   <Still
-                    src="/projects/the-sound-of-discovery/7.jpg"
-                    alt="Portrait sur le Nil — film The Sound of Discovery, tourné en Égypte par Mauvais Grain"
+                    src="/photo-studio.jpg"
+                    alt="Timéo Taris — fondateur de Mauvais Grain, caméra en main au coucher de soleil"
                   />
                 </div>
               </div>
