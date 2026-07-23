@@ -1,11 +1,10 @@
 import { Reveal } from "@/components/Reveal";
 import { clients } from "@/lib/site";
 
-// « Nos clients » — mur de logos épuré. Les logotypes (clairs, sur fond
-// transparent) reposent directement sur l'encre, en teinte discrète, et se
-// ravivent au survol. Pas de cadres, pas de défilement automatique : une grille
-// centrée qui s'enroule, révélée en cascade à l'entrée dans le champ.
-// prefers-reduced-motion : géré par la classe .reveal (globals.css).
+// « Nos clients » — grille STATIQUE de cartes (aucun défilement horizontal).
+// Chaque logo repose dans une carte sombre au liseré terracotta discret, qui se
+// soulève et s'éclaire au survol. Révélation en cascade à l'entrée dans le
+// champ. prefers-reduced-motion : géré par la classe .reveal (globals.css).
 export function Clients() {
   return (
     <section className="px-5 pb-20 pt-8 sm:px-8 lg:px-10">
@@ -21,16 +20,18 @@ export function Clients() {
           </h2>
         </Reveal>
 
-        <ul className="mx-auto mt-16 flex max-w-[900px] flex-wrap items-center justify-center gap-x-[clamp(2.75rem,6vw,5rem)] gap-y-14 sm:mt-20">
+        <ul className="mt-14 grid grid-cols-2 gap-3 sm:mt-20 sm:grid-cols-4 sm:gap-4">
           {clients.map((c, i) => (
-            <Reveal key={c.name} as="li" delay={90 + i * 55}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={c.logo}
-                alt={c.name}
-                loading="lazy"
-                className="h-8 w-auto opacity-65 transition-opacity duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:opacity-100 sm:h-9"
-              />
+            <Reveal key={c.name} as="li" delay={80 + i * 60}>
+              <div className="group flex aspect-[16/10] items-center justify-center rounded-2xl bg-gradient-to-br from-[#211812] to-[#15100c] p-6 ring-1 ring-[rgba(183,110,78,0.18)] transition-[transform,box-shadow,border-color] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:ring-[rgba(183,110,78,0.5)]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={c.logo}
+                  alt={c.name}
+                  loading="lazy"
+                  className="max-h-[44%] w-auto max-w-[72%] object-contain opacity-75 transition-opacity duration-500 group-hover:opacity-100"
+                />
+              </div>
             </Reveal>
           ))}
         </ul>
