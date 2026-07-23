@@ -3,7 +3,6 @@ import Link from "next/link";
 import { Reveal } from "@/components/Reveal";
 import { RevealTitle } from "@/components/RevealTitle";
 import { WordReveal } from "@/components/WordReveal";
-import { Timecode } from "@/components/Timecode";
 import { LiveImages } from "@/components/LiveImages";
 import { HeroFade } from "@/components/HeroFade";
 import { WorksShowcase } from "@/components/WorksShowcase";
@@ -58,10 +57,6 @@ function Hero() {
           « M », la droite sous le point. Le tout s'estompe au premier scroll. */}
       <HeroFade>
       <div className="mx-auto w-full max-w-[1600px] sm:w-fit sm:max-w-none">
-        {/* Signature viewfinder : point REC + timecode qui défile */}
-        <Reveal delay={600} className="mb-6 flex justify-center sm:mb-8">
-          <Timecode />
-        </Reveal>
         {/* Logotype animé : fondu puis point terracotta « REC » */}
         <RevealTitle
           text={site.name}
