@@ -5,7 +5,6 @@ import { MaskTitle } from "@/components/MaskTitle";
 import { Still } from "@/components/Poster";
 import { ScrollText } from "@/components/ScrollText";
 import { MethodFrise } from "@/components/MethodFrise";
-import { Process } from "@/components/Process";
 import { Clients } from "@/components/Clients";
 import { Testimonials } from "@/components/Testimonials";
 import { site, values } from "@/lib/site";
@@ -134,20 +133,6 @@ export default function StudioPage() {
         {/* 4 étapes en frise */}
         <MethodFrise steps={values} />
       </section>
-
-      {/* ── Le process : du repérage à l'étalonnage ───────────────────── */}
-      <section className="mx-auto mt-32 max-w-[1100px] px-5 pb-4 sm:mt-40 sm:px-8 lg:px-10">
-        <div className="mb-16 sm:mb-20">
-          <p className="font-cond mb-4 text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
-            Le process
-          </p>
-          <h2 className="font-wide overflow-hidden text-[clamp(2.2rem,5vw,4.5rem)] leading-[0.99] text-[var(--color-cream)]">
-            <MaskTitle delay={80}>Du repérage à l&apos;étalonnage</MaskTitle>
-          </h2>
-        </div>
-        <Process />
-      </section>
-
     </>
   );
 }
