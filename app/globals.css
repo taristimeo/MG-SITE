@@ -842,6 +842,10 @@ html {
     transform: none;
     transition: none;
   }
+  .film-strip::before,
+  .film-strip::after {
+    animation: none;
+  }
 }
 
 /* ═══ Pellicule — vitrine des réalisations en bande de film ═══════════════ */
@@ -870,11 +874,17 @@ html {
     #1c150c 25px 35px
   );
   background-size: 14px 35px;
-  background-position: center top;
+  background-position-x: center;
   background-repeat: repeat-y;
+  /* Les perforations défilent en continu : le film qui tourne. */
+  animation: perf-run 1.8s linear infinite;
 }
 .film-strip::before { left: 0; }
 .film-strip::after { right: 0; }
+@keyframes perf-run {
+  from { background-position-y: 0; }
+  to { background-position-y: 35px; }
+}
 
 .film-cell {
   margin-bottom: 20px;
