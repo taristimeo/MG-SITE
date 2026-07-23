@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 export type FriseStep = { title: string; text: string };
 
@@ -8,148 +8,248 @@ type Props = {
   steps: FriseStep[];
 };
 
-// « Notre méthode » en frise façon Apple : une ligne de connexion, des nœuds
-// numérotés (pastille terracotta), chaque étape avec son titre Gloock + un
-// texte court. Mobile : défilement horizontal avec scroll-snap et une
-// indication discrète. iOS-safe : transform/opacity/overflow/background
-// uniquement. prefers-reduced-motion : entrée neutralisée.
+// « Notre méthode » en timeline VERTICALE façon Apple : un rail vertical à
+// gauche, quatre nœuds numérotés (pastilles terracotta) empilés de haut en bas,
+// titre Gloock + texte à droite. Au scroll, la ligne du rail se trace de haut en
+// bas (fill terracotta en scaleY par-dessus une ligne de base discrète), chaque
+// étape se révèle en cascade (opacity + translateY) et son nœud s'active quand le
+// tracé l'atteint. iOS-safe STRICT : transform + opacity + background uniquement,
+// aucun filter, aucun clip-path. prefers-reduced-motion : tout affiché, aucun
+// listener. Écriture directe dans le DOM en requestAnimationFrame (pas de
+// re-render par frame). Thème géré exclusivement par tokens CSS.
 export function MethodFrise({ steps }: Props) {
-  const sectionRef = useRef<HTMLDivElement | null>(null);
-  const trackRef = useRef<HTMLDivElement | null>(null);
-  const [inView, setInView] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const railRef = useRef<HTMLDivElement | null>(null);
+  const fillRef = useRef<HTMLDivElement | null>(null);
+  const nodeRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
+    const root = rootRef.current;
+    const rail = railRef.current;
+    const fill = fillRef.current;
+    if (!root || !rail || !fill) return;
+
+    // Accessibilité : mouvement réduit → état final figé, aucun listener.
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setInView(true);
-      setScrolled(true);
+      root.classList.add("mf-static");
       return;
     }
-    const el = sectionRef.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting) {
-          setInView(true);
-          io.disconnect();
-        }
-      },
-      { threshold: 0.2, rootMargin: "0px 0px -8% 0px" },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
 
-  // Masque l'indication de défilement dès que l'utilisateur fait défiler la frise.
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    const onScroll = () => {
-      if (track.scrollLeft > 8) setScrolled(true);
+    // Positionne le rail entre le centre du premier nœud et celui du dernier,
+    // afin que la ligne tracée s'aligne exactement sur les pastilles.
+    const measure = () => {
+      const nodes = nodeRefs.current.filter(Boolean) as HTMLSpanElement[];
+      if (nodes.length < 2) return;
+      const rootRect = root.getBoundingClientRect();
+      const first = nodes[0].getBoundingClientRect();
+      const last = nodes[nodes.length - 1].getBoundingClientRect();
+      const top = first.top - rootRect.top + first.height / 2;
+      const bottom = last.top - rootRect.top + last.height / 2;
+      rail.style.top = `${top}px`;
+      rail.style.height = `${Math.max(0, bottom - top)}px`;
     };
-    track.addEventListener("scroll", onScroll, { passive: true });
-    return () => track.removeEventListener("scroll", onScroll);
+
+    let ticking = false;
+
+    const update = () => {
+      ticking = false;
+      const vh = window.innerHeight || document.documentElement.clientHeight;
+      const trigger = vh * 0.62; // ligne de déclenchement dans le viewport
+
+      // Progression du tracé : le rail se remplit au fur et à mesure qu'il
+      // franchit la ligne de déclenchement.
+      const railRect = rail.getBoundingClientRect();
+      let p = 0;
+      if (railRect.height > 0) {
+        p = (trigger - railRect.top) / railRect.height;
+      }
+      p = p < 0 ? 0 : p > 1 ? 1 : p;
+      fill.style.transform = `scaleY(${p})`;
+
+      // Activation des nœuds : actif dès que le tracé l'a atteint.
+      for (const node of nodeRefs.current) {
+        if (!node) continue;
+        const r = node.getBoundingClientRect();
+        const center = r.top + r.height / 2;
+        node.classList.toggle("is-active", center <= trigger);
+      }
+
+      // Révélation des étapes à l'entrée dans le champ.
+      const revealLine = vh * 0.88;
+      for (const step of stepRefs.current) {
+        if (!step) continue;
+        if (step.getBoundingClientRect().top < revealLine) {
+          step.classList.add("is-in");
+        }
+      }
+    };
+
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(update);
+    };
+
+    const onResize = () => {
+      measure();
+      onScroll();
+    };
+
+    measure();
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+    };
   }, []);
 
   return (
-    <div ref={sectionRef} className={`frise ${inView ? "frise-in" : ""}`}>
-      <div
-        ref={trackRef}
-        className="frise-track flex snap-x snap-mandatory gap-0 overflow-x-auto pb-2 sm:grid sm:grid-cols-4 sm:overflow-visible"
-      >
-        {steps.map((s, i) => (
-          <div
-            key={s.title}
-            className="frise-step relative w-[78vw] max-w-[19rem] shrink-0 snap-start pr-8 sm:w-auto sm:max-w-none sm:pr-8"
-            style={{ transitionDelay: `${i * 90}ms` }}
-          >
-            {/* Ligne de connexion vers le nœud suivant (sauf le dernier) */}
-            {i < steps.length - 1 && (
-              <span aria-hidden className="frise-line" />
-            )}
-            {/* Nœud numéroté — pastille terracotta */}
-            <span className="frise-node font-cond">
+    <div ref={rootRef} className="mf">
+      {/* Rail vertical : ligne de base discrète + ligne de tracé terracotta */}
+      <div ref={railRef} aria-hidden className="mf-rail">
+        <div className="mf-rail-base" />
+        <div ref={fillRef} className="mf-rail-fill" />
+      </div>
+
+      {steps.map((s, i) => (
+        <div
+          key={s.title}
+          ref={(el) => {
+            stepRefs.current[i] = el;
+          }}
+          className="mf-step"
+          style={{ transitionDelay: `${Math.min(i, 3) * 80}ms` }}
+        >
+          <div className="mf-node-col">
+            <span
+              ref={(el) => {
+                nodeRefs.current[i] = el;
+              }}
+              className="mf-node font-cond"
+            >
               {String(i + 1).padStart(2, "0")}
             </span>
-            <h3 className="font-wide mt-6 text-2xl leading-[1.1] text-[var(--color-bone)]">
+          </div>
+          <div className="mf-content">
+            <h3 className="font-wide text-[clamp(1.5rem,3.4vw,2rem)] leading-[1.12] text-[var(--color-bone)]">
               {s.title}
             </h3>
-            <p className="font-sans mt-3 text-sm leading-relaxed text-[var(--color-bone-dim)]">
+            <p className="font-sans mt-3 text-[0.95rem] leading-relaxed text-[var(--color-bone-dim)]">
               {s.text}
             </p>
           </div>
-        ))}
-      </div>
-
-      {/* Indication de défilement — mobile uniquement */}
-      <p
-        className={`frise-hint font-cond mt-5 flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-[var(--color-bone-faint)] sm:hidden ${
-          scrolled ? "frise-hint-off" : ""
-        }`}
-      >
-        Faites défiler <span aria-hidden>→</span>
-      </p>
+        </div>
+      ))}
 
       <style>{`
-        .frise-track {
-          -webkit-overflow-scrolling: touch;
-          scrollbar-width: none;
-        }
-        .frise-track::-webkit-scrollbar { display: none; }
-
-        .frise-node {
+        .mf {
           position: relative;
-          z-index: 1;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          width: 2.5rem;
-          height: 2.5rem;
-          border-radius: 9999px;
-          background: var(--color-terra);
-          color: var(--color-ink);
-          font-size: 0.7rem;
-          letter-spacing: 0.12em;
+          max-width: 760px;
+          margin-left: auto;
+          margin-right: auto;
         }
 
-        /* Ligne de connexion : part du centre du nœud et rejoint le nœud
-           suivant. Largeur 100% = une colonne d'étape (les colonnes sont de
-           largeur égale, en scroll mobile comme en grille desktop). */
-        .frise-line {
+        /* Rail : positionné en JS entre le premier et le dernier nœud. */
+        .mf-rail {
           position: absolute;
-          top: 1.25rem;            /* centre vertical du nœud (2.5rem / 2) */
-          left: 1.25rem;           /* centre horizontal du nœud */
-          width: 100%;
-          height: 1px;
-          background: var(--color-line-soft);
-          transform: scaleX(0);
-          transform-origin: left;
-          transition: transform 1s var(--ease-out-expo);
+          top: 0;
+          height: 0;
+          left: 1.375rem;        /* centre horizontal du nœud (2.75rem / 2) */
+          width: 2px;
+          transform: translateX(-1px);
+          z-index: 0;
         }
-        .frise-in .frise-line { transform: scaleX(1); }
+        .mf-rail-base,
+        .mf-rail-fill {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          border-radius: 2px;
+        }
+        .mf-rail-base { background: var(--color-line); }
+        .mf-rail-fill {
+          background: var(--color-terra);
+          transform: scaleY(0);
+          transform-origin: top;
+          will-change: transform;
+        }
 
-        .frise-step {
+        .mf-step {
+          position: relative;
+          display: flex;
+          align-items: flex-start;
+          gap: 1.25rem;
+          padding-bottom: clamp(3.5rem, 9vh, 6rem);
           opacity: 0;
-          transform: translateY(16px);
+          transform: translateY(22px);
           transition:
             opacity 0.8s var(--ease-out-soft),
             transform 0.9s var(--ease-out-expo);
         }
-        .frise-in .frise-step { opacity: 1; transform: none; }
-
-        .frise-hint {
+        .mf-step:last-child { padding-bottom: 0; }
+        .mf-step.is-in {
           opacity: 1;
-          transition: opacity 0.5s var(--ease-out-soft);
+          transform: none;
         }
-        .frise-hint-off { opacity: 0; }
 
-        @media (prefers-reduced-motion: reduce) {
-          .frise-step, .frise-line, .frise-hint {
-            opacity: 1 !important;
-            transform: none !important;
-            transition: none !important;
-          }
-          .frise-line { transform: scaleX(1) !important; }
+        .mf-node-col {
+          position: relative;
+          z-index: 1;
+          flex: 0 0 2.75rem;
+          display: flex;
+          justify-content: center;
+        }
+
+        .mf-node {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 2.75rem;
+          height: 2.75rem;
+          border-radius: 9999px;
+          background: var(--color-ink);
+          border: 1px solid var(--color-line);
+          color: var(--color-bone-faint);
+          font-size: 0.72rem;
+          letter-spacing: 0.12em;
+          transform: scale(1);
+          transition:
+            background 0.5s var(--ease-out-soft),
+            border-color 0.5s var(--ease-out-soft),
+            color 0.5s var(--ease-out-soft),
+            transform 0.5s var(--ease-out-expo);
+        }
+        .mf-node.is-active {
+          background: var(--color-terra);
+          border-color: var(--color-terra);
+          color: var(--color-ink);
+          transform: scale(1.06);
+        }
+
+        .mf-content {
+          flex: 1 1 auto;
+          padding-top: 0.35rem;
+        }
+
+        /* Mouvement réduit : tout est tracé / révélé / actif, sans transition. */
+        .mf-static .mf-step,
+        .mf-static .mf-node,
+        .mf-static .mf-rail-fill {
+          transition: none !important;
+        }
+        .mf-static .mf-step {
+          opacity: 1 !important;
+          transform: none !important;
+        }
+        .mf-static .mf-rail-fill { transform: scaleY(1) !important; }
+        .mf-static .mf-node {
+          background: var(--color-terra) !important;
+          border-color: var(--color-terra) !important;
+          color: var(--color-ink) !important;
+          transform: none !important;
         }
       `}</style>
     </div>
