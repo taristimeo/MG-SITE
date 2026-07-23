@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { RevealTitle } from "@/components/RevealTitle";
 import { Reveal } from "@/components/Reveal";
-import { WorksApple } from "@/components/WorksApple";
+import { WorksFiltered } from "@/components/WorksFiltered";
 import { projects, site } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -43,8 +43,9 @@ export default function RealisationsPage() {
         </Reveal>
       </header>
 
-      {/* Vitrine — grandes dalles immersives, aperçu vidéo, entrée au scroll */}
-      <WorksApple items={projects} />
+      {/* Filtre par catégorie + vitrine — grandes dalles immersives, aperçu
+          vidéo, entrée au scroll */}
+      <WorksFiltered />
     </section>
   );
 }
