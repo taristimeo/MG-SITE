@@ -1,19 +1,27 @@
 import Link from "next/link";
 import { FilmReveal } from "@/components/FilmReveal";
+import { FilmReel } from "@/components/FilmReel";
 import { CardMedia } from "@/components/CardMedia";
 import { CardCursor } from "@/components/CardCursor";
 import { projectThumb, projectPreview, type Project } from "@/lib/site";
 
-// Pellicule — les réalisations dans une bande de film qui SE DÉPLOIE d'un seul
-// tenant : toute la bande (perforations + photogrammes) se déroule vers le bas
-// comme un rouleau qui s'ouvre (scaleY depuis le haut), puis ses perforations
-// continuent de défiler. Que du transform + background (aucun filtre) →
-// robuste iOS. Aperçu vidéo au survol / en vue (CardMedia).
+// Pellicule — une vraie bobine Mauvais Grain, qui tourne, depuis laquelle la
+// bande de film se déroule vers le bas et sort les réalisations : le touret
+// (SVG) tourne en continu, une amorce vierge la relie à la bande, puis toute
+// la bande (perforations + photogrammes) se déploie d'un seul tenant (scaleY
+// depuis le haut) et ses perforations défilent. Que du transform + background
+// (aucun filtre, aucun clip-path) → robuste iOS. Aperçu vidéo en vue.
 export function FilmStrip({ items }: { items: Project[] }) {
   return (
     <CardCursor>
       <FilmReveal className="film-strip-unfurl">
+        <div className="film-reel-head">
+          <FilmReel />
+        </div>
         <div className="film-strip">
+          {/* Amorce : la pellicule vierge qui sort du touret */}
+          <span className="film-leader" aria-hidden />
+
           {items.map((p, i) => (
             <Link
               key={p.slug}

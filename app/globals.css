@@ -943,12 +943,60 @@ html {
   white-space: nowrap;
 }
 
+/* Bobine Mauvais Grain : le touret qui tourne, d'où sort la pellicule. */
+.film-reel-head {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Le touret chevauche le haut de la bande : la pellicule en sort. */
+  margin-bottom: -14px;
+}
+.film-reel {
+  width: 132px;
+  height: 132px;
+}
+.film-reel-spin {
+  width: 100%;
+  height: 100%;
+  animation: reel-spin 26s linear infinite;
+  will-change: transform;
+}
+@keyframes reel-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.film-reel-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.reel-label {
+  font-family: var(--font-cond);
+  font-size: 8.5px;
+  letter-spacing: 0.16em;
+  fill: rgba(232, 228, 216, 0.42);
+}
+/* Amorce vierge : le bout de pellicule qui relie le touret à la première
+   image — perforations seules, pas d'image. */
+.film-leader {
+  display: block;
+  height: 30px;
+  margin: 0 0 20px;
+  border-radius: 2px;
+  background: #100b06;
+  box-shadow: inset 0 0 0 1px rgba(232, 228, 216, 0.05);
+}
+
 /* Déroulé de TOUTE la bande d'un seul tenant : la pellicule entière
-   (perforations + photogrammes) se déploie du haut vers le bas comme un
-   rouleau qui s'ouvre — scaleY depuis le bord supérieur. Le cadre de mise en
-   page reste à pleine hauteur (scaleY n'affecte pas le flux → aucun saut),
-   puis les perforations continuent de défiler (perf-run). 100 % transform +
-   opacity → robuste iOS, aucun filtre ni clip-path près des vidéos. */
+   (amorce + perforations + photogrammes) se déploie du haut vers le bas comme
+   un rouleau qui sort du touret — scaleY depuis le bord supérieur. Le cadre de
+   mise en page reste à pleine hauteur (scaleY n'affecte pas le flux → aucun
+   saut), puis les perforations continuent de défiler (perf-run). 100 %
+   transform + opacity → robuste iOS, aucun filtre ni clip-path près des
+   vidéos. */
 .film-strip-unfurl .film-strip {
   transform: scaleY(0.035);
   transform-origin: top center;
@@ -967,5 +1015,8 @@ html {
     transform: none;
     opacity: 1;
     transition: none;
+  }
+  .film-reel-spin {
+    animation: none;
   }
 }
