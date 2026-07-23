@@ -942,3 +942,30 @@ html {
   color: var(--color-bone-faint);
   white-space: nowrap;
 }
+
+/* Déroulé de TOUTE la bande d'un seul tenant : la pellicule entière
+   (perforations + photogrammes) se déploie du haut vers le bas comme un
+   rouleau qui s'ouvre — scaleY depuis le bord supérieur. Le cadre de mise en
+   page reste à pleine hauteur (scaleY n'affecte pas le flux → aucun saut),
+   puis les perforations continuent de défiler (perf-run). 100 % transform +
+   opacity → robuste iOS, aucun filtre ni clip-path près des vidéos. */
+.film-strip-unfurl .film-strip {
+  transform: scaleY(0.035);
+  transform-origin: top center;
+  opacity: 0.35;
+  transition:
+    transform 1.35s var(--ease-out-expo),
+    opacity 0.7s ease-out;
+  will-change: transform, opacity;
+}
+.film-strip-unfurl.is-in .film-strip {
+  transform: scaleY(1);
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .film-strip-unfurl .film-strip {
+    transform: none;
+    opacity: 1;
+    transition: none;
+  }
+}
