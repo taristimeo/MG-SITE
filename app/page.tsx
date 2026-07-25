@@ -119,7 +119,7 @@ function Works() {
             Réalisations
           </p>
           <WordReveal
-            text="Des films, pas des vidéos"
+            text="Nos histoires en images"
             dot
             className="font-wide mt-4 text-[clamp(1.9rem,5vw,3.6rem)] leading-[1] text-[var(--color-bone)]"
           />
