@@ -101,8 +101,8 @@ export const founder = {
 // sur l'accueil (les mots « accents » passent en terracotta).
 export const manifesto = {
   kicker: "Le regard",
-  text: "Nous ne filmons pas ce qu'il se passe. Nous filmons ce que l'on ressent lorsqu'on y est.",
-  accents: ["ressent"],
+  text: "Une histoire bien racontée ne s'oublie pas.",
+  accents: ["racontée"],
 } as const;
 
 export type Value = { title: string; text: string };
