@@ -6,18 +6,19 @@ import type { CSSProperties } from "react";
 const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
 const strip = (w: string) => w.replace(/[.,!?;:«»'']/g, "").toLowerCase();
 
-// Illumination continue d'un mot : facteur f ∈ [0,1]. Le mot passe d'un crème
-// quasi éteint (alpha 0.14) à sa couleur pleine — crème, ou terracotta pour les
-// accents. On interpole aussi la teinte des accents pour un « allumage » tendre.
+// Illumination continue d'un mot : facteur f ∈ [0,1]. Le mot passe d'une encre
+// quasi éteinte (alpha 0.14) à sa couleur pleine — encre sombre, ou terracotta
+// pour les accents. Version claire (« blanc ») : l'encre est sombre
+// (#14100b = 20,16,11) sur fond clair, la terracotta #a85f3c = 168,95,60.
 function litColor(f: number, accent: boolean): string {
   const a = 0.14 + 0.86 * f;
   if (accent) {
-    const r = Math.round(232 + (183 - 232) * f);
-    const g = Math.round(228 + (110 - 228) * f);
-    const b = Math.round(216 + (78 - 216) * f);
+    const r = Math.round(20 + (168 - 20) * f);
+    const g = Math.round(16 + (95 - 16) * f);
+    const b = Math.round(11 + (60 - 11) * f);
     return `rgba(${r}, ${g}, ${b}, ${a})`;
   }
-  return `rgba(232, 228, 216, ${a})`;
+  return `rgba(20, 16, 11, ${a})`;
 }
 
 // Manifeste « scrollytelling » : la section fait ~2 écrans de haut, le texte
