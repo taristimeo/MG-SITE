@@ -74,7 +74,7 @@ export function StackedWorks({
 
   return (
     <CardCursor>
-      <div ref={wrapRef} className="mx-auto max-w-[1080px]">
+      <div ref={wrapRef} className="mx-auto max-w-[840px]">
         {items.map((p, i) => (
           <div
             key={p.slug}
