@@ -19,7 +19,7 @@ export function WorksApple({
 }) {
   return (
     <CardCursor>
-      <div className="mx-auto flex max-w-[1080px] flex-col gap-4 sm:gap-6">
+      <div className="mx-auto flex max-w-[840px] flex-col gap-4 sm:gap-6">
         {items.map((p, i) => (
           <FilmReveal key={p.slug} className="apple-rise">
             <Link
