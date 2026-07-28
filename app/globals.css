@@ -12,8 +12,11 @@
   --color-fog: #d7d2c5;
   --color-cream: #e8e4d8;
   --color-bone: #ece8dc;
-  --color-bone-dim: #9b9384;
-  --color-bone-faint: #6e685c;
+  /* Méta / labels : contraste vérifié sur --color-ink (formule WCAG 2.1).
+     bone-dim 7,14:1 · bone-faint 4,81:1 — tous deux ≥ AA (4,5:1) pour du
+     texte normal, en conservant la teinte chaude (h≈39-40°) de la charte. */
+  --color-bone-dim: #a29a8b;
+  --color-bone-faint: #847c6c;
 
   /* Accent terracotta — le point signature, parcimonieux (valeur charte DA) */
   --color-terra: #b76e4e;
@@ -49,7 +52,11 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-    overflow-x: hidden;
+    /* `clip` et non `hidden` : `overflow-x: hidden` force le calcul de
+       `overflow-y` à `auto` (spec CSS) et transforme le body en conteneur de
+       défilement — ce qui casse les `position: sticky` sur iOS. `clip` coupe
+       les débordements horizontaux sans créer de conteneur de scroll. */
+    overflow-x: clip;
   }
 
   ::selection {

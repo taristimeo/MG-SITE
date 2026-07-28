@@ -67,8 +67,10 @@ export function MethodFrise({ steps }: Props) {
     // Boucle de tracé : lit la position du rail dans le viewport, en déduit la
     // progression, écrit directement scaleY + l'état des nœuds. Pas de re-render.
     let ticking = false;
+    let raf = 0;
     const frame = () => {
       ticking = false;
+      raf = 0;
       const railRect = rail.getBoundingClientRect();
       const railH = railRect.height || 1;
       // Ligne de lecture à ~62% de la hauteur du viewport.
@@ -90,7 +92,7 @@ export function MethodFrise({ steps }: Props) {
     const requestFrame = () => {
       if (ticking) return;
       ticking = true;
-      requestAnimationFrame(frame);
+      raf = requestAnimationFrame(frame);
     };
 
     // Révélation en cascade des étapes à leur entrée dans le champ.
@@ -121,6 +123,9 @@ export function MethodFrise({ steps }: Props) {
       window.removeEventListener("scroll", requestFrame);
       window.removeEventListener("resize", onResize);
       io.disconnect();
+      // Annule la frame en attente : sans cela elle s'exécuterait après le
+      // démontage (et `ticking` resterait bloqué à true).
+      if (raf) cancelAnimationFrame(raf);
     };
   }, [steps.length]);
 
@@ -283,6 +288,34 @@ export function MethodFrise({ steps }: Props) {
           box-shadow: inset 0 0 0 1px var(--color-terra);
           transform: none;
           transition: none;
+        }
+
+        /* ── Desktop (≥ lg) : la frise occupe toute la largeur du conteneur et
+           passe en deux colonnes — titre de l'étape à gauche, texte à droite.
+           Le rail et les nœuds ne bougent pas. Mobile/tablette inchangés. */
+        @media (min-width: 1024px) {
+          .mv {
+            max-width: none;
+          }
+          .mv-step {
+            grid-template-columns: 2.75rem minmax(0, 1fr);
+            gap: 2rem;
+          }
+          .mv-step + .mv-step {
+            margin-top: 4.5rem;
+          }
+          .mv-body {
+            display: grid;
+            grid-template-columns: minmax(0, 19rem) minmax(0, 1fr);
+            gap: clamp(2.5rem, 4vw, 4rem);
+            /* Aligne la première ligne du texte sur la ligne de base du titre */
+            align-items: baseline;
+            max-width: none;
+          }
+          .mv-text {
+            margin-top: 0;
+            max-width: 58ch;
+          }
         }
 
         @media (prefers-reduced-motion: reduce) {

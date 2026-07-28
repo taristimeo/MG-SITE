@@ -1,12 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { navLinks, site } from "@/lib/site";
 
 export function Header() {
   const [open, setOpen] = useState(false);
   const [reduced, setReduced] = useState(false);
+  // Fond de la barre dès les premiers pixels de défilement.
+  const [scrolled, setScrolled] = useState(false);
+  // Sur l'accueil seulement : vrai une fois l'écran-titre dépassé.
+  const [pastHero, setPastHero] = useState(false);
+
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+
+  const menuRef = useRef<HTMLDivElement>(null);
+  const burgerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -14,6 +25,32 @@ export function Header() {
       document.body.style.overflow = "";
     };
   }, [open]);
+
+  // Position de défilement — écouteur passif, lecture throttlée en rAF pour ne
+  // jamais toucher au layout pendant le scroll (iOS surtout). Relancé à chaque
+  // changement de route : la nouvelle page repart en haut.
+  useEffect(() => {
+    let raf = 0;
+    const read = () => {
+      raf = 0;
+      const y = window.scrollY;
+      setScrolled(y > 8);
+      // Seuil ~70 % de la hauteur d'écran : le hero fait 100svh, on considère
+      // qu'il est dépassé bien avant sa sortie complète.
+      setPastHero(y > window.innerHeight * 0.7);
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(read);
+    };
+    read();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [pathname]);
 
   // Mouvement réduit : l'overlay et son stagger deviennent instantanés
   // (apparition/disparition en fondu simple, sans glissement ni délais).
@@ -25,10 +62,94 @@ export function Header() {
     return () => mq.removeEventListener("change", sync);
   }, []);
 
+  // Éléments focusables du menu, bouton hamburger inclus (c'est la commande de
+  // fermeture) : sert au piège de focus tant que l'overlay est ouvert.
+  const focusables = useCallback(() => {
+    const els: HTMLElement[] = [];
+    if (burgerRef.current) els.push(burgerRef.current);
+    els.push(
+      ...Array.from(
+        menuRef.current?.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ) ?? [],
+      ),
+    );
+    return els;
+  }, []);
+
+  // Accessibilité de l'overlay : focus déplacé sur le premier lien à
+  // l'ouverture, Échap ferme, Tab boucle à l'intérieur, et le focus revient sur
+  // le hamburger à la fermeture.
+  useEffect(() => {
+    if (!open) return;
+
+    const first = menuRef.current?.querySelector<HTMLElement>("a[href]");
+    first?.focus();
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const items = focusables();
+      if (items.length === 0) return;
+      const firstEl = items[0];
+      const lastEl = items[items.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      const inside = active ? items.includes(active) : false;
+      if (e.shiftKey) {
+        if (!inside || active === firstEl) {
+          e.preventDefault();
+          lastEl.focus();
+        }
+      } else if (!inside || active === lastEl) {
+        e.preventDefault();
+        firstEl.focus();
+      }
+    };
+
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      burgerRef.current?.focus();
+    };
+  }, [open, focusables]);
+
   const menuItems = [...navLinks, { label: "On en parle", href: "/contact" }];
+
+  // Accueil : le logotype géant du hero tient lieu de wordmark. Celui du header
+  // reste en retrait tant qu'on n'a pas dépassé l'écran-titre (pas de doublon).
+  const logoHidden = isHome && !pastHero;
 
   return (
     <header className="fixed inset-x-0 top-0 z-50">
+      {/* Fond de la barre au défilement. Couche dédiée et non le <header>
+          lui-même : un backdrop-filter sur le header en ferait un bloc
+          conteneur pour l'overlay en position fixed, qui ne couvrirait plus
+          l'écran. z-index négatif = derrière le contenu de la barre, mais
+          toujours dans le contexte d'empilement du header. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          // 85 % d'opacité : lisible même si backdrop-filter n'est pas
+          // supporté (anciens iOS / mode économie de données).
+          backgroundColor: scrolled
+            ? "color-mix(in srgb, var(--color-ink) 85%, transparent)"
+            : "transparent",
+          // Flou seulement une fois la barre active : en haut de page on
+          // repasse à `none` pour ne pas laisser un backdrop composité en
+          // permanence au-dessus des vidéos (coût GPU inutile sur iPhone).
+          backdropFilter: scrolled ? "blur(14px) saturate(1.4)" : "none",
+          WebkitBackdropFilter: scrolled ? "blur(14px) saturate(1.4)" : "none",
+          borderBottom: `1px solid ${scrolled ? "var(--color-line-soft)" : "transparent"}`,
+          transition: reduced
+            ? "none"
+            : "background-color 0.4s var(--ease-out-soft), border-color 0.4s var(--ease-out-soft)",
+        }}
+      />
+
       <div className="header-in mx-auto flex max-w-[1600px] items-center justify-between px-5 py-5 sm:px-8 lg:px-10">
         <nav className="hidden items-center gap-7 md:flex">
           {navLinks.map((l) => (
@@ -42,11 +163,20 @@ export function Header() {
           ))}
         </nav>
 
-        {/* Logotype centré (mobile : à gauche) */}
+        {/* Logotype centré (mobile : à gauche). Sur l'accueil, il s'efface tant
+            que le hero est à l'écran : masqué en opacité (la place reste
+            réservée, la barre ne saute pas), retiré du parcours clavier et de
+            l'arbre d'accessibilité tant qu'il est invisible. */}
         <Link
           href="/"
           onClick={() => setOpen(false)}
-          className="font-wide text-[1.3rem] leading-none text-[var(--color-cream)] md:absolute md:left-1/2 md:-translate-x-1/2"
+          aria-hidden={logoHidden || undefined}
+          tabIndex={logoHidden ? -1 : undefined}
+          className={`font-wide text-[1.3rem] leading-none text-[var(--color-cream)] md:absolute md:left-1/2 md:-translate-x-1/2 ${
+            reduced
+              ? "transition-none"
+              : "transition-opacity duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          } ${logoHidden ? "pointer-events-none opacity-0" : "opacity-100"}`}
         >
           {site.name}
           <span className="dot">.</span>
@@ -63,6 +193,7 @@ export function Header() {
       {/* Bouton menu : hors de .header-in (qui crée un contexte d'empilement)
           pour rester cliquable et visible au-dessus de l'overlay */}
       <button
+        ref={burgerRef}
         type="button"
         aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
         aria-expanded={open}
@@ -83,6 +214,7 @@ export function Header() {
 
       {/* Menu mobile — inerte quand fermé : liens ni focusables ni annoncés */}
       <div
+        ref={menuRef}
         inert={!open}
         aria-hidden={!open}
         className={`fixed inset-0 flex flex-col justify-center overflow-hidden bg-[var(--color-ink)] px-8 md:hidden ${
