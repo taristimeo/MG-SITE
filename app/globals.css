@@ -21,6 +21,10 @@
   /* Accent terracotta — le point signature, parcimonieux (valeur charte DA) */
   --color-terra: #b76e4e;
   --color-terra-dim: #8f5439;
+  /* Texte posé SUR un aplat terracotta (pastilles, boutons pleins). La
+     terracotta ne s'inversant pas entre les thèmes, cette valeur est choisie
+     par thème pour rester au-dessus de 4,5:1 — encre sombre ici (4,8:1). */
+  --color-on-terra: #14100b;
 
   /* Typo : Gloock (logotype/titres), mono (labels/méta), Saira (texte) */
   --font-wide: var(--font-gloock), "Times New Roman", serif;

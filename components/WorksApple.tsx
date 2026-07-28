@@ -52,7 +52,7 @@ export function WorksApple({
                 <p className="font-cond text-[11px] tracking-[0.25em] text-[var(--color-terra)]">
                   {p.category} · {p.year}
                 </p>
-                <h3 className="font-wide mt-2 text-[clamp(1.7rem,7vw,2.9rem)] leading-[1.02] text-[var(--color-cream)]">
+                <h3 className="font-wide mt-2 text-[clamp(1.7rem,7vw,2.9rem)] leading-[1.02] text-white">
                   {p.title}
                 </h3>
                 <p className="font-cond mt-4 text-[11px] tracking-[0.2em] text-white/60 transition-colors duration-300 group-hover:text-[var(--color-terra)]">

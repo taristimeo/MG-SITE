@@ -247,7 +247,7 @@ export function MethodFrise({ steps }: Props) {
         }
         .mv-node.is-active {
           background: var(--color-terra);
-          color: var(--color-ink);
+          color: var(--color-on-terra);
           box-shadow: inset 0 0 0 1px var(--color-terra);
           transform: scale(1.06);
         }
