@@ -3,73 +3,53 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import type { CSSProperties } from "react";
-import { Reveal } from "@/components/Reveal";
 import { services } from "@/lib/site";
 
-const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
-
-// « Ce qu'on fait » : les 5 prestations en cartes empilées. Chaque carte est
-// sticky avec un décalage croissant : au scroll, la suivante vient recouvrir la
-// précédente. Le CSS sticky fait le gros œuvre (et se dégrade en simple liste) ;
-// un rAF ajoute la PROFONDEUR : la carte recouverte recule légèrement (scale +
-// remontée) et se voile, comme une pile de cartes physiques qui s'enfonce. Le
-// contenu de chaque carte monte en fondu staggeré à sa première apparition.
-// Tout est écrit directement dans le DOM (aucun re-render au scroll).
-// prefers-reduced-motion : aucun rAF, pile CSS pure, contenu statique.
+// « Ce qu'on fait » : les 5 prestations en INDEX DÉPLIANT.
+// On abandonne ici l'empilement collant (déjà porté par le manifeste et les
+// réalisations) au profit d'un autre langage : une table des matières
+// éditoriale. Chaque prestation est une ligne pleine largeur ouverte par un
+// filet qui se TRACE de gauche à droite ; le contenu se déplie ensuite en
+// cascade (repère, phrase, appel). En desktop les lignes alternent de colonne
+// (quinconce) et entrent latéralement — la page occupe toute sa largeur et le
+// regard zigzague au lieu de subir une pile. Au survol, la ligne se déplie
+// franchement : fond qui s'allume, contenu qui glisse, filet en terracotta.
+// 100 % transform / opacity / background → robuste iOS (aucun filter ni
+// clip-path). prefers-reduced-motion : tout est posé d'emblée, sans transition.
 export function ServicesStack() {
-  const listRef = useRef<HTMLOListElement | null>(null);
+  const rootRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const list = listRef.current;
-    if (!list) return;
-    const cards = Array.from(
-      list.querySelectorAll<HTMLLIElement>("[data-card]"),
-    );
-    const inners = cards.map((c) => c.querySelector<HTMLElement>("[data-inner]"));
-    const veils = cards.map((c) => c.querySelector<HTMLElement>("[data-veil]"));
+    const root = rootRef.current;
+    if (!root) return;
+    const rows = Array.from(root.querySelectorAll<HTMLElement>("[data-row]"));
+    if (!rows.length) return;
 
-    let raf = 0;
-    const update = () => {
-      raf = 0;
-      for (let i = 0; i < cards.length; i++) {
-        const inner = inners[i];
-        if (!inner) continue;
-        const veil = veils[i];
-        const next = cards[i + 1];
-        if (!next) {
-          inner.style.transform = "none";
-          if (veil) veil.style.opacity = "0";
-          continue;
+    // Mouvement réduit : on révèle tout immédiatement, aucun observateur.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      for (const row of rows) row.classList.add("is-in");
+      return;
+    }
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          entry.target.classList.add("is-in");
+          io.unobserve(entry.target);
         }
-        const r = cards[i].getBoundingClientRect();
-        const nr = next.getBoundingClientRect();
-        // p : 0 quand la carte suivante affleure le bas de celle-ci, 1 quand
-        // elle l'a entièrement recouverte.
-        const p = clamp01((r.bottom - nr.top) / r.height);
-        const e = p * p * (3 - 2 * p); // smoothstep
-        const scale = (1 - 0.05 * e).toFixed(4);
-        const ty = (-10 * e).toFixed(1);
-        inner.style.transform = `translateY(${ty}px) scale(${scale})`;
-        if (veil) veil.style.opacity = (0.5 * e).toFixed(3);
-      }
-    };
-    const onScroll = () => {
-      if (!raf) raf = requestAnimationFrame(update);
-    };
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      if (raf) cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
+      },
+      { threshold: 0.2, rootMargin: "0px 0px -8% 0px" },
+    );
+    for (const row of rows) io.observe(row);
+    return () => io.disconnect();
   }, []);
 
   return (
-    <section className="px-5 py-24 sm:px-8 sm:py-32 lg:px-10">
-      <div className="mx-auto max-w-[1100px]">
+    <section className="px-5 py-14 sm:px-8 sm:py-32 lg:px-10">
+      <style>{SERVICES_CSS}</style>
+
+      <div className="mx-auto max-w-[1400px]">
         <div className="text-center">
           <p className="font-cond text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
             Ce qu&apos;on fait
@@ -79,69 +59,137 @@ export function ServicesStack() {
           </h2>
         </div>
 
-        <ol ref={listRef} className="mt-16 flex flex-col gap-6 sm:mt-20">
-          {services.map((s, i) => (
-            <li
-              key={s.id}
-              data-card
-              className="sticky"
-              style={{ top: `calc(84px + ${i * 18}px)` }}
-            >
-              <div
-                data-inner
-                className="relative flex min-h-[38vh] flex-col justify-between rounded-3xl border border-[var(--color-line-soft)] p-8 shadow-2xl sm:min-h-[42vh] sm:p-12"
-                style={
-                  {
-                    background:
-                      i % 2 ? "var(--color-ink-3)" : "var(--color-ink-2)",
-                    transformOrigin: "center top",
-                    willChange: "transform",
-                  } as CSSProperties
-                }
-              >
-                <Reveal
-                  as="div"
-                  delay={40}
-                  className="flex items-baseline justify-between"
+        <div ref={rootRef} className="mt-10 sm:mt-20">
+          <ol>
+            {services.map((s, i) => {
+              // Quinconce desktop : une ligne sur deux bascule dans la colonne
+              // de droite, et entre depuis le côté correspondant.
+              const right = i % 2 === 1;
+              return (
+                <li
+                  key={s.id}
+                  data-row
+                  className="svc-row"
+                  style={{ "--svc-x": right ? "26px" : "-26px" } as CSSProperties}
                 >
-                  <span className="font-cond text-sm tracking-[0.2em] text-[var(--color-terra)]">
-                    {s.index}
-                  </span>
-                  <span className="font-cond text-[11px] tracking-[0.2em] text-[var(--color-bone-faint)]">
-                    {s.title}
-                  </span>
-                </Reveal>
+                  {/* Filet d'ouverture : se trace au moment où la ligne entre */}
+                  <span
+                    aria-hidden
+                    className="svc-rule block h-px w-full bg-[var(--color-line-soft)]"
+                  />
 
-                <Reveal
-                  as="p"
-                  delay={140}
-                  className="font-wide max-w-[18ch] text-[clamp(1.7rem,4.6vw,3.6rem)] leading-[1.12] text-[var(--color-cream)]"
-                >
-                  {s.line}
-                </Reveal>
-
-                <Reveal as="div" delay={240}>
                   <Link
                     href="/realisations"
-                    className="link-underline font-cond text-[11px] tracking-[0.2em] text-[var(--color-bone-dim)] transition-colors hover:text-[var(--color-terra)]"
+                    aria-label={`Voir les films — ${s.title}`}
+                    className="svc-link relative block py-8 sm:py-12"
                   >
-                    Voir les films <span aria-hidden>→</span>
-                  </Link>
-                </Reveal>
+                    {/* Fond qui s'allume au survol (desktop) */}
+                    <span
+                      aria-hidden
+                      className="svc-glow pointer-events-none absolute inset-0 -mx-4 rounded-2xl bg-[var(--color-ink-2)] sm:-mx-6"
+                    />
 
-                {/* Voile de profondeur : s'assombrit sur la portion encore
-                    visible à mesure que la carte suivante la recouvre. */}
-                <div
-                  data-veil
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 rounded-3xl bg-[var(--color-ink)]"
-                  style={{ opacity: 0 }}
-                />
-              </div>
-            </li>
-          ))}
-        </ol>
+                    <span className="svc-fold relative block lg:grid lg:grid-cols-2 lg:gap-x-16">
+                      <span
+                        className={`block ${right ? "lg:col-start-2" : "lg:col-start-1"}`}
+                      >
+                        {/* Repère : numéro + intitulé de la prestation */}
+                        <span className="svc-in svc-meta font-cond flex items-baseline gap-4 text-[11px] tracking-[0.22em]">
+                          <span className="text-[var(--color-terra)]">
+                            {s.index}
+                          </span>
+                          <span className="text-[var(--color-bone-faint)]">
+                            {s.title}
+                          </span>
+                        </span>
+
+                        {/* La phrase — le cœur de la ligne */}
+                        <span className="svc-in svc-phrase font-wide mt-4 block max-w-[24ch] text-[clamp(1.5rem,3.4vw,2.6rem)] leading-[1.14] text-[var(--color-cream)]">
+                          {s.line}
+                        </span>
+
+                        {/* L'appel, conservé sur chaque ligne */}
+                        <span className="svc-in svc-cta font-cond mt-5 block text-[11px] tracking-[0.2em] text-[var(--color-bone-dim)]">
+                          Voir les films{" "}
+                          <span aria-hidden className="svc-arrow inline-block">
+                            →
+                          </span>
+                        </span>
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ol>
+
+          {/* Filet de clôture de l'index */}
+          <div data-row className="svc-row">
+            <span
+              aria-hidden
+              className="svc-rule block h-px w-full bg-[var(--color-line-soft)]"
+            />
+          </div>
+        </div>
       </div>
     </section>
   );
 }
+
+/* ------------------------------------------------------------------ */
+/* CSS local à l'index dépliant — gardé ici (pas dans globals.css) car il
+   n'existe que pour ce composant. Uniquement transform / opacity /
+   background-color : rien qui puisse casser un rendu iOS. */
+const SERVICES_CSS = `
+.svc-rule {
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 1.1s var(--ease-out-expo), background-color 0.4s var(--ease-out-expo);
+}
+.svc-row.is-in .svc-rule { transform: scaleX(1); }
+
+.svc-in {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.9s var(--ease-out-soft),
+    transform 1s var(--ease-out-expo);
+  will-change: opacity, transform;
+}
+.svc-row.is-in .svc-in { opacity: 1; transform: none; }
+.svc-meta { transition-delay: 0.1s; }
+.svc-phrase { transition-delay: 0.2s; }
+.svc-cta { transition-delay: 0.34s; }
+
+/* Desktop : entrée latérale, dans le sens de la colonne (quinconce) */
+@media (min-width: 1024px) {
+  .svc-in { transform: translateY(18px) translateX(var(--svc-x, 0px)); }
+  .svc-row.is-in .svc-in { transform: none; }
+}
+
+/* Survol (pointeur fin uniquement) : la ligne se déplie */
+.svc-glow {
+  opacity: 0;
+  transition: opacity 0.5s var(--ease-out-expo);
+}
+.svc-fold {
+  transition: transform 0.6s var(--ease-out-expo);
+}
+.svc-arrow {
+  transition: transform 0.5s var(--ease-out-expo);
+}
+@media (hover: hover) and (pointer: fine) {
+  .svc-link:hover .svc-glow { opacity: 1; }
+  .svc-link:hover .svc-fold { transform: translateX(14px); }
+  .svc-link:hover .svc-arrow { transform: translateX(6px); }
+  .svc-link:hover .svc-cta { color: var(--color-terra); }
+  .svc-row:hover .svc-rule { background-color: var(--color-terra); }
+}
+.svc-link:focus-visible .svc-glow { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .svc-rule { transform: scaleX(1); transition: none; }
+  .svc-in { opacity: 1; transform: none; transition: none; }
+  .svc-fold, .svc-arrow, .svc-glow { transition: none; }
+}
+`;
