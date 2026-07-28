@@ -8,202 +8,226 @@ type Props = {
   steps: FriseStep[];
 };
 
-// « Notre méthode » en timeline VERTICALE façon Apple : un rail vertical à
-// gauche, quatre nœuds numérotés (pastilles terracotta) empilés de haut en bas,
-// titre Gloock + texte à droite. Au scroll, la ligne du rail se trace de haut en
-// bas (fill terracotta en scaleY par-dessus une ligne de base discrète), chaque
-// étape se révèle en cascade (opacity + translateY) et son nœud s'active quand le
-// tracé l'atteint. iOS-safe STRICT : transform + opacity + background uniquement,
-// aucun filter, aucun clip-path. prefers-reduced-motion : tout affiché, aucun
-// listener. Écriture directe dans le DOM en requestAnimationFrame (pas de
-// re-render par frame). Thème géré exclusivement par tokens CSS.
+// « Notre méthode » — timeline VERTICALE façon Apple.
+// Un rail descend le long de la colonne ; une ligne terracotta se TRACE de haut
+// en bas au fil du scroll (scaleY piloté en requestAnimationFrame, écriture
+// directe dans le DOM). Chaque étape se révèle à son entrée (opacity+translateY)
+// et son nœud s'active quand le tracé l'atteint.
+// iOS-safe STRICT : transform (scaleY/translateY/scale) + opacity + background
+// uniquement. Aucun filter, aucun clip-path.
+// prefers-reduced-motion : rail tracé, étapes visibles, nœuds actifs, 0 listener.
 export function MethodFrise({ steps }: Props) {
   const rootRef = useRef<HTMLDivElement | null>(null);
-  const railRef = useRef<HTMLDivElement | null>(null);
-  const fillRef = useRef<HTMLDivElement | null>(null);
-  const nodeRefs = useRef<(HTMLSpanElement | null)[]>([]);
-  const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const listRef = useRef<HTMLOListElement | null>(null);
+  const railRef = useRef<HTMLSpanElement | null>(null);
+  const fillRef = useRef<HTMLSpanElement | null>(null);
+  const nodeRefs = useRef<Array<HTMLSpanElement | null>>([]);
+  const stepRefs = useRef<Array<HTMLLIElement | null>>([]);
 
   useEffect(() => {
     const root = rootRef.current;
+    const list = listRef.current;
     const rail = railRef.current;
     const fill = fillRef.current;
-    if (!root || !rail || !fill) return;
+    if (!root || !list || !rail || !fill) return;
 
-    // Accessibilité : mouvement réduit → état final figé, aucun listener.
+    const nodes = nodeRefs.current;
+    const stepEls = stepRefs.current;
+
+    // ── prefers-reduced-motion : état final, aucun listener ────────────────
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      root.classList.add("mf-static");
+      root.classList.add("mv-static");
       return;
     }
 
-    // Positionne le rail entre le centre du premier nœud et celui du dernier,
-    // afin que la ligne tracée s'aligne exactement sur les pastilles.
-    const measure = () => {
-      const nodes = nodeRefs.current.filter(Boolean) as HTMLSpanElement[];
-      if (nodes.length < 2) return;
-      const rootRect = root.getBoundingClientRect();
-      const first = nodes[0].getBoundingClientRect();
-      const last = nodes[nodes.length - 1].getBoundingClientRect();
-      const top = first.top - rootRect.top + first.height / 2;
-      const bottom = last.top - rootRect.top + last.height / 2;
-      rail.style.top = `${top}px`;
-      rail.style.height = `${Math.max(0, bottom - top)}px`;
+    // Fractions (0→1) de chaque nœud le long du rail — recalculées au layout.
+    let nodeFracs: number[] = [];
+    // Suivi des nœuds actifs pour n'écrire dans le DOM qu'au changement.
+    const activeState: boolean[] = nodes.map(() => false);
+
+    // Positionne le rail entre le centre du 1er et du dernier nœud, puis
+    // mesure les fractions. À exécuter au montage et à chaque resize.
+    const layout = () => {
+      const first = nodes[0];
+      const last = nodes[nodes.length - 1];
+      if (!first || !last) return;
+      const listTop = list.getBoundingClientRect().top;
+      const centerOf = (el: HTMLElement) => {
+        const r = el.getBoundingClientRect();
+        return r.top + r.height / 2 - listTop;
+      };
+      const firstC = centerOf(first);
+      const lastC = centerOf(last);
+      const span = Math.max(1, lastC - firstC);
+      rail.style.top = `${firstC}px`;
+      rail.style.height = `${span}px`;
+      nodeFracs = nodes.map((n) => (n ? (centerOf(n) - firstC) / span : 0));
     };
 
+    // Boucle de tracé : lit la position du rail dans le viewport, en déduit la
+    // progression, écrit directement scaleY + l'état des nœuds. Pas de re-render.
     let ticking = false;
-
-    const update = () => {
+    let raf = 0;
+    const frame = () => {
       ticking = false;
-      const vh = window.innerHeight || document.documentElement.clientHeight;
-      const trigger = vh * 0.62; // ligne de déclenchement dans le viewport
-
-      // Progression du tracé : le rail se remplit au fur et à mesure qu'il
-      // franchit la ligne de déclenchement.
+      raf = 0;
       const railRect = rail.getBoundingClientRect();
-      let p = 0;
-      if (railRect.height > 0) {
-        p = (trigger - railRect.top) / railRect.height;
-      }
-      p = p < 0 ? 0 : p > 1 ? 1 : p;
+      const railH = railRect.height || 1;
+      // Ligne de lecture à ~62% de la hauteur du viewport.
+      const readLine = window.innerHeight * 0.62;
+      let p = (readLine - railRect.top) / railH;
+      if (p < 0) p = 0;
+      else if (p > 1) p = 1;
+
       fill.style.transform = `scaleY(${p})`;
 
-      // Activation des nœuds : actif dès que le tracé l'a atteint.
-      for (const node of nodeRefs.current) {
-        if (!node) continue;
-        const r = node.getBoundingClientRect();
-        const center = r.top + r.height / 2;
-        node.classList.toggle("is-active", center <= trigger);
-      }
-
-      // Révélation des étapes à l'entrée dans le champ.
-      const revealLine = vh * 0.88;
-      for (const step of stepRefs.current) {
-        if (!step) continue;
-        if (step.getBoundingClientRect().top < revealLine) {
-          step.classList.add("is-in");
+      for (let i = 0; i < nodes.length; i++) {
+        const on = p >= (nodeFracs[i] ?? 1) - 0.0001;
+        if (on !== activeState[i]) {
+          activeState[i] = on;
+          nodes[i]?.classList.toggle("is-active", on);
         }
       }
     };
-
-    const onScroll = () => {
+    const requestFrame = () => {
       if (ticking) return;
       ticking = true;
-      requestAnimationFrame(update);
+      raf = requestAnimationFrame(frame);
     };
+
+    // Révélation en cascade des étapes à leur entrée dans le champ.
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            e.target.classList.add("is-in");
+            io.unobserve(e.target);
+          }
+        }
+      },
+      { threshold: 0.25, rootMargin: "0px 0px -12% 0px" },
+    );
+    for (const el of stepEls) if (el) io.observe(el);
 
     const onResize = () => {
-      measure();
-      onScroll();
+      layout();
+      requestFrame();
     };
 
-    measure();
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
+    layout();
+    requestFrame();
+    window.addEventListener("scroll", requestFrame, { passive: true });
     window.addEventListener("resize", onResize);
+
     return () => {
-      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("scroll", requestFrame);
       window.removeEventListener("resize", onResize);
+      io.disconnect();
+      // Annule la frame en attente : sans cela elle s'exécuterait après le
+      // démontage (et `ticking` resterait bloqué à true).
+      if (raf) cancelAnimationFrame(raf);
     };
-  }, []);
+  }, [steps.length]);
 
   return (
-    <div ref={rootRef} className="mf">
-      {/* Rail vertical : ligne de base discrète + ligne de tracé terracotta */}
-      <div ref={railRef} aria-hidden className="mf-rail">
-        <div className="mf-rail-base" />
-        <div ref={fillRef} className="mf-rail-fill" />
-      </div>
+    <div ref={rootRef} className="mv">
+      <ol ref={listRef} className="mv-steps">
+        {/* Rail vertical : base discrète + tracé terracotta (scaleY au scroll) */}
+        <span ref={railRef} aria-hidden className="mv-rail">
+          <span className="mv-rail-base" />
+          <span ref={fillRef} className="mv-rail-fill" />
+        </span>
 
-      {steps.map((s, i) => (
-        <div
-          key={s.title}
-          ref={(el) => {
-            stepRefs.current[i] = el;
-          }}
-          className="mf-step"
-          style={{ transitionDelay: `${Math.min(i, 3) * 80}ms` }}
-        >
-          <div className="mf-node-col">
+        {steps.map((s, i) => (
+          <li
+            key={s.title}
+            ref={(el) => {
+              stepRefs.current[i] = el;
+            }}
+            className="mv-step"
+            style={{ transitionDelay: `${i * 70}ms` }}
+          >
             <span
               ref={(el) => {
                 nodeRefs.current[i] = el;
               }}
-              className="mf-node font-cond"
+              className="mv-node font-cond"
             >
               {String(i + 1).padStart(2, "0")}
             </span>
-          </div>
-          <div className="mf-content">
-            <h3 className="font-wide text-[clamp(1.5rem,3.4vw,2rem)] leading-[1.12] text-[var(--color-bone)]">
-              {s.title}
-            </h3>
-            <p className="font-sans mt-3 text-[0.95rem] leading-relaxed text-[var(--color-bone-dim)]">
-              {s.text}
-            </p>
-          </div>
-        </div>
-      ))}
+            <div className="mv-body">
+              <h3 className="font-wide mv-title">{s.title}</h3>
+              <p className="font-sans mv-text">{s.text}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
 
       <style>{`
-        .mf {
-          position: relative;
-          max-width: 760px;
-          margin-left: auto;
-          margin-right: auto;
+        .mv {
+          margin-inline: auto;
+          width: 100%;
+          max-width: 740px;
         }
 
-        /* Rail : positionné en JS entre le premier et le dernier nœud. */
-        .mf-rail {
-          position: absolute;
-          top: 0;
-          height: 0;
-          left: 1.375rem;        /* centre horizontal du nœud (2.75rem / 2) */
-          width: 2px;
-          transform: translateX(-1px);
-          z-index: 0;
+        .mv-steps {
+          position: relative;
+          list-style: none;
+          margin: 0;
+          padding: 0;
         }
-        .mf-rail-base,
-        .mf-rail-fill {
+
+        /* Rail : positionné en JS entre le centre du 1er et du dernier nœud.
+           Colonne de gauche = 2.75rem, centre du nœud à 1.375rem. */
+        .mv-rail {
+          position: absolute;
+          left: 1.375rem;
+          width: 2px;
+          transform: translateX(-50%);
+          z-index: 0;
+          pointer-events: none;
+        }
+        .mv-rail-base {
           position: absolute;
           inset: 0;
           width: 100%;
-          border-radius: 2px;
+          background: var(--color-line);
         }
-        .mf-rail-base { background: var(--color-line); }
-        .mf-rail-fill {
+        .mv-rail-fill {
+          position: absolute;
+          inset: 0;
+          width: 100%;
           background: var(--color-terra);
           transform: scaleY(0);
-          transform-origin: top;
+          transform-origin: top center;
           will-change: transform;
         }
 
-        .mf-step {
+        .mv-step {
           position: relative;
-          display: flex;
-          align-items: flex-start;
+          display: grid;
+          grid-template-columns: 2.75rem 1fr;
           gap: 1.25rem;
-          padding-bottom: clamp(3.5rem, 9vh, 6rem);
+          align-items: start;
           opacity: 0;
           transform: translateY(22px);
           transition:
             opacity 0.8s var(--ease-out-soft),
             transform 0.9s var(--ease-out-expo);
         }
-        .mf-step:last-child { padding-bottom: 0; }
-        .mf-step.is-in {
+        .mv-step.is-in {
           opacity: 1;
           transform: none;
         }
-
-        .mf-node-col {
-          position: relative;
-          z-index: 1;
-          flex: 0 0 2.75rem;
-          display: flex;
-          justify-content: center;
+        .mv-step + .mv-step {
+          margin-top: clamp(3rem, 7vw, 4.5rem);
         }
 
-        .mf-node {
+        /* Nœud : pastille discrète au repos, se remplit en terracotta + léger
+           scale quand le tracé l'atteint (classe .is-active écrite en JS). */
+        .mv-node {
+          position: relative;
+          z-index: 1;
           display: inline-flex;
           align-items: center;
           justify-content: center;
@@ -211,45 +235,101 @@ export function MethodFrise({ steps }: Props) {
           height: 2.75rem;
           border-radius: 9999px;
           background: var(--color-ink);
-          border: 1px solid var(--color-line);
-          color: var(--color-bone-faint);
-          font-size: 0.72rem;
+          box-shadow: inset 0 0 0 1px var(--color-line);
+          color: var(--color-bone-dim);
+          font-size: 0.7rem;
           letter-spacing: 0.12em;
-          transform: scale(1);
           transition:
             background 0.5s var(--ease-out-soft),
-            border-color 0.5s var(--ease-out-soft),
             color 0.5s var(--ease-out-soft),
+            box-shadow 0.5s var(--ease-out-soft),
             transform 0.5s var(--ease-out-expo);
         }
-        .mf-node.is-active {
+        .mv-node.is-active {
           background: var(--color-terra);
-          border-color: var(--color-terra);
-          color: var(--color-ink);
+          color: var(--color-on-terra);
+          box-shadow: inset 0 0 0 1px var(--color-terra);
           transform: scale(1.06);
         }
 
-        .mf-content {
-          flex: 1 1 auto;
+        .mv-body {
           padding-top: 0.35rem;
+          max-width: 46ch;
+        }
+        .mv-title {
+          font-size: clamp(1.5rem, 3.4vw, 2rem);
+          line-height: 1.1;
+          color: var(--color-bone);
+        }
+        .mv-text {
+          margin-top: 0.75rem;
+          font-size: 0.98rem;
+          line-height: 1.7;
+          color: var(--color-bone-dim);
         }
 
-        /* Mouvement réduit : tout est tracé / révélé / actif, sans transition. */
-        .mf-static .mf-step,
-        .mf-static .mf-node,
-        .mf-static .mf-rail-fill {
-          transition: none !important;
+        /* prefers-reduced-motion / fallback statique : tout à l'état final. */
+        .mv-static .mv-step {
+          opacity: 1;
+          transform: none;
+          transition: none;
         }
-        .mf-static .mf-step {
-          opacity: 1 !important;
-          transform: none !important;
+        .mv-static .mv-rail {
+          top: 1.375rem;
+          bottom: 1.375rem;
+          height: auto;
         }
-        .mf-static .mf-rail-fill { transform: scaleY(1) !important; }
-        .mf-static .mf-node {
-          background: var(--color-terra) !important;
-          border-color: var(--color-terra) !important;
-          color: var(--color-ink) !important;
-          transform: none !important;
+        .mv-static .mv-rail-fill {
+          transform: scaleY(1);
+        }
+        .mv-static .mv-node {
+          background: var(--color-terra);
+          color: var(--color-ink);
+          box-shadow: inset 0 0 0 1px var(--color-terra);
+          transform: none;
+          transition: none;
+        }
+
+        /* ── Desktop (≥ lg) : la frise occupe toute la largeur du conteneur et
+           passe en deux colonnes — titre de l'étape à gauche, texte à droite.
+           Le rail et les nœuds ne bougent pas. Mobile/tablette inchangés. */
+        @media (min-width: 1024px) {
+          .mv {
+            max-width: none;
+          }
+          .mv-step {
+            grid-template-columns: 2.75rem minmax(0, 1fr);
+            gap: 2rem;
+          }
+          .mv-step + .mv-step {
+            margin-top: 4.5rem;
+          }
+          .mv-body {
+            display: grid;
+            grid-template-columns: minmax(0, 19rem) minmax(0, 1fr);
+            gap: clamp(2.5rem, 4vw, 4rem);
+            /* Aligne la première ligne du texte sur la ligne de base du titre */
+            align-items: baseline;
+            max-width: none;
+          }
+          .mv-text {
+            margin-top: 0;
+            max-width: 58ch;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .mv-step {
+            opacity: 1 !important;
+            transform: none !important;
+            transition: none !important;
+          }
+          .mv-rail-fill {
+            transform: scaleY(1) !important;
+          }
+          .mv-node {
+            transition: none !important;
+          }
         }
       `}</style>
     </div>

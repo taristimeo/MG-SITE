@@ -52,7 +52,7 @@ export function ScrollText({ text, className = "" }: Props) {
 
     const css = getComputedStyle(document.documentElement);
     const from = parseHex(css.getPropertyValue("--color-bone-faint")) ?? [
-      110, 104, 92,
+      132, 124, 108,
     ];
     const to = parseHex(css.getPropertyValue("--color-cream")) ?? [
       232, 228, 216,

@@ -35,10 +35,15 @@ const itemCls =
 function FooterItemEl({ text, href }: FooterItem) {
   if (!href) return <span className={itemCls}>{text}</span>;
   const external =
-    href.startsWith("http") || href.startsWith("mailto:") || href.startsWith("tel:") || href === "#";
+    href.startsWith("http") || href.startsWith("mailto:") || href.startsWith("tel:");
   const cls = `${itemCls} transition-colors hover:text-[var(--color-terra)]`;
   return external ? (
-    <a href={href} target={href.startsWith("http") || href === "#" ? "_blank" : undefined} rel="noreferrer" className={cls}>
+    <a
+      href={href}
+      target={href.startsWith("http") ? "_blank" : undefined}
+      rel="noreferrer"
+      className={cls}
+    >
       {text}
     </a>
   ) : (
@@ -48,10 +53,20 @@ function FooterItemEl({ text, href }: FooterItem) {
   );
 }
 
-export function Footer() {
+export function Footer({ year }: { year: number }) {
   const ref = useRef<HTMLElement>(null);
   const [shown, setShown] = useState(false);
   const [reduced, setReduced] = useState(false);
+  // Année du copyright : le rendu initial reprend celle calculée côté serveur
+  // (donc figée au build sur une page statique) — le HTML et la première passe
+  // client sont identiques, pas d'écart d'hydratation. On la rafraîchit ensuite
+  // au montage si l'année a changé depuis le déploiement.
+  const [displayYear, setDisplayYear] = useState(year);
+
+  useEffect(() => {
+    const now = new Date().getFullYear();
+    if (now !== year) setDisplayYear(now);
+  }, [year]);
 
   // Révélation à l'entrée dans le viewport : fondu-montée avec léger flou qui
   // se dissipe, en cascade. Mouvement réduit : tout est visible d'emblée.
@@ -93,7 +108,6 @@ export function Footer() {
   return (
     <footer
       ref={ref}
-      id="contact"
       className="border-t border-[var(--color-line-soft)] px-5 pb-10 pt-16 sm:px-8 sm:pb-12 sm:pt-24 lg:px-10 lg:pt-32"
     >
       {/* Groupes imbriqués : grandes capitales + liens collés, qui s'enchaînent
@@ -140,7 +154,7 @@ export function Footer() {
         style={reveal(groups.length + 1)}
         className="mt-5 text-center font-cond text-[0.72rem] tracking-[0.12em] text-[var(--color-bone-faint)]"
       >
-        © {site.founded}—{new Date().getFullYear()} {site.name}
+        © {site.founded}—{displayYear} {site.name}
         <span className="dot">.</span> · {site.city} — {site.founder}
       </div>
     </footer>

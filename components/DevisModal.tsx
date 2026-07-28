@@ -9,9 +9,13 @@ import { DevisForm } from "@/components/DevisForm";
 // animés (transform), sinon `position: fixed` ne couvre pas tout l'écran.
 export function DevisModal({
   label = "Demander un devis",
+  ariaLabel,
   className,
 }: {
   label?: React.ReactNode;
+  // Nom accessible court quand `label` contient une mise en page riche
+  // (plusieurs lignes), pour ne pas annoncer tout le bloc au lecteur d'écran.
+  ariaLabel?: string;
   className?: string;
 }) {
   const [open, setOpen] = useState(false);
@@ -65,7 +69,15 @@ export function DevisModal({
         panelRef.current?.querySelectorAll<HTMLElement>(
           'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])',
         ) ?? [],
-      ).filter((el) => el.offsetParent !== null || el === document.activeElement);
+      ).filter(
+        (el) =>
+          // Visible (ou déjà focalisé, cas des champs en cours de saisie)…
+          (el.offsetParent !== null || el === document.activeElement) &&
+          // …réellement atteignable au clavier (exclut le champ piège)…
+          el.tabIndex >= 0 &&
+          // …et pas dans une zone masquée aux technologies d'assistance.
+          !el.closest('[aria-hidden="true"]'),
+      );
 
     // Déplace le focus dans la modale (1er champ, sinon le panneau).
     const first = focusables()[0];
@@ -179,6 +191,7 @@ export function DevisModal({
       <button
         type="button"
         onClick={() => setOpen(true)}
+        aria-label={ariaLabel}
         className={
           className ??
           "btn-cta font-cond rounded-full bg-[var(--color-terra)] px-9 py-4 text-sm text-[var(--color-ink)]"

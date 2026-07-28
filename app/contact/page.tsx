@@ -30,9 +30,13 @@ export default function ContactPage() {
             className="mt-3 text-[clamp(2.4rem,8vw,7rem)] text-[var(--color-cream)]"
           />
           <Reveal delay={260}>
-            <p className="mt-8 inline-flex items-center gap-3 font-cond text-[11px] tracking-[0.2em] text-[var(--color-bone-dim)]">
-              <span className="avail-dot" aria-hidden />
-              Disponible pour de nouveaux projets · Réponse sous 24 h
+            {/* Le point reste collé à la PREMIÈRE ligne quand le texte passe
+                sur deux lignes (mobile) : items-start + décalage optique. */}
+            <p className="mt-8 inline-flex items-start gap-3 text-left font-cond text-[11px] leading-[1.7] tracking-[0.2em] text-[var(--color-bone-dim)] sm:text-center">
+              <span className="avail-dot mt-[0.48em] shrink-0" aria-hidden />
+              <span>
+                Disponible pour de nouveaux projets · Réponse sous 24 h
+              </span>
             </p>
           </Reveal>
         </div>
@@ -40,11 +44,10 @@ export default function ContactPage() {
         {/* La bande devis — l'unique geste fort de la page : elle se remplit
             de terracotta et sa flèche file vers l'avant */}
         <Reveal delay={340}>
+          {/* Le rappel « gratuit et sans engagement » est passé DANS la bande
+              (état de repos plus habité), il n'est plus répété en dessous. */}
           <div className="mt-16 sm:mt-24">
             <ContactBand />
-            <p className="font-cond mt-5 text-center text-[10px] tracking-[0.22em] text-[var(--color-bone-faint)]">
-              Gratuit et sans engagement · quelques lignes suffisent
-            </p>
           </div>
         </Reveal>
 

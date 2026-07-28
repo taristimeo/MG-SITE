@@ -115,7 +115,7 @@ export default async function ProjectPage({
   };
 
   return (
-    <article className="pb-24">
+    <article className="pb-16 sm:pb-24">
       {videoLd && (
         <script
           type="application/ld+json"
@@ -129,7 +129,7 @@ export default async function ProjectPage({
       {/* Hero cinéma : le still du film en fond très assombri (zoom arrière au
           scroll), le titre par-dessus. La vidéo, c'est le lecteur en dessous —
           une seule vidéo par page, l'image d'ouverture ne consomme rien. */}
-      <header className="relative flex min-h-[68svh] flex-col items-center justify-center overflow-hidden px-5 pt-20 text-center sm:min-h-[78svh] sm:px-8 sm:pt-28">
+      <header className="relative flex min-h-[62svh] flex-col justify-center overflow-hidden px-5 pt-20 text-left sm:min-h-[78svh] sm:px-8 sm:pt-28 lg:px-10">
         <div aria-hidden className="absolute inset-0">
           <div className="h-full w-full opacity-40">
             <HeroZoom>
@@ -141,13 +141,15 @@ export default async function ProjectPage({
           <div className="absolute inset-0 bg-gradient-to-b from-[rgba(10,9,8,0.85)] via-transparent to-[var(--color-ink)]" />
         </div>
 
-        <div className="relative">
+        {/* Titre ET méta calés sur le même bord gauche : plus de décrochage
+            entre un titre aligné à gauche et une catégorie centrée. */}
+        <div className="relative mx-auto w-full max-w-[1400px]">
           {/* Titre : révélation par masque (la ligne monte de sous un cache),
               puis catégorie et générique montent en cascade. */}
-          <h1 className="font-wide mx-auto max-w-[16ch] text-[clamp(3rem,13vw,12rem)] leading-[0.95] text-[var(--color-cream)]">
+          <h1 className="font-wide max-w-[16ch] text-[clamp(3rem,13vw,10rem)] leading-[0.95] text-[var(--color-cream)]">
             <MaskTitle>{project.title}</MaskTitle>
           </h1>
-          <Reveal delay={260} as="p" className="font-cond mt-6 text-sm tracking-[0.3em] text-[var(--color-terra)]">
+          <Reveal delay={260} as="p" className="font-cond mt-5 text-sm tracking-[0.3em] text-[var(--color-terra)] sm:mt-6">
             {project.category}
           </Reveal>
           <Reveal delay={360} as="p" className="font-cond mt-3 text-[11px] tracking-[0.25em] text-[var(--color-bone-dim)]">
@@ -176,8 +178,8 @@ export default async function ProjectPage({
       )}
 
       {/* Générique — centré, révélé ligne à ligne en cascade */}
-      <section className="px-5 py-14 sm:px-8 sm:py-20 lg:py-24">
-        <dl className="mx-auto flex max-w-[420px] flex-col items-center gap-6 text-center">
+      <section className="px-5 py-10 sm:px-8 sm:py-20 lg:py-24">
+        <dl className="mx-auto flex max-w-[420px] flex-col items-center gap-5 text-center sm:gap-6">
           {credits.map((c, i) => (
             <Reveal key={c.role} delay={i * 90}>
               <dt className="font-cond text-xs tracking-[0.2em] text-[var(--color-terra)]">
@@ -192,12 +194,12 @@ export default async function ProjectPage({
       </section>
 
       {/* Texte : Le projet / Notre approche / Le résultat */}
-      <section className="px-5 pt-16 sm:px-8 sm:pt-28 lg:pt-36">
+      <section className="px-5 pt-12 sm:px-8 sm:pt-28 lg:pt-36">
         <ProjectStory sections={sections} />
       </section>
 
       {/* Autres réalisations */}
-      <section className="px-5 pt-20 sm:px-8 sm:pt-32 lg:px-10">
+      <section className="px-5 pt-14 sm:px-8 sm:pt-32 lg:px-10">
         <h2 className="font-wide text-center text-[clamp(1.8rem,5vw,3.5rem)] text-[var(--color-bone)]">
           Autres réalisations
         </h2>
@@ -205,7 +207,7 @@ export default async function ProjectPage({
       </section>
 
       {/* Navigation film précédent / suivant — la continuité « à l'affiche » */}
-      <nav className="mt-24 border-t border-[var(--color-line-soft)] px-5 pt-10 sm:mt-32 sm:px-8 lg:px-10">
+      <nav className="mt-16 border-t border-[var(--color-line-soft)] px-5 pt-8 sm:mt-32 sm:px-8 sm:pt-10 lg:px-10">
         <div className="mx-auto flex max-w-[1100px] items-center justify-between gap-6">
           <Reveal className="max-w-[45%]">
           <Link href={`/realisations/${prev.slug}`} className="group block">
@@ -256,14 +258,14 @@ export default async function ProjectPage({
       </nav>
 
       {/* Appel à l'action — un seul CTA sobre pour ne pas finir en cul-de-sac */}
-      <section className="px-5 pt-20 text-center sm:px-8 sm:pt-28 lg:px-10">
+      <section className="px-5 pt-14 text-center sm:px-8 sm:pt-28 lg:px-10">
         <Reveal>
           <p className="font-cond text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
             Un projet comme celui-ci ?
           </p>
         </Reveal>
         <Reveal delay={120}>
-          <div className="mt-8 flex justify-center">
+          <div className="mt-6 flex justify-center sm:mt-8">
             <DevisModal label="Démarrer un projet" />
           </div>
         </Reveal>

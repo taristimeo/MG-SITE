@@ -53,7 +53,7 @@ export default function StudioPage() {
             className="mt-3 text-[clamp(2.4rem,7.5vw,6.5rem)] text-[var(--color-cream)]"
           />
           <Reveal delay={500}>
-            <p className="font-cond mt-12 text-[0.7rem] tracking-[0.25em] text-[var(--color-bone-faint)]">
+            <p className="font-cond mt-10 text-[0.7rem] tracking-[0.25em] text-[var(--color-bone-faint)] sm:mt-12">
               Défiler <span aria-hidden>↓</span>
             </p>
           </Reveal>
@@ -73,33 +73,47 @@ export default function StudioPage() {
         </Reveal>
       </section>
 
-      {/* Notre approche — récit en trois temps, corps animé au scroll */}
+      {/* Notre approche — récit en trois temps, corps animé au scroll.
+          Mobile : colonne unique resserrée (identique à avant, rythme plus
+          dense). Desktop (lg+) : deux colonnes — l'index/kicker à gauche, le
+          titre et le corps à droite — pour occuper la largeur au lieu de
+          laisser la moitié droite vide. */}
       <section
         aria-label="Le studio en trois temps"
-        className="mx-auto max-w-[640px] px-5 py-24 sm:px-8 sm:py-32 lg:px-10"
+        className="mx-auto max-w-[640px] px-5 py-14 sm:px-8 sm:py-32 lg:max-w-[1180px] lg:px-10"
       >
-        <div className="flex flex-col gap-[16vh] sm:gap-[20vh]">
+        <div className="flex flex-col gap-20 sm:gap-[20vh]">
           {chapters.map((c, i) => (
-            <article key={c.index} className="max-w-[46ch]">
-              <Reveal>
-                <span
-                  aria-hidden
-                  className="block h-px w-14 bg-[var(--color-terra)]"
+            <article
+              key={c.index}
+              className="max-w-[46ch] lg:grid lg:max-w-none lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-x-16 xl:grid-cols-[17rem_minmax(0,1fr)] xl:gap-x-24"
+            >
+              {/* Colonne « repère » : le trait et la numérotation */}
+              <div>
+                <Reveal>
+                  <span
+                    aria-hidden
+                    className="block h-px w-14 bg-[var(--color-terra)]"
+                  />
+                </Reveal>
+                <p className="font-cond mt-6 text-xs uppercase tracking-[0.2em] text-[var(--color-terra)]">
+                  {c.index}{" "}
+                  <span className="text-[var(--color-bone-faint)]">
+                    / {c.kicker}
+                  </span>
+                </p>
+              </div>
+
+              {/* Colonne « récit » */}
+              <div className="lg:max-w-[52ch]">
+                <h2 className="font-wide mt-4 text-[clamp(1.9rem,3.4vw,2.9rem)] leading-[1.08] text-[var(--color-bone)] lg:mt-0">
+                  <MaskTitle delay={i === 0 ? 120 : 90}>{c.title}</MaskTitle>
+                </h2>
+                <ScrollText
+                  text={c.text}
+                  className="font-sans mt-6 text-[1.15rem] leading-[1.75]"
                 />
-              </Reveal>
-              <p className="font-cond mt-6 text-xs uppercase tracking-[0.2em] text-[var(--color-terra)]">
-                {c.index}{" "}
-                <span className="text-[var(--color-bone-faint)]">
-                  / {c.kicker}
-                </span>
-              </p>
-              <h2 className="font-wide mt-4 text-[clamp(1.9rem,3.4vw,2.9rem)] leading-[1.08] text-[var(--color-bone)]">
-                <MaskTitle delay={i === 0 ? 120 : 90}>{c.title}</MaskTitle>
-              </h2>
-              <ScrollText
-                text={c.text}
-                className="font-sans mt-6 text-[1.15rem] leading-[1.75]"
-              />
+              </div>
             </article>
           ))}
         </div>
@@ -122,9 +136,9 @@ export default function StudioPage() {
       </section>
 
       {/* ── Notre méthode ─────────────────────────────────────────────── */}
-      <section className="mx-auto mt-32 max-w-[1100px] px-5 pb-4 sm:mt-40 sm:px-8 lg:px-10">
+      <section className="mx-auto mt-20 max-w-[1100px] px-5 pb-4 sm:mt-40 sm:px-8 lg:px-10">
         {/* En-tête de section */}
-        <div className="mb-16 sm:mb-20">
+        <div className="mb-10 sm:mb-20">
           <h2 className="font-wide overflow-hidden text-[clamp(2.2rem,5vw,4.5rem)] leading-[0.99] text-[var(--color-cream)]">
             <MaskTitle delay={80}>Notre méthode</MaskTitle>
           </h2>

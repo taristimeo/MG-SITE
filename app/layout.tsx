@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Gloock, JetBrains_Mono, Saira } from "next/font/google";
 import "./globals.css";
 import { Grain } from "@/components/Grain";
@@ -54,6 +54,15 @@ export const metadata: Metadata = {
     follow: true,
     googleBot: { index: true, follow: true, "max-image-preview": "large" },
   },
+};
+
+// Barre d'état du navigateur (iOS/Android) accordée au fond du site : plus de
+// bandeau blanc au-dessus de la page. Valeur statique = fond du thème SOMBRE
+// (--color-ink) ; à passer sur le fond clair dans la branche jumelle.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#f6f3ec",
 };
 
 // Données structurées — studio local (référencement local + éligibilité aux
@@ -131,7 +140,9 @@ export default function RootLayout({
         <Grain />
         <Header />
         <main>{children}</main>
-        <Footer />
+        {/* L'année est calculée ici (composant serveur) et passée au pied de
+            page : le HTML rendu et la première passe client concordent. */}
+        <Footer year={new Date().getFullYear()} />
       </body>
     </html>
   );

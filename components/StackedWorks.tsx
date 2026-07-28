@@ -85,7 +85,7 @@ export function StackedWorks({
               <Link
                 href={`/realisations/${p.slug}`}
                 data-card
-                className="group relative block aspect-[4/5] overflow-hidden rounded-[26px] bg-[var(--color-ink-2)] shadow-[0_-6px_44px_-14px_rgba(0,0,0,0.75)] ring-1 ring-white/[0.08] sm:aspect-[16/10]"
+                className="group relative block aspect-[4/5] overflow-hidden rounded-[26px] bg-[var(--color-ink-2)] shadow-[0_-6px_44px_-14px_rgba(0,0,0,0.75)] ring-1 ring-[var(--color-line)] sm:aspect-[16/10]"
               >
                 {/* Média — léger sur-cadrage, zoom doux au survol. */}
                 <div className="absolute inset-0 scale-[1.05] transition-transform duration-[1400ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.1]">

@@ -13,12 +13,20 @@
   --color-fog: #4a4339;
   --color-cream: #14100b;
   --color-bone: #201a12;
+  /* Méta / labels : contraste vérifié sur --color-ink (formule WCAG 2.1).
+     bone-dim 7,28:1 · bone-faint 4,75:1 — tous deux ≥ AA (4,5:1) pour du
+     texte normal, en conservant la teinte chaude de la charte. */
   --color-bone-dim: #574f43;
-  --color-bone-faint: #877e6f;
+  --color-bone-faint: #736b5d;
 
   /* Accent terracotta — le point signature, parcimonieux (valeur charte DA) */
   --color-terra: #a85f3c;
   --color-terra-dim: #8f5439;
+  /* Texte posé SUR un aplat terracotta (pastilles, boutons pleins). La
+     terracotta ne s'inversant pas entre les thèmes, cette valeur est choisie
+     par thème pour rester au-dessus de 4,5:1 — blanc ici (4,8:1 sur la
+     terracotta claire, là où l'encre sombre ne donnerait que 3,9:1). */
+  --color-on-terra: #ffffff;
 
   /* Typo : Gloock (logotype/titres), mono (labels/méta), Saira (texte) */
   --font-wide: var(--font-gloock), "Times New Roman", serif;
@@ -50,7 +58,11 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-    overflow-x: hidden;
+    /* `clip` et non `hidden` : `overflow-x: hidden` force le calcul de
+       `overflow-y` à `auto` (spec CSS) et transforme le body en conteneur de
+       défilement — ce qui casse les `position: sticky` sur iOS. `clip` coupe
+       les débordements horizontaux sans créer de conteneur de scroll. */
+    overflow-x: clip;
   }
 
   ::selection {
