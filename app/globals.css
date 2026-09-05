@@ -879,3 +879,379 @@ html {
     transition: none;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BROUILLON PREMIUM — « LE BANC DE MONTAGE »
+   ─────────────────────────────────────────────────────────────────────
+   Un site en deux tons : le crème de la charte pour l'éditorial, le noir
+   chaud de la charte pour les films (la salle de projection). Le passage
+   de l'un à l'autre est le geste structurant de la page — comme on éteint
+   la lumière avant une projection.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Toute section marquée data-tone="dark" rebascule les variables de la
+   charte sombre dans SON sous-arbre : les composants n'ont rien à savoir
+   du ton dans lequel on les pose, ils lisent les mêmes variables. */
+[data-tone="dark"] {
+  --color-ink: #0a0908;
+  --color-ink-2: #15120f;
+  --color-ink-3: #1e1a15;
+  --color-line: #393229;
+  --color-line-soft: #221d17;
+  --color-fog: #d7d2c5;
+  --color-cream: #e8e4d8;
+  --color-bone: #ece8dc;
+  --color-bone-dim: #9b9384;
+  --color-bone-faint: #6e685c;
+  --color-terra: #b76e4e;
+  --color-terra-dim: #8f5439;
+  /* Sur la terracotta sombre, l'encre chaude repasse devant le blanc. */
+  --color-on-terra: #14100b;
+
+  background-color: var(--color-ink);
+  color: var(--color-bone);
+}
+
+/* Le header est fixe : il ne peut pas hériter du ton de la section qu'il
+   survole. Un observateur (ToneWatcher) lui pose la teinte de ce qui passe
+   dessous — la barre reste lisible d'un bout à l'autre du récit. */
+html[data-header-tone="dark"] [data-header] {
+  --color-ink: #0a0908;
+  /* Semi-transparent et non un gris fixe : le bouton garde son contour aussi
+     bien sur un plan noir que sur un ciel de coucher de soleil. */
+  --color-line: rgba(232, 228, 216, 0.32);
+  --color-line-soft: #221d17;
+  --color-cream: #e8e4d8;
+  --color-bone: #ece8dc;
+  --color-bone-dim: #9b9384;
+  --color-bone-faint: #6e685c;
+  --color-terra: #b76e4e;
+}
+[data-header] {
+  transition: color 0.5s var(--ease-out-soft);
+}
+
+/* ── Le HUD : timecode de visionneuse ─────────────────────────────────
+   Une réglette fixe en bas de l'écran. Le timecode avance avec la barre
+   de défilement (le site EST le film), le chapitre courant se nomme.
+   Discret, monospace, jamais dans le chemin de lecture. */
+.hud {
+  position: fixed;
+  z-index: 45;
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%) translateY(1.25rem);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.6s var(--ease-out-soft),
+    transform 0.7s var(--ease-out-expo);
+}
+.hud.is-on {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.hud-shell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 999px;
+  /* Verre fumé constant : la réglette passe au-dessus du crème comme du
+     noir, elle ne doit pas changer d'identité en route. */
+  border: 1px solid rgba(232, 228, 216, 0.16);
+  background: rgba(10, 9, 8, 0.72);
+  backdrop-filter: blur(14px) saturate(1.3);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  padding: 0.5rem 0.9rem;
+  color: #9b9384;
+}
+/* La jauge de progression : un trait de montage qui se remplit. */
+.hud-track {
+  position: relative;
+  height: 1px;
+  width: 3.5rem;
+  background: rgba(232, 228, 216, 0.2);
+  overflow: hidden;
+}
+.hud-fill {
+  position: absolute;
+  inset: 0;
+  background: var(--color-terra);
+  transform-origin: left;
+  transform: scaleX(var(--p, 0));
+}
+
+/* ── La pellicule : perforations Bolex, dessinées en CSS ──────────────
+   Deux bandes de trous carrés arrondis, haut et bas — le repère visuel
+   qui dit « film » sans qu'on ait à l'écrire. */
+.sprocket {
+  --hole: 9px;
+  --gap: 20px;
+  height: var(--hole);
+  /* Le trou prend la couleur du fond de page, l'amorce celle du support :
+     les deux variables se rebasculent avec le ton, la pellicule reste
+     lisible aussi bien sur le crème que dans la salle. */
+  background-image: radial-gradient(
+    closest-side,
+    var(--color-ink) 0 60%,
+    var(--color-ink-3) 63%
+  );
+  background-size: var(--gap) var(--hole);
+  background-repeat: repeat-x;
+}
+
+/* ── Le hero « scrub » : on monte le film à la main ───────────────────
+   Le curseur (desktop) ou le défilement (mobile) déplace la tête de
+   lecture dans l'extrait. Le cadre respire, la poignée suit. */
+.scrub-frame {
+  cursor: ew-resize;
+}
+.scrub-hint {
+  transition:
+    opacity 0.5s var(--ease-out-soft),
+    transform 0.6s var(--ease-out-expo);
+}
+.scrub-frame.is-held .scrub-hint {
+  opacity: 0;
+  transform: translateY(6px);
+}
+/* La tête de lecture : un trait fin qui glisse sous le cadre. */
+.scrub-head {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--color-terra);
+  transform: translateX(-0.5px);
+  box-shadow: 0 0 12px 1px color-mix(in srgb, var(--color-terra) 55%, transparent);
+  opacity: 0;
+  transition: opacity 0.35s var(--ease-out-soft);
+}
+.scrub-frame.is-held .scrub-head {
+  opacity: 1;
+}
+
+/* ── La loupe à grain ────────────────────────────────────────────────
+   Le nom du studio pris au mot : au survol d'une image, un disque
+   agrandit la matière et laisse remonter le grain argentique. */
+.loupe {
+  position: absolute;
+  height: 11rem;
+  width: 11rem;
+  border-radius: 999px;
+  pointer-events: none;
+  border: 1px solid color-mix(in srgb, var(--color-terra) 60%, transparent);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.25),
+    0 22px 60px -20px rgba(0, 0, 0, 0.65);
+  background-repeat: no-repeat;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.7);
+  transition:
+    opacity 0.4s var(--ease-out-soft),
+    transform 0.55s var(--ease-out-expo);
+  will-change: transform, opacity;
+}
+.loupe.is-on {
+  opacity: 1;
+}
+/* Le grain, dans la loupe seulement : c'est la démonstration. */
+.loupe::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0.4;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+
+/* ── L'étalonnage : le rideau avant / après ──────────────────────────
+   La moitié gauche montre le rush tel qu'il sort de la carte, la droite
+   le plan étalonné. Le rideau se déplace au pointeur ou au clavier. */
+.grade-raw {
+  /* Simulation d'un rush « à plat » (log) : contraste et saturation
+     rabattus, noirs relevés — ce qu'on voit avant de travailler la
+     couleur. */
+  filter: saturate(0.42) contrast(0.74) brightness(1.1);
+}
+.grade-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--color-cream);
+  cursor: ew-resize;
+}
+.grade-knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  height: 2.75rem;
+  width: 2.75rem;
+  transform: translate(-50%, -50%);
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid var(--color-cream);
+  background: color-mix(in srgb, var(--color-ink) 55%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: var(--color-cream);
+  transition: transform 0.4s var(--ease-out-expo);
+}
+.grade-handle:hover .grade-knob,
+.grade-handle:focus-visible .grade-knob {
+  transform: translate(-50%, -50%) scale(1.12);
+}
+
+/* ── Le chapitrage : la lumière s'éteint ─────────────────────────────
+   Volets d'ouverture d'une salle de projection : deux bandes noires qui
+   se rétractent quand le chapitre entre en vue. */
+.gate {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  height: 50%;
+  background: #070605;
+  transition: transform 1.5s var(--ease-out-expo);
+  will-change: transform;
+}
+.gate-top {
+  top: 0;
+  transform: translateY(0);
+}
+.gate-bottom {
+  bottom: 0;
+  transform: translateY(0);
+}
+.is-open .gate-top {
+  transform: translateY(-100%);
+}
+.is-open .gate-bottom {
+  transform: translateY(100%);
+}
+
+/* ── L'index dépliant des prestations ────────────────────────────────
+   Une ligne par métier ; au survol, l'image du métier vient se poser
+   derrière le curseur. Rien ne bouge en page, tout se joue en calque. */
+.index-row {
+  transition: color 0.45s var(--ease-out-expo);
+}
+.index-row .index-num {
+  transition:
+    color 0.45s var(--ease-out-expo),
+    transform 0.6s var(--ease-out-expo);
+}
+.index-row:hover .index-num,
+.index-row:focus-visible .index-num {
+  color: var(--color-terra);
+  transform: translateX(4px);
+}
+.index-peek {
+  position: fixed;
+  z-index: 40;
+  height: 14rem;
+  width: 21rem;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.94);
+  transition:
+    opacity 0.4s var(--ease-out-soft),
+    transform 0.6s var(--ease-out-expo);
+  box-shadow: 0 40px 90px -35px rgba(0, 0, 0, 0.7);
+  will-change: transform, opacity;
+}
+.index-peek.is-on {
+  opacity: 1;
+}
+
+/* ── La planche-contact ──────────────────────────────────────────────
+   L'index des films en planche de tirage : chaque vignette porte son
+   numéro de prise, et le film retenu se cercle au crayon gras. */
+.contact-cell {
+  transition:
+    transform 0.7s var(--ease-out-expo),
+    filter 0.7s var(--ease-out-soft);
+}
+.contact-cell:hover {
+  transform: scale(1.02);
+}
+/* Le cercle de crayon gras : un ovale terracotta qui se trace autour de
+   la vignette survolée, comme sur une vraie planche annotée. */
+.grease {
+  position: absolute;
+  left: -14px;
+  top: -13px;
+  /* Dimensions explicites : un <svg> avec viewBox et sans largeur/hauteur
+     déclarées se recale sur son ratio intrinsèque (1:1 ici) au lieu de
+     remplir la boîte définie par les décalages — le cercle déborderait
+     alors sous le titre. */
+  width: calc(100% + 28px);
+  height: calc(100% + 26px);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s var(--ease-out-soft);
+}
+.grease path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 0.9s var(--ease-out-expo);
+  vector-effect: non-scaling-stroke;
+}
+.contact-cell:hover .grease,
+.contact-cell:focus-visible .grease {
+  opacity: 1;
+}
+.contact-cell:hover .grease path,
+.contact-cell:focus-visible .grease path {
+  stroke-dashoffset: 0;
+}
+
+/* ── Le compte à rebours d'amorce (leader) ───────────────────────────
+   Le chiffre d'amorce d'une bobine, tracé au trait, qui accueille la
+   page réalisations. Une seule fois, sans bloquer la lecture. */
+@keyframes leader-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.leader-sweep {
+  animation: leader-spin 4s linear infinite;
+  transform-origin: 50% 50%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hud,
+  .scrub-hint,
+  .scrub-head,
+  .loupe,
+  .grade-knob,
+  .index-peek,
+  .contact-cell,
+  .grease,
+  .grease path,
+  [data-header] {
+    transition: none;
+  }
+  .gate {
+    transition: none;
+    transform: translateY(0);
+  }
+  .is-open .gate-top {
+    transform: translateY(-100%);
+  }
+  .is-open .gate-bottom {
+    transform: translateY(100%);
+  }
+  .leader-sweep {
+    animation: none;
+  }
+}

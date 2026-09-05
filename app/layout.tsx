@@ -4,6 +4,8 @@ import "./globals.css";
 import { Grain } from "@/components/Grain";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { ToneWatcher } from "@/components/bench/ToneWatcher";
+import { Hud } from "@/components/bench/Hud";
 import { services, site } from "@/lib/site";
 
 // Logotype & titres — Gloock (serif display fort contraste, cf. la charte).
@@ -138,11 +140,16 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessLd) }}
         />
         <Grain />
+        {/* Le header suit le ton de la section qu'il survole (crème / salle
+            de projection), la barre d'état du navigateur avec lui. */}
+        <ToneWatcher />
         <Header />
         <main>{children}</main>
         {/* L'année est calculée ici (composant serveur) et passée au pied de
             page : le HTML rendu et la première passe client concordent. */}
         <Footer year={new Date().getFullYear()} />
+        {/* La réglette de visionneuse — timecode et chapitre courant */}
+        <Hud />
       </body>
     </html>
   );

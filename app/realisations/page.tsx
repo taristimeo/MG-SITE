@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { RevealTitle } from "@/components/RevealTitle";
 import { Reveal } from "@/components/Reveal";
-import { WorksFiltered } from "@/components/WorksFiltered";
+import { RevealTitle } from "@/components/RevealTitle";
+import { ContactSheet } from "@/components/bench/ContactSheet";
 import { projects, site } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -10,42 +10,93 @@ export const metadata: Metadata = {
   alternates: { canonical: "/realisations" },
 };
 
-// Page « Réalisations » — vitrine VISUELLE : un en-tête court et animé, puis les
-// films en GRANDES dalles immersives (WorksApple), aperçu vidéo en vue. L'image
-// et le mouvement portent la page ; le texte se réduit à l'essentiel.
-// 100 % transform + opacity → robuste iOS (aucun filter/clip-path sur les vidéos).
+/**
+ * RÉALISATIONS — la planche-contact.
+ *
+ * L'index n'est pas une grille de plus : c'est la planche de tirage du studio.
+ * Une amorce de bobine en tête de page, les films alignés, numérotés, perforés,
+ * et le crayon gras qui cercle celui qu'on regarde.
+ */
 export default function RealisationsPage() {
-  // Bornes d'années dérivées des données — pour la ligne de compte, sans texte superflu.
   const years = projects.map((p) => Number(p.year));
-  const from = Math.min(...years);
-  const to = Math.max(...years);
-  const span = from === to ? `${from}` : `${from}–${to}`;
+  const span = `${Math.min(...years)}–${Math.max(...years)}`;
 
   return (
     <section className="px-5 pb-24 pt-28 sm:px-8 sm:pt-36 lg:px-10">
-      {/* En-tête court, centré, animé */}
-      <header className="mx-auto mb-14 max-w-[1080px] text-center sm:mb-20">
-        <Reveal>
-          <p className="font-cond text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
-            Le travail
-          </p>
-        </Reveal>
+      <div className="mx-auto max-w-[1400px]">
+        {/* En-tête : l'amorce de bobine */}
+        <header className="mb-14 flex flex-col items-center gap-8 sm:mb-20 sm:flex-row sm:items-end sm:justify-between">
+          <div className="text-center sm:text-left">
+            <Reveal>
+              <p className="font-cond text-[11px] tracking-[0.25em] text-[var(--color-bone-faint)]">
+                Planche-contact — {span}
+              </p>
+            </Reveal>
+            <RevealTitle
+              text="Réalisations"
+              className="mt-3 text-[clamp(2.6rem,9vw,5.5rem)] leading-[1] text-[var(--color-cream)]"
+            />
+          </div>
 
-        <RevealTitle
-          text="Réalisations"
-          className="mt-4 text-[clamp(2.6rem,10vw,5.5rem)] leading-[1] text-[var(--color-cream)]"
-        />
+          <Reveal delay={420}>
+            <Leader count={projects.length} />
+          </Reveal>
+        </header>
 
-        <Reveal delay={700}>
-          <p className="font-cond mt-6 text-[11px] tracking-[0.25em] text-[var(--color-bone-dim)]">
-            {projects.length} films <span className="text-[var(--color-terra)]">·</span> {span}
-          </p>
-        </Reveal>
-      </header>
-
-      {/* Filtre par catégorie + vitrine — grandes dalles immersives, aperçu
-          vidéo, entrée au scroll */}
-      <WorksFiltered />
+        <ContactSheet />
+      </div>
     </section>
+  );
+}
+
+/**
+ * L'amorce : la mire de début de bobine, avec le nombre de films au centre.
+ * Tracée en SVG — nette à toute taille, sans un octet d'image.
+ */
+function Leader({ count }: { count: number }) {
+  return (
+    <div
+      className="relative h-[104px] w-[104px] shrink-0"
+      aria-label={`${count} films`}
+      role="img"
+    >
+      <svg viewBox="0 0 100 100" className="h-full w-full" fill="none">
+        <circle
+          cx="50"
+          cy="50"
+          r="47"
+          stroke="var(--color-line)"
+          strokeWidth="1"
+        />
+        <circle
+          cx="50"
+          cy="50"
+          r="34"
+          stroke="var(--color-line-soft)"
+          strokeWidth="1"
+        />
+        {/* La croix de visée */}
+        <path
+          d="M50 0V26M50 74v26M0 50h26M74 50h26"
+          stroke="var(--color-line)"
+          strokeWidth="1"
+        />
+        {/* Le balai qui tourne, comme un décompte d'amorce */}
+        <g className="leader-sweep">
+          <path
+            d="M50 50V3"
+            stroke="var(--color-terra)"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          />
+        </g>
+      </svg>
+      <span
+        aria-hidden
+        className="font-wide absolute inset-0 flex items-center justify-center text-[2.1rem] leading-none text-[var(--color-bone)]"
+      >
+        {count}
+      </span>
+    </div>
   );
 }

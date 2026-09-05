@@ -49,6 +49,38 @@ npm run build
 npm run start
 ```
 
+## Brouillon « Le banc de montage » (branche `claude/studio-audiovisuel-premium-7tx50p`)
+
+Cette branche est une **proposition de refonte premium**, pas la version en
+ligne. Elle garde la charte (crème chaud, terracotta, Gloock / JetBrains Mono /
+Saira, le point du logotype) et la reprend dans un parti pris unique : *le site
+est monté comme un film*.
+
+**Le principe : deux tons.** Le crème de la charte pour tout ce qui se lit, le
+noir chaud de la charte pour tout ce qui se regarde. N'importe quelle section
+peut basculer en « salle de projection » avec `data-tone="dark"` : les
+variables de couleur se rebasculent dans son sous-arbre, et les composants
+n'ont rien à savoir du ton dans lequel on les pose. Le header suit
+automatiquement (`ToneWatcher`), la barre d'état du navigateur aussi.
+
+**Les six gestes signature** (dans `components/bench/`) :
+
+| Composant | Ce que ça fait |
+| --- | --- |
+| `Moviola` | L'écran-titre est une table de montage : on promène le curseur sur la pellicule des six films et on scrubbe — la position choisit le film *et* l'instant dans ce film. Un seul extrait chargé à la fois. |
+| `Hud` | Une réglette de visionneuse : le défilement devient un timecode, la progression un trait de montage, et le chapitre courant se nomme (lu sur les `data-chapter` de la page). |
+| `FilmChapters` | La salle : les films phares projetés plein écran, épinglés, volets qui s'ouvrent à l'entrée du chapitre. |
+| `GradeSplit` | Le rideau d'étalonnage : le même plan, rush à gauche, étalonné à droite. Suit le curseur, manœuvrable au doigt et au clavier. |
+| `GrainLoupe` | La loupe à grain : au survol d'une image, un disque agrandit la matière — le nom du studio pris au mot. |
+| `ContactSheet` | Les réalisations en planche-contact : vignettes perforées, numéros de tirage, et le crayon gras terracotta qui cercle la prise regardée. |
+
+`ServiceIndex` complète l'ensemble : les métiers en index dépliant, avec la
+planche du métier qui suit le curseur.
+
+**Ce qui reste à trancher** : le rush du `GradeSplit` est une *simulation*
+(contraste et saturation rabattus) — mention affichée sous le cadre. Pour la
+mise en ligne, remplacer par un vrai export à plat du même plan.
+
 ## Modifier le contenu
 
 Tout le contenu éditorial est centralisé dans [`lib/site.ts`](lib/site.ts) :

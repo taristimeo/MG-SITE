@@ -123,7 +123,7 @@ export function Header() {
   const logoHidden = isHome && !pastHero;
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50">
+    <header data-header className="fixed inset-x-0 top-0 z-50">
       {/* Fond de la barre au défilement. Couche dédiée et non le <header>
           lui-même : un backdrop-filter sur le header en ferait un bloc
           conteneur pour l'overlay en position fixed, qui ne couvrirait plus
