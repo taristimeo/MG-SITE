@@ -8,7 +8,7 @@ import { site } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Contact — Demander un devis",
   description: `Demandez un devis à ${site.name}, studio de production vidéo à ${site.city}. Parlez-nous de votre projet vidéo : corporate, événement, mariage, publicité ou clip.`,
-  alternates: { canonical: "/contact" },
+  alternates: { canonical: "/banc/contact" },
 };
 
 // Contact éditorial : le devis est LA pièce centrale — une bande géante qui se

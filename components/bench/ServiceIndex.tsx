@@ -43,7 +43,7 @@ export function ServiceIndex() {
         {services.map((s) => (
           <li key={s.id} className="border-b border-[var(--color-line-soft)]">
             <Link
-              href="/contact"
+              href="/banc/contact"
               onMouseEnter={() => setHover(s.id)}
               onMouseLeave={() => setHover((h) => (h === s.id ? null : h))}
               className="index-row group flex items-baseline gap-4 py-6 sm:gap-8 sm:py-9"

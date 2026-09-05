@@ -8,11 +8,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const base = site.url;
   const lastModified = new Date();
 
-  const routes = ["", "/realisations", "/studio", "/contact"].map((path) => ({
+  // Les trois brouillons cohabitent le temps de l'arbitrage. Seul le
+  // brouillon 01 expose des pages internes ; les deux autres tiennent sur un
+  // écran unique. La page de garde, elle, est un document de travail et reste
+  // hors index (voir ses métadonnées).
+  const routes = [
+    "/banc",
+    "/banc/realisations",
+    "/banc/studio",
+    "/banc/contact",
+    "/viseur",
+    "/pellicule",
+  ].map((path) => ({
     url: `${base}${path}`,
     lastModified,
     changeFrequency: "monthly" as const,
-    priority: path === "" ? 1 : 0.8,
+    priority: path === "/banc" ? 1 : 0.8,
   }));
 
   const projectRoutes = projects.map((p) => ({

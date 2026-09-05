@@ -1255,3 +1255,211 @@ html[data-header-tone="dark"] [data-header] {
     animation: none;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LE SÉLECTEUR DE BROUILLON
+   ─────────────────────────────────────────────────────────────────────
+   Outil de comparaison, pas élément de design : verre fumé et monospace,
+   volontairement distinct des trois maquettes. Ancré au bord gauche à
+   mi-hauteur — le seul endroit libre dans les trois à la fois.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.draft-switcher {
+  position: fixed;
+  left: 0;
+  top: 50%;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  transform: translateY(-50%);
+  /* Rien ne bouge avant que les préférences soient relues : pas de sursaut
+     au chargement. */
+  transition: none;
+}
+.draft-switcher.is-ready {
+  transition: transform 0.5s var(--ease-out-expo);
+}
+/* Escamoté : seule la languette dépasse, le temps de juger un écran nu. */
+.draft-switcher.is-hidden {
+  transform: translateY(-50%) translateX(calc(-100% + 10px));
+}
+.draft-switcher.is-hidden .draft-panel {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.draft-panel {
+  width: 15.5rem;
+  overflow: hidden;
+  border: 1px solid rgba(232, 228, 216, 0.14);
+  border-left: 0;
+  border-radius: 0 10px 10px 0;
+  background: rgba(10, 9, 8, 0.86);
+  backdrop-filter: blur(16px) saturate(1.3);
+  -webkit-backdrop-filter: blur(16px) saturate(1.3);
+  padding: 0.9rem 0.9rem 0.7rem;
+  /* Replié : le panneau se rétracte derrière la languette. */
+  margin-left: -15.5rem;
+  opacity: 0;
+  transition:
+    margin-left 0.55s var(--ease-out-expo),
+    opacity 0.4s var(--ease-out-soft);
+}
+.draft-switcher.is-open .draft-panel {
+  margin-left: 0;
+  opacity: 1;
+}
+
+.draft-title {
+  margin: 0 0 0.7rem;
+  font-family: var(--font-cond);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #6e685c;
+}
+
+.draft-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.draft-item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  border-radius: 6px;
+  padding: 0.5rem 0.55rem;
+  color: #9b9384;
+  transition:
+    background-color 0.3s var(--ease-out-expo),
+    color 0.3s var(--ease-out-expo);
+}
+.draft-item:hover {
+  background: rgba(232, 228, 216, 0.06);
+  color: #ece8dc;
+}
+.draft-item.is-active {
+  background: rgba(183, 110, 78, 0.14);
+  color: #ece8dc;
+}
+.draft-num {
+  font-family: var(--font-cond);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: #6e685c;
+}
+.draft-item.is-active .draft-num {
+  color: #b76e4e;
+}
+.draft-name {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.25;
+}
+.draft-key {
+  margin-left: auto;
+  border: 1px solid rgba(232, 228, 216, 0.16);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-family: var(--font-cond);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  color: #6e685c;
+}
+
+.draft-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.7rem;
+  border-top: 1px solid rgba(232, 228, 216, 0.1);
+  padding-top: 0.6rem;
+}
+.draft-foot-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-cond);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #6e685c;
+  transition: color 0.3s var(--ease-out-expo);
+}
+.draft-foot-link:hover {
+  color: #b76e4e;
+}
+
+/* La languette — toujours saisissable, même panneau replié ou escamoté */
+.draft-tab {
+  display: flex;
+  height: 3.4rem;
+  width: 1.9rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border: 1px solid rgba(232, 228, 216, 0.14);
+  border-left: 0;
+  border-radius: 0 8px 8px 0;
+  background: rgba(10, 9, 8, 0.86);
+  backdrop-filter: blur(16px) saturate(1.3);
+  -webkit-backdrop-filter: blur(16px) saturate(1.3);
+  color: #ece8dc;
+  transition: background-color 0.3s var(--ease-out-expo);
+}
+.draft-tab:hover {
+  background: rgba(20, 17, 14, 0.94);
+}
+.draft-tab-num {
+  font-family: var(--font-cond);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: #b76e4e;
+}
+.draft-tab-arrow {
+  font-size: 13px;
+  line-height: 1;
+  color: #6e685c;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .draft-switcher,
+  .draft-switcher.is-ready,
+  .draft-panel,
+  .draft-item,
+  .draft-tab,
+  .draft-foot-link {
+    transition: none;
+  }
+}
+
+/* ── La page de garde : le choix des trois brouillons ─────────────── */
+.gate-card {
+  transition:
+    transform 0.7s var(--ease-out-expo),
+    border-color 0.5s var(--ease-out-expo);
+}
+.gate-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--color-terra);
+}
+.gate-card img {
+  transition: transform 1.2s var(--ease-out-expo);
+}
+.gate-card:hover img {
+  transform: scale(1.05);
+}
+@media (prefers-reduced-motion: reduce) {
+  .gate-card,
+  .gate-card img {
+    transition: none;
+  }
+  .gate-card:hover,
+  .gate-card:hover img {
+    transform: none;
+  }
+}

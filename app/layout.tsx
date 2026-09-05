@@ -2,10 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Gloock, JetBrains_Mono, Saira } from "next/font/google";
 import "./globals.css";
 import { Grain } from "@/components/Grain";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 import { ToneWatcher } from "@/components/bench/ToneWatcher";
-import { Hud } from "@/components/bench/Hud";
+import { DraftSwitcher } from "@/components/drafts/DraftSwitcher";
 import { services, site } from "@/lib/site";
 
 // Logotype & titres — Gloock (serif display fort contraste, cf. la charte).
@@ -143,13 +141,12 @@ export default function RootLayout({
         {/* Le header suit le ton de la section qu'il survole (crème / salle
             de projection), la barre d'état du navigateur avec lui. */}
         <ToneWatcher />
-        <Header />
-        <main>{children}</main>
-        {/* L'année est calculée ici (composant serveur) et passée au pied de
-            page : le HTML rendu et la première passe client concordent. */}
-        <Footer year={new Date().getFullYear()} />
-        {/* La réglette de visionneuse — timecode et chapitre courant */}
-        <Hud />
+        {/* En-tête, pied de page et réglette appartiennent au brouillon 01 :
+            ils sont posés par son propre layout, pas ici — les deux autres
+            brouillons occupent l'écran entier. */}
+        {children}
+        {/* L'outil de comparaison, commun aux trois brouillons */}
+        <DraftSwitcher />
       </body>
     </html>
   );

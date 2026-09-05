@@ -5,6 +5,10 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { navLinks, site } from "@/lib/site";
 
+// Le brouillon « banc de montage » vit sous /banc : ses liens de navigation
+// y sont préfixés, la racine restant la page de choix des trois brouillons.
+const BASE = "/banc";
+
 export function Header() {
   const [open, setOpen] = useState(false);
   const [reduced, setReduced] = useState(false);
@@ -14,7 +18,7 @@ export function Header() {
   const [pastHero, setPastHero] = useState(false);
 
   const pathname = usePathname();
-  const isHome = pathname === "/";
+  const isHome = pathname === BASE;
 
   const menuRef = useRef<HTMLDivElement>(null);
   const burgerRef = useRef<HTMLButtonElement>(null);
@@ -155,7 +159,7 @@ export function Header() {
           {navLinks.map((l) => (
             <Link
               key={l.href}
-              href={l.href}
+              href={`${BASE}${l.href}`}
               className="link-underline font-cond text-[14px] text-[var(--color-bone)] transition-colors hover:text-[var(--color-terra)]"
             >
               {l.label}
@@ -168,7 +172,7 @@ export function Header() {
             réservée, la barre ne saute pas), retiré du parcours clavier et de
             l'arbre d'accessibilité tant qu'il est invisible. */}
         <Link
-          href="/"
+          href={BASE}
           onClick={() => setOpen(false)}
           aria-hidden={logoHidden || undefined}
           tabIndex={logoHidden ? -1 : undefined}
@@ -183,7 +187,7 @@ export function Header() {
         </Link>
 
         <Link
-          href="/contact"
+          href={`${BASE}/contact`}
           className="hidden rounded-full border border-[var(--color-line)] px-5 py-2 font-cond text-[13px] text-[var(--color-bone)] transition-colors hover:border-[var(--color-terra)] hover:bg-[var(--color-terra)] hover:text-[var(--color-ink)] md:block"
         >
           On en parle
@@ -251,7 +255,7 @@ export function Header() {
           {menuItems.map((l, i) => (
             <Link
               key={l.href}
-              href={l.href}
+              href={`${BASE}${l.href}`}
               onClick={() => setOpen(false)}
               style={{
                 transitionDelay: !reduced && open ? `${160 + i * 90}ms` : "0ms",

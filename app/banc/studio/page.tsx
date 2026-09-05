@@ -11,7 +11,7 @@ import { site, values } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Studio — Vidéaste & réalisateur à Bordeaux",
   description: `${site.name}, studio de production vidéo fondé par ${site.founder} à ${site.city}. Notre approche : observer avant de filmer, du repérage à la post-production.`,
-  alternates: { canonical: "/studio" },
+  alternates: { canonical: "/banc/studio" },
 };
 
 const chapters = [

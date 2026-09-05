@@ -7,7 +7,7 @@ import { projects, site } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Réalisations — Films & vidéos",
   description: `Portfolio de ${site.name}, studio de production vidéo à ${site.city} : films corporate, événementiel, clips, tourisme et publicité. Découvrez nos réalisations.`,
-  alternates: { canonical: "/realisations" },
+  alternates: { canonical: "/banc/realisations" },
 };
 
 /**
