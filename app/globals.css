@@ -4214,3 +4214,48 @@ html[data-header-tone="dark"] [data-header] {
     transform: translateY(-10px);
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LE VISEUR — LE PROJECTEUR (rendu WebGL)
+   ─────────────────────────────────────────────────────────────────────
+   Le plan n'est plus une balise mais une texture. Le canvas se pose PAR-
+   DESSUS la pile DOM d'origine, qui reste en place et redevient visible
+   telle quelle si le contexte WebGL n'est pas obtenu.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.vs-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.9s var(--ease-out-soft);
+}
+.vs-canvas.is-on {
+  opacity: 1;
+}
+
+/* Projecteur allumé : la pile DOM s'efface, mais reste montée — l'extrait
+   qui l'habite est la source de la texture, il doit continuer à décoder.
+   D'où l'opacité et non `display: none`. */
+.vs-root[data-gl="on"] .vs-frames {
+  opacity: 0;
+  transition: opacity 0.6s var(--ease-out-soft);
+}
+
+/* Le vignettage et le grain sont désormais calculés dans le fragment :
+   les calques qui les simulaient feraient double emploi. */
+.vs-root[data-gl="on"] .vs-vig,
+.vs-root[data-gl="on"] ~ .grain {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vs-canvas,
+  .vs-root[data-gl="on"] .vs-frames {
+    transition: none;
+  }
+}

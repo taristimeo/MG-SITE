@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { FilmCanvas, type FilmCanvasHandle } from "./gl/FilmCanvas";
 import { projectPreview, projectThumb, projects, site } from "@/lib/site";
 import { ViseurOverlay } from "./ViseurOverlay";
 import {
@@ -52,6 +53,8 @@ export function Viseur() {
   const [fiche, setFiche] = useState(false);
   const [panel, setPanel] = useState<Panel>(null);
   const [videoOn, setVideoOn] = useState(false);
+  // Le projecteur WebGL a-t-il pu démarrer ? Sinon on garde les plans en DOM.
+  const [gl, setGl] = useState(false);
   const [reduced, setReduced] = useState(false);
 
   // ── Ce que la boucle sait : la position continue sur la bague ───────
@@ -70,6 +73,8 @@ export function Viseur() {
   const rootRef = useRef<HTMLDivElement>(null);
   const framesRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<FilmCanvasHandle>(null);
+  const firstPlanRef = useRef(true);
   const tcRef = useRef<HTMLSpanElement>(null);
   const frameEls = useRef<(HTMLDivElement | null)[]>([]);
   const titleEls = useRef<(HTMLDivElement | null)[]>([]);
@@ -375,6 +380,27 @@ export function Viseur() {
     if (p && typeof p.catch === "function") p.catch(() => {});
   }, [active, settled, panel]);
 
+  // ── Le projecteur : le plan courant y entre par déplacement ─────────
+  // Le premier plan est POSÉ (le fondu d'ouverture du projecteur suffit) ;
+  // les suivants ARRIVENT, l'ancien filant sous la turbulence.
+  useEffect(() => {
+    const c = canvasRef.current;
+    if (!c) return;
+    const still = projectThumb(projects[active]);
+    if (firstPlanRef.current) {
+      firstPlanRef.current = false;
+      c.set(still);
+    } else {
+      c.go(still);
+    }
+  }, [active]);
+
+  // L'extrait sert de texture : le projecteur y puise image par image, et
+  // repasse tout seul sur le photogramme fixe si la lecture n'aboutit pas.
+  useEffect(() => {
+    canvasRef.current?.attachVideo(videoRef.current);
+  }, [gl]);
+
   // ── Le timecode : il avance sans repasser par React ─────────────────
   useEffect(() => {
     let t = 0;
@@ -393,12 +419,24 @@ export function Viseur() {
   const st = spinning ? 1 : !intro && fiche ? 2 : 0;
 
   return (
-    <div ref={rootRef} data-tone="dark" data-st={st} className="vs-root">
+    <div
+      ref={rootRef}
+      data-tone="dark"
+      data-st={st}
+      data-gl={gl ? "on" : "off"}
+      className="vs-root"
+    >
       <h1 className="sr-only">
         {site.name} — le viseur : {p.title}
       </h1>
 
-      {/* ── Les plans ─────────────────────────────────────────────── */}
+      {/* ── Les plans ─────────────────────────────────────────────────
+          Le projecteur WebGL rend le plan courant : grain, souffle de lampe,
+          aberration d'objectif, et transition par déplacement d'un film à
+          l'autre. La pile DOM juste dessous reste le repli exact si le
+          contexte n'est pas obtenu — le site ne perd alors que la matière. */}
+      <FilmCanvas ref={canvasRef} onReady={setGl} />
+
       <div ref={framesRef} className="vs-frames">
         {projects.map((f, i) => (
           <div
