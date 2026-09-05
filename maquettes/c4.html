@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mauvais Grain — Le Journal de tournage</title>
+<link rel="stylesheet" href="_base.css">
+<style>
+/* ═══════════════════════════════════════════════════════════
+   C4 — LE JOURNAL DE TOURNAGE
+   Une gazette de studio : le site se lit, l'image vient à toi.
+   ═══════════════════════════════════════════════════════════ */
+
+body{
+  font-family:var(--sans);
+  color:var(--bone);
+  background:var(--ink);
+}
+
+.page{
+  position:relative;
+  width:100%; height:100%;
+  padding:0 54px 26px;
+  display:flex; flex-direction:column;
+  transition:opacity .7s var(--soft), filter .7s var(--soft);
+}
+/* état 2 : le journal reste lisible, mais s'estompe */
+body.is-open .page{ opacity:.34; filter:saturate(.6); }
+
+/* ─────────────── BANDEAU DE TÊTE ─────────────── */
+
+.strip{
+  display:flex; align-items:center; justify-content:space-between;
+  font-family:var(--cond); font-weight:500; text-transform:uppercase;
+  font-size:9px; letter-spacing:.2em; color:var(--bone-faint);
+  padding:9px 0 8px;
+  border-bottom:1px solid var(--line);
+}
+.strip b{ font-weight:500; color:var(--bone-dim); }
+
+.mast{
+  display:grid; grid-template-columns:1fr auto 1fr; align-items:center;
+  padding:14px 0 10px;
+}
+.mast-side{
+  font-family:var(--cond); font-weight:400; text-transform:uppercase;
+  font-size:9.5px; letter-spacing:.16em; line-height:2.05;
+  color:var(--bone-dim);
+}
+.mast-side.r{ text-align:right; }
+.mast-side .num{
+  display:block; font-family:var(--wide); font-size:26px;
+  letter-spacing:0; line-height:1; color:var(--bone); text-transform:none;
+  margin-bottom:6px;
+}
+.mast-side.r .num{ color:var(--terra); }
+
+.logo{
+  font-family:var(--wide); font-weight:400; word-spacing:.02em;
+  font-size:86px; line-height:.9; letter-spacing:-.022em;
+  margin:0; padding:0 34px; white-space:nowrap;
+  color:var(--bone);
+}
+
+.baseline{
+  border-top:1px solid var(--line);
+  border-bottom:3px solid var(--bone);
+  padding:8px 0 9px;
+  text-align:center;
+  font-family:var(--cond); font-weight:500; text-transform:uppercase;
+  font-size:10px; letter-spacing:.44em; color:var(--bone-dim);
+  text-indent:.44em;
+}
+.baseline::after{
+  content:""; display:block; height:1px; background:var(--line);
+  margin:9px -54px -10px;
+}
+
+/* ─────────────── LE JOURNAL ─────────────── */
+
+.paper{
+  flex:1; min-height:0;
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr 232px;
+  grid-template-rows:minmax(0,1.2fr) auto minmax(0,1fr);
+  padding-top:20px;
+}
+.cell{ min-width:0; padding:0 22px; }
+.c1{ grid-column:1; grid-row:1/4; padding-left:0; padding-right:24px; }
+.c2a{ grid-column:2; grid-row:1; border-left:1px solid var(--line); }
+.c3a{ grid-column:3; grid-row:1; border-left:1px solid var(--line); }
+.exergue{ grid-column:2/4; grid-row:2; border-left:1px solid var(--line); }
+.c2b{ grid-column:2; grid-row:3; border-left:1px solid var(--line); }
+.c3b{ grid-column:3; grid-row:3; border-left:1px solid var(--line); }
+.index{
+  grid-column:4; grid-row:1/4;
+  border-left:1px solid var(--line);
+  padding-left:24px; padding-right:0;
+  display:flex; flex-direction:column;
+}
+
+/* Typographie courante */
+p{ margin:0 0 .78em; }
+.body{
+  font-size:12.3px; line-height:1.72; font-weight:330;
+  color:var(--bone-dim);
+  text-align:justify; text-justify:inter-word;
+  hyphens:auto; -webkit-hyphens:auto;
+}
+.body strong{ font-weight:600; color:var(--bone); }
+
+.chapo{
+  font-size:13.6px; line-height:1.66; font-weight:380;
+  color:var(--bone);
+  text-align:justify; hyphens:auto; -webkit-hyphens:auto;
+  margin-bottom:14px;
+}
+.chapo::first-letter{
+  font-family:var(--wide); font-weight:400;
+  font-size:3.55em; line-height:.78;
+  float:left; margin:.045em .085em -.03em 0;
+  color:var(--terra);
+}
+
+.kicker{
+  font-family:var(--cond); font-weight:600; text-transform:uppercase;
+  font-size:8.5px; letter-spacing:.22em; color:var(--bone-faint);
+  display:flex; align-items:center; gap:8px;
+  margin:0 0 9px;
+}
+.kicker::after{ content:""; flex:1; height:1px; background:var(--line); }
+.kicker.t{ padding-top:11px; border-top:1px solid var(--line); margin-top:14px; }
+
+.sub{
+  font-family:var(--wide); font-size:18px; line-height:1.14;
+  margin:0 0 8px; color:var(--bone);
+}
+
+/* Partis pris */
+.credo{ list-style:none; margin:0 0 2px; padding:0; }
+.credo li{
+  font-size:13px; line-height:1.5; font-weight:360; color:var(--bone);
+  padding:6px 0 7px 0; border-bottom:1px dotted var(--line);
+  display:flex; gap:9px;
+}
+.credo li:last-child{ border-bottom:0; }
+.credo i{
+  font-style:normal; color:var(--terra);
+  font-family:var(--cond); font-size:9px; letter-spacing:.1em;
+  padding-top:4px;
+}
+
+/* Métiers */
+.metiers{ list-style:none; margin:0; padding:0; }
+.metiers li{ display:flex; gap:11px; padding:7px 0 8px; border-top:1px solid var(--line-soft); }
+.metiers li:first-child{ border-top:0; padding-top:2px; }
+.metiers .n{
+  font-family:var(--cond); font-weight:600; font-size:9px; letter-spacing:.08em;
+  color:var(--terra); padding-top:3px; flex:none;
+}
+.metiers .t{
+  font-family:var(--cond); font-weight:600; text-transform:uppercase;
+  font-size:9px; letter-spacing:.16em; color:var(--bone);
+  display:block; margin-bottom:2px;
+}
+.metiers .q{ font-size:11.8px; line-height:1.5; color:var(--bone-dim); font-weight:330; }
+
+/* Le mot qui appelle l'image */
+.film{
+  display:inline-block;
+  font-weight:520; font-size:.93em; letter-spacing:.055em;
+  text-transform:uppercase; color:var(--bone);
+  border-bottom:1px solid var(--terra);
+  padding-bottom:1px; cursor:pointer; white-space:nowrap;
+  transition:color .2s var(--soft), background-color .2s var(--soft);
+}
+.film:hover, .film.is-hot{
+  color:var(--terra);
+  background:rgba(168,95,60,.09);
+}
+.year{ font-family:var(--cond); font-size:.82em; letter-spacing:.04em; color:var(--bone-faint); }
+
+/* Exergue — le manifeste */
+.exergue{
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  padding-top:17px; padding-bottom:17px;
+  margin:15px 0;
+  display:flex; align-items:center; gap:22px;
+}
+.exergue .mark{
+  font-family:var(--wide); font-size:66px; line-height:.6;
+  color:var(--terra); flex:none; align-self:flex-start; margin-top:24px;
+}
+.exergue q{
+  font-family:var(--wide); font-size:39px; line-height:1.13;
+  letter-spacing:-.018em; color:var(--bone); quotes:none;
+  display:block;
+}
+.exergue em{ font-style:normal; color:var(--terra); }
+.exergue .sig{
+  font-family:var(--cond); text-transform:uppercase; font-size:8.5px;
+  letter-spacing:.2em; color:var(--bone-faint); margin-top:11px; display:block;
+}
+
+/* Ours / contact */
+.ours{ font-family:var(--cond); font-size:9.5px; line-height:2.1; letter-spacing:.09em; color:var(--bone-dim); }
+.ours span{ display:block; text-transform:uppercase; }
+.ours .lbl{ color:var(--bone-faint); font-size:8.5px; letter-spacing:.2em; }
+.ours a{ color:var(--bone); text-decoration:none; text-transform:none; letter-spacing:.04em; }
+
+/* ─────────────── INDEX ─────────────── */
+.index h2{
+  font-family:var(--cond); font-weight:600; text-transform:uppercase;
+  font-size:8.5px; letter-spacing:.24em; color:var(--bone);
+  margin:0 0 12px; padding-bottom:9px; border-bottom:2px solid var(--bone);
+}
+.idx{ list-style:none; margin:0; padding:0; }
+.idx li{
+  display:grid; grid-template-columns:20px 1fr;
+  gap:9px; padding:8px 0 9px; border-bottom:1px solid var(--line-soft);
+}
+.idx .n{
+  font-family:var(--cond); font-weight:600; font-size:9px; letter-spacing:.04em;
+  color:var(--terra); padding-top:4px;
+}
+.idx .t{
+  font-family:var(--wide); font-size:15.5px; line-height:1.14; color:var(--bone);
+  word-spacing:.06em;
+  cursor:pointer; display:inline-block;
+  border-bottom:1px solid transparent; transition:color .2s var(--soft);
+}
+.idx li:hover .t, .idx .t.is-hot{ color:var(--terra); border-bottom-color:var(--terra); }
+.idx .m{
+  font-family:var(--cond); font-size:8.5px; text-transform:uppercase;
+  letter-spacing:.14em; color:var(--bone-faint); margin-top:5px; display:block;
+}
+.index .foot{ margin-top:auto; padding-top:14px; border-top:1px solid var(--line); }
+
+/* ─────────────── LA VIGNETTE QUI SUIT LE CURSEUR ─────────────── */
+.thumb{
+  position:fixed; left:0; top:0; z-index:150; margin:0;
+  width:266px; pointer-events:none;
+  opacity:0; transform:translate3d(-999px,-999px,0) rotate(-2.4deg) scale(.965);
+  transition:opacity .26s var(--soft), transform .34s var(--expo);
+  will-change:transform;
+}
+.thumb.on{ opacity:1; }
+.thumb .frame{
+  padding:7px 7px 6px; background:var(--ink);
+  border:1px solid var(--line);
+  box-shadow:0 20px 48px -22px rgba(32,26,18,.5);
+}
+.thumb img{ width:100%; height:152px; object-fit:cover; display:block; }
+.thumb figcaption{
+  font-family:var(--cond); text-transform:uppercase; font-size:8px;
+  letter-spacing:.17em; color:var(--bone-dim);
+  margin:6px 8px 0; padding-top:6px; border-top:1px solid var(--line-soft);
+  display:flex; justify-content:space-between; gap:10px;
+}
+.thumb figcaption b{ font-weight:600; color:var(--terra); }
+
+/* ─────────────── COLONNE LATÉRALE (film ouvert) ─────────────── */
+.sheet{
+  position:fixed; top:0; right:0; z-index:180;
+  width:40%; height:100%;
+  background:var(--ink-2);
+  border-left:1px solid var(--bone);
+  padding:40px 46px 34px;
+  display:flex; flex-direction:column;
+  transform:translate3d(100%,0,0);
+  transition:transform .78s var(--expo);
+  box-shadow:-30px 0 70px -40px rgba(32,26,18,.5);
+}
+body.is-open .sheet{ transform:translate3d(0,0,0); }
+
+.sheet-top{ display:flex; justify-content:space-between; align-items:baseline; }
+.sheet-top .k{
+  font-family:var(--cond); font-weight:600; text-transform:uppercase;
+  font-size:8.5px; letter-spacing:.24em; color:var(--bone-faint);
+}
+.sheet-top .x{
+  font-family:var(--cond); font-size:9px; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--bone-dim); cursor:pointer;
+  background:none; border:0; padding:0;
+}
+.sheet-top .x:hover{ color:var(--terra); }
+
+.sheet h3{
+  font-family:var(--wide); font-weight:400; word-spacing:.03em; font-size:47px; line-height:1.02;
+  letter-spacing:-.02em; margin:16px 0 0; color:var(--bone);
+}
+.sheet .hero{
+  margin:20px 0 0; border:1px solid var(--line);
+  padding:7px; background:var(--ink);
+}
+.sheet .hero img{ width:100%; height:238px; object-fit:cover; }
+
+.facts{ display:flex; margin:20px 0 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+.facts div{ flex:1; padding:11px 0 12px; border-left:1px solid var(--line-soft); padding-left:13px; }
+.facts div:first-child{ border-left:0; padding-left:0; }
+.facts dt{
+  font-family:var(--cond); font-size:8px; text-transform:uppercase;
+  letter-spacing:.2em; color:var(--bone-faint); margin-bottom:5px;
+}
+.facts dd{
+  margin:0; font-family:var(--cond); font-size:11px; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--bone);
+}
+
+.sheet .app-k{
+  font-family:var(--cond); font-weight:600; text-transform:uppercase;
+  font-size:8.5px; letter-spacing:.22em; color:var(--bone-faint); margin:20px 0 8px;
+}
+.sheet .app{
+  font-family:var(--wide); font-size:19px; line-height:1.42;
+  color:var(--bone-dim); margin:0;
+}
+.also{ margin-top:22px; padding-top:13px; border-top:1px solid var(--line); }
+.also ul{ list-style:none; margin:0; padding:0; }
+.also li{
+  display:flex; align-items:baseline; gap:12px;
+  padding:6px 0 7px; border-bottom:1px solid var(--line-soft); cursor:pointer;
+}
+.also li:last-child{ border-bottom:0; }
+.also .n{ font-family:var(--cond); font-size:8.5px; letter-spacing:.1em; color:var(--terra); }
+.also .t{ font-family:var(--wide); font-size:16px; color:var(--bone); word-spacing:.05em; }
+.also li:hover .t{ color:var(--terra); }
+.also .m{
+  margin-left:auto; font-family:var(--cond); font-size:8px; text-transform:uppercase;
+  letter-spacing:.14em; color:var(--bone-faint);
+}
+.stills{ display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin-top:auto; padding-top:20px; }
+.stills img{ width:100%; height:74px; object-fit:cover; border:1px solid var(--line); }
+.sheet .cap{
+  font-family:var(--cond); font-size:8px; text-transform:uppercase;
+  letter-spacing:.18em; color:var(--bone-faint); margin-top:10px;
+  display:flex; justify-content:space-between;
+}
+
+/* ─────────────── MOBILE ─────────────── */
+@media (max-width:520px){
+  body{ overflow:auto; }
+  .page{ padding:0 18px 24px; height:auto; }
+  .strip{ font-size:7.5px; letter-spacing:.14em; }
+  .mast{ grid-template-columns:1fr; text-align:center; padding:12px 0 8px; }
+  .mast-side{ display:none; }
+  .logo{ font-size:44px; padding:0; }
+  .baseline{ letter-spacing:.22em; font-size:8px; }
+  .baseline::after{ margin:9px -18px -10px; }
+  .paper{
+    display:block; padding-top:16px;
+  }
+  .cell{ padding:0; border-left:0 !important; }
+  .exergue{ margin:18px 0; padding:16px 0; display:block; }
+  .exergue .mark{ display:none; }
+  .exergue q{ font-size:26px; }
+  .index{ display:block; margin-top:18px; padding-left:0; border-left:0; border-top:1px solid var(--line); padding-top:16px; }
+  .c2a,.c3a,.c2b,.c3b{ margin-top:18px; padding-top:16px; border-top:1px solid var(--line-soft); }
+  .thumb{ display:none; }
+  .sheet{ width:100%; padding:26px 20px; }
+  .sheet h3{ font-size:34px; }
+  .sheet .hero img{ height:150px; }
+  .sheet .app{ font-size:16px; }
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ── bandeau de tête ── -->
+  <header>
+    <div class="strip">
+      <span>Studio de production vidéo · Bordeaux</span>
+      <span><b>Samedi 5 septembre 2026</b></span>
+      <span>Fondé en 2022 par Timéo Taris</span>
+    </div>
+
+    <div class="mast">
+      <div class="mast-side">
+        <span class="num">N° 06</span>
+        Six films au sommaire<br>
+        Édition de Bordeaux
+      </div>
+      <h1 class="logo">Mauvais Grain<span class="dot">.</span></h1>
+      <div class="mast-side r">
+        <span class="num">2022 — 2026</span>
+        94 quai des Chartrons<br>
+        33000 Bordeaux
+      </div>
+    </div>
+
+    <div class="baseline">L’image au service de votre histoire</div>
+  </header>
+
+  <!-- ── le journal ── -->
+  <div class="paper">
+
+    <!-- COLONNE 1 -->
+    <div class="cell c1">
+      <p class="chapo">Mauvais Grain est un studio de production vidéo installé à Bordeaux, fondé en 2022 par Timéo Taris. L’image au service de votre histoire : six films, cinq métiers, une seule manière de travailler.</p>
+
+      <div class="kicker">Les partis pris du fondateur</div>
+      <ul class="credo">
+        <li><i>01</i><span>Observer plutôt que mettre en scène.</span></li>
+        <li><i>02</i><span>Accompagner plutôt que diriger.</span></li>
+        <li><i>03</i><span>Raconter plutôt que vendre.</span></li>
+      </ul>
+
+      <div class="kicker t">Les cinq métiers</div>
+      <ul class="metiers">
+        <li><span class="n">01</span><span><span class="t">Corporate</span><span class="q">« Votre stratégie mérite mieux qu’une vidéo. Elle mérite un film. »</span></span></li>
+        <li><span class="n">02</span><span><span class="t">Événementiel</span><span class="q">« Un événement ne dure qu’un soir. Son film, beaucoup plus longtemps. »</span></span></li>
+        <li><span class="n">03</span><span><span class="t">Immobilier</span><span class="q">« Un bien se visite. Un lieu, ça se ressent. »</span></span></li>
+        <li><span class="n">04</span><span><span class="t">Tourisme</span><span class="q">« Mettre en lumière vos paysages, vos expériences et l’identité d’un territoire. »</span></span></li>
+        <li><span class="n">05</span><span><span class="t">Clip</span><span class="q">« Donner une image à votre musique. »</span></span></li>
+      </ul>
+    </div>
+
+    <!-- COLONNE 2 — haut -->
+    <div class="cell c2a">
+      <div class="kicker">Notes de tournage — I</div>
+      <h2 class="sub">Observer<br>sans intervenir</h2>
+      <p class="body">Autoproduit, <span class="film" data-film="sound">The Sound of Discovery</span> <span class="year">(Tourisme, 2026)</span> tient en une phrase de méthode : « Observer sans intervenir. Laisser les rencontres, les ambiances et la lumière naturelle guider le récit. »</p>
+      <p class="body">Même refus de la mise en scène pour <span class="film" data-film="silhouette">Silhouette</span> <span class="year">(Clip, 2026)</span>, où le studio choisit de « construire le film autour de plans fixes. Le mouvement naît uniquement de la danseuse. » La caméra ne bouge plus : c’est le sujet qui écrit le plan.</p>
+    </div>
+
+    <!-- COLONNE 3 — haut -->
+    <div class="cell c3a">
+      <div class="kicker">Notes de tournage — II</div>
+      <h2 class="sub">Laisser<br>respirer le plan</h2>
+      <p class="body">Avec <span class="film" data-film="vastness">The Shape of Vastness</span> <span class="year">(Tourisme, 2025)</span>, le studio revendique la lenteur : « Prendre le temps d’observer. Un film contemplatif où chaque plan laisse respirer le paysage. »</p>
+      <p class="body">Pour <span class="film" data-film="gone">Gone Colors</span> <span class="year">(DeLaurentis, Clip, 2024)</span>, tout s’est joué sur une fenêtre de lumière : « Tourner durant les dernières minutes du jour, pour une lumière douce et chaleureuse. »</p>
+    </div>
+
+    <!-- EXERGUE -->
+    <div class="cell exergue">
+      <span class="mark">«</span>
+      <div>
+        <q>Une histoire bien <em>racontée</em><br>ne s’oublie pas.</q>
+        <span class="sig">Manifeste — Mauvais Grain, Bordeaux</span>
+      </div>
+    </div>
+
+    <!-- COLONNE 2 — bas -->
+    <div class="cell c2b">
+      <div class="kicker">Notes de tournage — III</div>
+      <p class="body">Sur <span class="film" data-film="graduation">Graduation</span> <span class="year">(COB, Événementiel, 2024)</span>, le studio adopte « une approche immersive, au plus près des étudiants, pour saisir les instants spontanés ».</p>
+      <p class="body">Pour <span class="film" data-film="medocaine">La Médocaine</span> <span class="year">(Événementiel, 2024)</span>, il s’agissait de « se mêler au public : concerts, DJ, jeux de lumière et feu d’artifice ».</p>
+    </div>
+
+    <!-- COLONNE 3 — bas -->
+    <div class="cell c3b">
+      <div class="kicker">Prendre contact</div>
+      <div class="ours">
+        <span class="lbl">Courriel</span>
+        <span><a href="#">timeotaris@mauvaisgrain.com</a></span>
+        <span class="lbl">Téléphone</span>
+        <span>06 52 06 53 89</span>
+        <span class="lbl">Atelier</span>
+        <span>94 quai des Chartrons<br>33000 Bordeaux</span>
+        <span class="lbl">Suivre</span>
+        <span>Instagram — YouTube</span>
+      </div>
+    </div>
+
+    <!-- INDEX -->
+    <aside class="index">
+      <h2>Sommaire — Six films</h2>
+      <ul class="idx">
+        <li><span class="n">01</span><span><span class="film-t t" data-film="sound">The Sound of Discovery</span><span class="m">Autoproduit · Tourisme · 2026</span></span></li>
+        <li><span class="n">02</span><span><span class="film-t t" data-film="silhouette">Silhouette</span><span class="m">Autoproduit · Clip · 2026</span></span></li>
+        <li><span class="n">03</span><span><span class="film-t t" data-film="vastness">The Shape of Vastness</span><span class="m">Autoproduit · Tourisme · 2025</span></span></li>
+        <li><span class="n">04</span><span><span class="film-t t" data-film="gone">Gone Colors</span><span class="m">DeLaurentis · Clip · 2024</span></span></li>
+        <li><span class="n">05</span><span><span class="film-t t" data-film="graduation">Graduation</span><span class="m">COB · Événementiel · 2024</span></span></li>
+        <li><span class="n">06</span><span><span class="film-t t" data-film="medocaine">La Médocaine</span><span class="m">La Médocaine · Événementiel · 2024</span></span></li>
+      </ul>
+      <div class="foot ours">
+        <span class="lbl">Mode d’emploi</span>
+        <span style="text-transform:none;letter-spacing:.04em;line-height:1.7">Survolez un titre : l’image vient à vous. Cliquez : le film s’ouvre.</span>
+      </div>
+    </aside>
+
+  </div>
+</div>
+
+<!-- vignette au curseur -->
+<figure class="thumb" id="thumb">
+  <div class="frame">
+    <img id="thumbImg" src="" alt="">
+    <figcaption><b id="thumbN">N° 01</b><span id="thumbCap"></span></figcaption>
+  </div>
+</figure>
+
+<!-- colonne latérale : fiche film -->
+<section class="sheet" id="sheet" aria-hidden="true">
+  <div class="sheet-top">
+    <span class="k" id="sheetK">Fiche film — N° 01</span>
+    <button class="x" id="sheetX" type="button">Fermer ×</button>
+  </div>
+  <h3 id="sheetT">The Sound of Discovery</h3>
+  <div class="hero"><img id="sheetImg" src="" alt=""></div>
+  <div class="facts">
+    <div><dt>Client</dt><dd id="fClient">Autoproduit</dd></div>
+    <div><dt>Catégorie</dt><dd id="fCat">Tourisme</dd></div>
+    <div><dt>Année</dt><dd id="fYear">2026</dd></div>
+  </div>
+  <div class="app-k">Approche</div>
+  <p class="app" id="sheetApp"></p>
+  <div class="also"><div class="app-k" style="margin:0 0 4px">Au sommaire — suite</div><ul id="also"></ul></div>
+  <div class="stills" id="stills"></div>
+  <div class="cap"><span>Photogrammes — planche de tournage</span><span>Mauvais Grain</span></div>
+</section>
+
+<div class="grain"></div>
+
+<script>
+(function(){
+  var FILMS = {
+    sound:{n:"01",t:"The Sound of Discovery",c:"Autoproduit",g:"Tourisme",y:"2026",s:"the-sound-of-discovery",
+      a:"« Observer sans intervenir. Laisser les rencontres, les ambiances et la lumière naturelle guider le récit. »"},
+    silhouette:{n:"02",t:"Silhouette",c:"Autoproduit",g:"Clip",y:"2026",s:"silhouette",
+      a:"« Construire le film autour de plans fixes. Le mouvement naît uniquement de la danseuse. »"},
+    vastness:{n:"03",t:"The Shape of Vastness",c:"Autoproduit",g:"Tourisme",y:"2025",s:"the-shape-of-vastness",
+      a:"« Prendre le temps d’observer. Un film contemplatif où chaque plan laisse respirer le paysage. »"},
+    gone:{n:"04",t:"Gone Colors",c:"DeLaurentis",g:"Clip",y:"2024",s:"delaurentis-gone-colors",
+      a:"« Tourner durant les dernières minutes du jour, pour une lumière douce et chaleureuse. »"},
+    graduation:{n:"05",t:"Graduation",c:"COB",g:"Événementiel",y:"2024",s:"graduation",
+      a:"« Une approche immersive, au plus près des étudiants, pour saisir les instants spontanés. »"},
+    medocaine:{n:"06",t:"La Médocaine",c:"La Médocaine",g:"Événementiel",y:"2024",s:"la-medocaine",
+      a:"« Se mêler au public : concerts, DJ, jeux de lumière et feu d’artifice. »"}
+  };
+
+  var thumb=document.getElementById('thumb'),
+      tImg=document.getElementById('thumbImg'),
+      tN=document.getElementById('thumbN'),
+      tCap=document.getElementById('thumbCap'),
+      sheet=document.getElementById('sheet'),
+      targets=document.querySelectorAll('[data-film]');
+
+  var W=264, H=205, current=null, x=-999, y=-999;
+
+  function place(px,py){
+    var mx=Math.min(Math.max(px+26, 12), window.innerWidth-W-12);
+    var my=Math.min(Math.max(py-H/2, 12), window.innerHeight-H-12);
+    x=mx; y=my;
+    thumb.style.transform='translate3d('+mx+'px,'+my+'px,0) rotate(-2.4deg)';
+  }
+
+  function fill(k){
+    var f=FILMS[k];
+    tImg.src='img/'+f.s+'-1.jpg';
+    tN.textContent='N° '+f.n;
+    tCap.textContent=f.g+' — '+f.y;
+  }
+
+  function show(k,px,py){
+    if(current!==k){ current=k; fill(k); }
+    thumb.classList.add('on');
+    place(px,py);
+  }
+  function hide(){ thumb.classList.remove('on'); }
+
+  targets.forEach(function(el){
+    el.addEventListener('mouseenter',function(e){
+      if(document.body.classList.contains('is-open')) return;
+      show(el.dataset.film, e.clientX, e.clientY);
+    });
+    el.addEventListener('mousemove',function(e){
+      if(document.body.classList.contains('is-open')) return;
+      place(e.clientX,e.clientY);
+    });
+    el.addEventListener('mouseleave',hide);
+    el.addEventListener('click',function(){ open(el.dataset.film); });
+  });
+
+  function openFilm(k){ open(k); }
+  function open(k){
+    var f=FILMS[k];
+    document.getElementById('sheetK').textContent='Fiche film — N° '+f.n;
+    document.getElementById('sheetT').textContent=f.t;
+    document.getElementById('sheetImg').src='img/'+f.s+'-1.jpg';
+    document.getElementById('fClient').textContent=f.c;
+    document.getElementById('fCat').textContent=f.g;
+    document.getElementById('fYear').textContent=f.y;
+    document.getElementById('sheetApp').textContent=f.a;
+    var keys=Object.keys(FILMS), i0=keys.indexOf(k), al=document.getElementById('also');
+    al.innerHTML='';
+    for(var j=1;j<=3;j++){
+      (function(g){
+        var li=document.createElement('li');
+        li.innerHTML='<span class="n">'+g.n+'</span><span class="t">'+g.t+'</span><span class="m">'+g.g+' · '+g.y+'</span>';
+        li.onclick=function(){ openFilm(g.key); };
+        al.appendChild(li);
+      })(Object.assign({key:keys[(i0+j)%keys.length]},FILMS[keys[(i0+j)%keys.length]]));
+    }
+    var st=document.getElementById('stills'); st.innerHTML='';
+    [2,3,4].forEach(function(i){
+      var im=document.createElement('img'); im.src='img/'+f.s+'-'+i+'.jpg'; im.alt=''; st.appendChild(im);
+    });
+    hide();
+    document.body.classList.add('is-open');
+    sheet.setAttribute('aria-hidden','false');
+  }
+  function close(){
+    document.body.classList.remove('is-open');
+    sheet.setAttribute('aria-hidden','true');
+    document.querySelectorAll('.is-hot').forEach(function(e){e.classList.remove('is-hot');});
+  }
+  document.getElementById('sheetX').addEventListener('click',close);
+
+  /* ── états de capture ───────────────────────────── */
+  window.mgState=function(n){
+    document.querySelectorAll('.is-hot').forEach(function(e){e.classList.remove('is-hot');});
+    if(n===0){ hide(); close(); return; }
+    var el=document.querySelector('.film[data-film="sound"]');
+    if(n===1){
+      close();
+      el.classList.add('is-hot');
+      var r=el.getBoundingClientRect();
+      current=null; fill('sound');
+      thumb.classList.add('on');
+      place(r.right, r.top+r.height/2);
+    }
+    if(n===2){
+      el.classList.add('is-hot');
+      document.querySelector('.film-t[data-film="sound"]').classList.add('is-hot');
+      open('sound');
+    }
+  };
+})();
+</script>
+</body>
+</html>

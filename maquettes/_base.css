@@ -1,0 +1,110 @@
+/* ══════════════════════════════════════════════════════════════════
+   MAUVAIS GRAIN — socle commun aux cinq maquettes.
+   Charte identique à celle du site : ne rien changer ici.
+   ══════════════════════════════════════════════════════════════════ */
+
+@font-face {
+  font-family: "Gloock";
+  src: url("fonts/gloock.woff2") format("woff2");
+  font-weight: 400;
+  font-display: block;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("fonts/mono.woff2") format("woff2");
+  font-weight: 100 800;
+  font-display: block;
+}
+@font-face {
+  font-family: "Saira";
+  src: url("fonts/saira.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: block;
+}
+
+:root {
+  /* Fond crème de la charte — jamais de blanc pur */
+  --ink: #f6f3ec;
+  --ink-2: #efeadf;
+  --ink-3: #e6e0d2;
+  --line: #d6cfbf;
+  --line-soft: #e7e1d4;
+
+  /* Encres chaudes */
+  --bone: #201a12;
+  --bone-dim: #574f43;
+  --bone-faint: #736b5d;
+
+  /* Accent terracotta — parcimonieux, c'est LE point signature */
+  --terra: #a85f3c;
+
+  --wide: "Gloock", "Times New Roman", serif;
+  --cond: "JetBrains Mono", ui-monospace, monospace;
+  --sans: "Saira", system-ui, sans-serif;
+
+  --expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* Variante « salle de projection » — noir chaud de la charte.
+   À poser sur n'importe quel bloc via data-tone="dark". */
+[data-tone="dark"],
+.tone-dark {
+  --ink: #0a0908;
+  --ink-2: #15120f;
+  --ink-3: #1e1a15;
+  --line: #393229;
+  --line-soft: #221d17;
+  --bone: #ece8dc;
+  --bone-dim: #9b9384;
+  --bone-faint: #6e685c;
+  --terra: #b76e4e;
+  background: var(--ink);
+  color: var(--bone);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  background: var(--ink);
+  color: var(--bone);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden; /* les maquettes tiennent dans l'écran */
+}
+
+/* Logotype & titres */
+.wide {
+  font-family: var(--wide);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 0.98;
+}
+/* Labels & méta */
+.cond {
+  font-family: var(--cond);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+/* Le point terracotta du logotype */
+.dot { color: var(--terra); }
+
+img { display: block; max-width: 100%; }
+
+/* Grain argentique — clin d'œil au nom, très discret */
+.grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 200;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}

@@ -1,0 +1,711 @@
+<!-- Mauvais Grain — piste C3 « La Pellicule » -->
+<meta charset="utf-8">
+<title>Mauvais Grain — La Pellicule</title>
+<link rel="stylesheet" href="_base.css">
+<style>
+/* ═════════════════════════════════════════════════════════
+   C3 — LA PELLICULE
+   Le site ne descend pas : il défile. Une bande unique
+   passe devant l'écran, entre deux rangées de perforations.
+   ═════════════════════════════════════════════════════════ */
+
+:root{
+  --rail-h: 58px;
+  --u: 1px;            /* unité de largeur des photogrammes */
+  --base: 16px;        /* échelle typographique des panneaux */
+}
+
+#app{
+  position: fixed; inset: 0;
+  background: #f6f3ec;
+  --ground:    #f6f3ec;
+  --rail:      #e8e2d4;
+  --rail-line: #d6cfbf;
+  --hole:      #fbf9f4;
+  --chrome:    #201a12;
+  --chrome-dim:#736b5d;
+  --scrimc:    246,243,236;
+  transition: background-color .75s var(--soft);
+}
+#app.is-dark{
+  background: #0a0908;
+  --ground:    #0a0908;
+  --rail:      #171310;
+  --rail-line: #33291f;
+  --hole:      #050404;
+  --chrome:    #ece8dc;
+  --chrome-dim:#8d8676;
+  --scrimc:    10,9,8;
+}
+
+/* ── La fenêtre de projection ───────────────────────────── */
+.gate{
+  position: absolute; left: 0; right: 0;
+  top: var(--rail-h); bottom: var(--rail-h);
+  overflow: hidden;
+}
+.strip{
+  display: flex; height: 100%;
+  will-change: transform;
+  transform: translate3d(0,0,0);
+}
+
+/* ── Perforations ───────────────────────────────────────── */
+.rail{
+  position: absolute; left: 0; right: 0; height: var(--rail-h);
+  background: var(--rail); z-index: 20;
+  transition: background-color .75s var(--soft);
+}
+.rail.t{ top: 0; box-shadow: inset 0 -1px 0 var(--rail-line); }
+.rail.b{ bottom: 0; box-shadow: inset 0 1px 0 var(--rail-line); }
+.rail::after{ /* liseré de base de pellicule */
+  content:""; position:absolute; left:0; right:0; height:7px;
+  background: linear-gradient(to bottom, rgba(0,0,0,.055), transparent);
+}
+.rail.t::after{ bottom:0; transform: scaleY(-1); }
+.rail.b::after{ top:0; }
+.holes{
+  position: absolute; left: 0; right: 0; top: 50%;
+  height: 30px; margin-top: -15px;
+  background: var(--hole);
+  transition: background-color .75s var(--soft);
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='62' height='30'%3E%3Crect x='14' y='6' width='34' height='18' rx='5' fill='%23fff'/%3E%3C/svg%3E");
+          mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='62' height='30'%3E%3Crect x='14' y='6' width='34' height='18' rx='5' fill='%23fff'/%3E%3C/svg%3E");
+  -webkit-mask-repeat: repeat-x; mask-repeat: repeat-x;
+  -webkit-mask-size: 62px 30px; mask-size: 62px 30px;
+  -webkit-mask-position: 0 center; mask-position: 0 center;
+}
+.holes::after{
+  content:""; position:absolute; inset:0;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.05);
+  -webkit-mask-image: inherit; mask-image: inherit;
+}
+
+/* ── Photogrammes ───────────────────────────────────────── */
+.panel img{ max-width: none; }
+
+/* voiles de lisibilité : chaque photogramme porte les siens,
+   dans SA propre couleur de sol — jamais de bavure d'un ton sur l'autre */
+.panel::before, .panel::after{
+  content:""; position:absolute; left:0; right:0; z-index:2;
+  pointer-events:none; background-color: var(--pg);
+}
+.panel::before{
+  top:0; height:118px; opacity:.8;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0,0,0,.5) 46%, transparent 100%);
+          mask-image: linear-gradient(to bottom, #000 0%, rgba(0,0,0,.5) 46%, transparent 100%);
+}
+.panel::after{
+  bottom:0; height:164px; opacity:.76;
+  -webkit-mask-image: linear-gradient(to top, #000 0%, rgba(0,0,0,.48) 44%, transparent 100%);
+          mask-image: linear-gradient(to top, #000 0%, rgba(0,0,0,.48) 44%, transparent 100%);
+}
+.panel > *:not(.ph):not(.scrim):not(.f-cap):not(.pnum):not(.edge){
+  position: relative; z-index: 4;
+}
+.panel{
+  position: relative;
+  flex: 0 0 calc(var(--w) * var(--u));
+  width: calc(var(--w) * var(--u));
+  height: 100%;
+  font-size: var(--base);
+  overflow: hidden;
+}
+.panel + .panel{ border-left: 1px solid var(--sep); }
+.p-cream{ background:#f6f3ec; color:#201a12; --sep:#d6cfbf; --pg:#f6f3ec; }
+.p-dark { background:#0a0908; color:#ece8dc; --sep:#2b241c; --pg:#0a0908; }
+
+.pnum{
+  position: absolute; left: 2.75em; bottom: 1.7em;
+  font-size: .62em; letter-spacing: .2em; opacity: .55; z-index: 6;
+}
+.p-dark .pnum{ color:#9b9384; }
+.p-cream .pnum{ color:#736b5d; }
+
+.meta{ font-size: .68em; letter-spacing: .17em; }
+.appr{
+  font-size: 1.02em; line-height: 1.62; font-weight: 300;
+  letter-spacing: .004em; margin: 0;
+}
+
+/* ── 01 · Amorce ────────────────────────────────────────── */
+.amorce{ display:flex; flex-direction:column; justify-content:center; padding: 0 4.5em; }
+.amorce .kick{ color:#a85f3c; margin-bottom: 2.6em; display:flex; align-items:center; gap:.9em; }
+.amorce .kick i{ display:block; width:2.6em; height:1px; background:#a85f3c; opacity:.55; }
+.amorce h1{
+  margin:0; font-size: 8.5em; line-height:.87; letter-spacing:-.025em;
+}
+.amorce .base{
+  margin: 1.6em 0 0; font-size: 1.25em; font-weight: 300;
+  color:#574f43; letter-spacing:.005em; white-space:nowrap;
+}
+.hint{
+  margin-top: 3.1em; display:inline-flex; align-items:center; gap:.85em;
+  font-size:.7em; letter-spacing:.22em; color:#a85f3c;
+  transition: opacity .5s var(--soft), transform .5s var(--soft);
+}
+.hint b{ font-weight:500; }
+.hint .arw{ display:block; width: 4.6em; height:1px; background:#a85f3c; position:relative; }
+.hint .arw::after{
+  content:""; position:absolute; right:0; top:-2.5px; width:5px; height:5px;
+  border-top:1px solid #a85f3c; border-right:1px solid #a85f3c; transform: rotate(45deg);
+}
+.hint .arw::before{
+  content:""; position:absolute; top:0; left:0; height:1px; width:1.6em;
+  background:#f6f3ec; animation: sweep 2.4s var(--soft) infinite;
+}
+@keyframes sweep{ 0%{ transform: translateX(-1.6em); } 100%{ transform: translateX(4.6em); } }
+#app.moved .hint{ opacity:0; transform: translateX(-10px); }
+.amorce .edge{
+  position:absolute; right:0; top:0; bottom:0; width: 7em;
+  background: linear-gradient(to right, rgba(246,243,236,0), rgba(214,207,191,.28));
+  pointer-events:none;
+}
+
+/* ── 02 · Manifeste ─────────────────────────────────────── */
+.manif{ display:flex; flex-direction:column; justify-content:center; padding: 0 4em; }
+.manif .lbl{ color:#a85f3c; margin-bottom:2.4em; }
+.manif blockquote{
+  margin:0; font-size: 4.5em; line-height:1.02; letter-spacing:-.02em;
+}
+.manif blockquote em{ font-style:normal; color:#a85f3c; position:relative; white-space:nowrap; }
+.manif blockquote em::after{
+  content:""; position:absolute; left:0; right:0; bottom:.06em; height:1px; background:#a85f3c; opacity:.4;
+}
+.manif .who{
+  margin-top: 3.2em; padding-top: 1.7em; border-top:1px solid #d6cfbf;
+  font-size: 1.02em; font-weight:300; color:#574f43; max-width: 26em; line-height:1.6;
+}
+
+/* ── Films ──────────────────────────────────────────────── */
+.ph{
+  position:absolute; inset:0; width: 112%; left:-6%; height:100%;
+  object-fit: cover; will-change: transform;
+}
+.scrim{
+  position:absolute; inset:0;
+  background:
+    linear-gradient(to top, rgba(8,7,6,.9) 0%, rgba(8,7,6,.46) 25%, rgba(8,7,6,0) 56%),
+    linear-gradient(to right, rgba(8,7,6,.5) 0%, rgba(8,7,6,0) 58%);
+}
+.f-cap{ position:absolute; left:3.4em; right:3.4em; bottom: 6.8em; z-index:5; }
+.f-cap .meta{ color:#c8bfae; margin-bottom:1.15em; display:flex; gap:1.1em; align-items:center; }
+.f-cap .meta s{ text-decoration:none; color:#a06a4d; }
+.f-cap h2{ margin:0; font-size:3.5em; line-height:.98; letter-spacing:-.02em; }
+.f-cap .appr{ margin-top:1.2em; max-width: 30em; color:#cfc7b8; font-size:.98em; }
+
+/* photogramme cadré (panneaux étroits) */
+.f-framed{ display:flex; flex-direction:column; justify-content:center; padding: 0 2.6em; }
+.f-framed .frame{ position:relative; width:100%; aspect-ratio: 16/9; overflow:hidden; background:#151210; }
+.f-framed .frame img{ position:absolute; inset:0; width:112%; left:-6%; height:100%; object-fit:cover; }
+.f-framed .meta{ color:#9b9384; display:flex; gap:1.1em; align-items:center; margin-bottom:1.5em; }
+.f-framed .meta s{ text-decoration:none; color:#b76e4e; }
+.f-framed h2{ margin:1.35em 0 0; font-size:2.6em; line-height:1; letter-spacing:-.02em; }
+.f-framed .appr{ margin-top:1em; color:#9b9384; font-size:.95em; max-width:26em; }
+
+/* photogramme scindé (texte / image) */
+.f-split{ display:flex; }
+.f-split .txt{
+  flex: 0 0 36%; padding: 4.2em 2.8em 4.4em 3em;
+  display:flex; flex-direction:column; justify-content:center;
+  border-left:1px solid #2b241c; position:relative;
+}
+.f-split .txt .num{ position:absolute; top:4.2em; left:2.8em; }
+.f-split .txt .meta{ color:#9b9384; }
+.f-split .txt h2{ margin:.6em 0 0; font-size:2.75em; line-height:1; letter-spacing:-.02em; }
+.f-split .txt .appr{ margin-top:1.1em; color:#9b9384; font-size:.95em; }
+.f-split .txt .num{ font-size:.62em; letter-spacing:.2em; color:#b76e4e; }
+.f-split .im{ position:relative; flex:1; overflow:hidden; }
+.f-split .im img{ position:absolute; inset:0; width:112%; left:-6%; height:100%; object-fit:cover; }
+.f-split .im::after{
+  content:""; position:absolute; inset:0;
+  background: linear-gradient(to left, rgba(10,9,8,.5), rgba(10,9,8,0) 38%);
+}
+
+/* ── Partis pris ────────────────────────────────────────── */
+.credo{ display:flex; }
+.credo .im{ position:relative; flex:0 0 38%; overflow:hidden; }
+.credo .im img{ position:absolute; inset:0; width:112%; left:-6%; height:100%; object-fit:cover; }
+.credo .im::after{ content:""; position:absolute; inset:0; background:linear-gradient(to top, rgba(32,26,18,.35), transparent 50%); }
+.credo .txt{ flex:1; padding: 4.6em 3.4em; display:flex; flex-direction:column; justify-content:center; }
+.credo .lbl{ color:#a85f3c; margin-bottom:2.6em; }
+.credo ol{ list-style:none; margin:0; padding:0; }
+.credo li{
+  font-family: var(--wide); font-size:2.15em; line-height:1.14; letter-spacing:-.015em;
+  padding: .62em 0; border-bottom:1px solid #e0d9c9; display:flex; gap:.55em;
+}
+.credo li:first-child{ border-top:1px solid #e0d9c9; }
+.credo li span{ color:#a85f3c; }
+.credo .sig{ margin-top:2.4em; font-size:.95em; color:#736b5d; font-weight:300; }
+
+/* ── Clients ────────────────────────────────────────────── */
+.clients{ display:flex; flex-direction:column; justify-content:center; padding: 0 3.4em; }
+.clients .lbl{ color:#a85f3c; margin-bottom:2.2em; }
+.clients .grid{ display:grid; grid-template-columns: repeat(2, 1fr); gap: 1.2em; }
+.clients .grid div{
+  height: 9.1em; min-width:0; display:flex; align-items:center; justify-content:center;
+  border:1px solid #e2dbcb; background:#f2eee5;
+}
+.clients .grid img{ height:64%; width:auto; filter: brightness(0); opacity:.78; }
+
+/* ── Métiers ────────────────────────────────────────────── */
+.jobs{ display:flex; }
+.jobs .col{ flex:1; min-width:0; display:flex; flex-direction:column; justify-content:center; padding: 0 3.6em; }
+.jobs .band{ position:relative; flex:0 0 21.5em; overflow:hidden; border-left:1px solid #d6cfbf; }
+.jobs .band img{ position:absolute; inset:0; width:112%; left:-6%; height:100%; object-fit:cover; }
+.jobs .band::after{ content:""; position:absolute; inset:0;
+  background:linear-gradient(to bottom, rgba(246,243,236,.7) 0%, rgba(246,243,236,0) 32%, rgba(246,243,236,0) 72%, rgba(246,243,236,.4) 100%); }
+.jobs .lbl{ color:#a85f3c; margin-bottom:1.1em; }
+.jobs h3{ margin:0 0 2.1em; font-family:var(--wide); font-size:2.9em; font-weight:400; letter-spacing:-.022em; line-height:1; }
+.jobs .row{
+  display:grid; grid-template-columns: 3.6em 11em 1fr; align-items:baseline;
+  gap: 0 1.6em; padding: 1.05em 0; border-top:1px solid #e0d9c9;
+}
+.jobs .row:last-child{ border-bottom:1px solid #e0d9c9; }
+.jobs .row b{ font-family:var(--cond); font-size:.68em; letter-spacing:.16em; font-weight:500; color:#a85f3c; }
+.jobs .row strong{ font-family:var(--wide); font-weight:400; font-size:1.62em; letter-spacing:-.015em; }
+.jobs .row p{ margin:0; font-size:.97em; font-weight:300; color:#574f43; line-height:1.5; }
+
+/* ── Contact ────────────────────────────────────────────── */
+.contact{ display:flex; flex-direction:column; justify-content:center; padding: 0 3.8em; }
+.contact .lbl{ color:#a85f3c; margin-bottom:2.2em; }
+.contact h2{ margin:0; font-size:5em; line-height:.94; letter-spacing:-.025em; }
+.contact .base{ margin:.85em 0 0; font-size:1.12em; font-weight:300; color:#574f43; }
+.contact .lines{ margin-top:2.5em; border-top:1px solid #d6cfbf; }
+.contact .lines a, .contact .lines p{
+  display:flex; align-items:baseline; gap:1.4em; margin:0; padding:.82em 0;
+  border-bottom:1px solid #e0d9c9; text-decoration:none; color:#201a12;
+  font-size:1.12em; font-weight:300;
+}
+.contact .lines em{
+  font-style:normal; font-family:var(--cond); font-size:.58em; letter-spacing:.16em;
+  color:#736b5d; flex:0 0 9em; text-transform:uppercase;
+}
+.contact .cta{
+  margin-top:2.4em; display:flex; align-items:center; gap:1.6em;
+}
+.contact .btn{
+  display:inline-flex; align-items:center; gap:.9em; background:#a85f3c; color:#f6f3ec;
+  padding:1.05em 1.7em; text-decoration:none;
+  font-family:var(--cond); font-size:.72em; letter-spacing:.16em; text-transform:uppercase;
+}
+.contact .btn span{ display:block; width:1.8em; height:1px; background:#f6f3ec; opacity:.7; }
+.contact .soc{ display:flex; gap:1.5em; font-family:var(--cond); font-size:.66em; letter-spacing:.16em; text-transform:uppercase; color:#736b5d; }
+.contact .soc a{ color:#736b5d; text-decoration:none; border-bottom:1px solid #d6cfbf; padding-bottom:.3em; }
+
+/* ── Chrome fixe ────────────────────────────────────────── */
+.mark, .corner, .reel{
+  --chrome:#201a12; --chrome-dim:#736b5d;
+  --halo: 0 1px 14px rgba(246,243,236,.75), 0 0 3px rgba(246,243,236,.6);
+}
+.mark.on-dark, .corner.on-dark, .reel.on-dark{
+  --chrome:#ece8dc; --chrome-dim:#8d8676;
+  --halo: 0 1px 16px rgba(6,5,4,.75), 0 0 4px rgba(6,5,4,.7);
+}
+.mark, .corner, .reel .cnt, .reel .cap{ text-shadow: var(--halo); }
+.mark{
+  position:absolute; left:34px; top: calc(var(--rail-h) + 26px); z-index:30;
+  font-family:var(--wide); font-size:19px; letter-spacing:-.01em; color:var(--chrome);
+  opacity:0; transform: translateY(-6px);
+  transition: opacity .55s var(--soft), transform .55s var(--soft), color .75s var(--soft);
+  pointer-events:none;
+}
+#app.moved .mark{ opacity:1; transform:none; }
+
+.corner{
+  position:absolute; right:34px; top: calc(var(--rail-h) + 28px); z-index:30;
+  font-family:var(--cond); font-size:10px; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--chrome-dim); transition: color .75s var(--soft);
+}
+
+
+/* ── Bobine ─────────────────────────────────────────────── */
+.reel{
+  position:absolute; right:34px; bottom: calc(var(--rail-h) + 24px); z-index:30;
+  display:flex; align-items:center; gap:16px;
+}
+
+.reel .read{ text-align:right; }
+.reel .cnt{
+  font-family:var(--cond); font-size:22px; font-weight:500; letter-spacing:.04em;
+  color:var(--chrome); transition:color .75s var(--soft);
+}
+.reel .cnt i{ font-style:normal; color:var(--chrome-dim); }
+.reel .cap{
+  font-family:var(--cond); font-size:9px; letter-spacing:.22em; text-transform:uppercase;
+  color:var(--chrome-dim); margin-top:5px; transition:color .75s var(--soft);
+}
+.reel svg{ width:88px; height:88px; display:block; }
+.rl-out{ fill:none; stroke: var(--chrome-dim); stroke-opacity:.55; stroke-width:1.1; }
+.rl-film{ fill:none; stroke: var(--chrome-dim); stroke-opacity:.26; }
+.rl-tick{ stroke:#a85f3c; stroke-width:1.6; stroke-linecap:round; }
+.reel.on-dark .rl-tick{ stroke:#b76e4e; }
+.rl-sp{ transform-box: fill-box; transform-origin: center; }
+.rl-sp circle{ fill: var(--chrome-dim); fill-opacity:.5; }
+.rl-hub{ fill:#a85f3c; }
+.reel.on-dark .rl-hub{ fill:#b76e4e; }
+
+/* ── Progression ────────────────────────────────────────── */
+.prog{
+  position:absolute; left:0; right:0; bottom: var(--rail-h); height:2px; z-index:25;
+  background: rgba(0,0,0,.05);
+}
+.prog i{ display:block; height:100%; width:0; background:#a85f3c; }
+#app.is-dark .prog{ background: rgba(255,255,255,.06); }
+#app.is-dark .prog i{ background:#b76e4e; }
+
+/* ═════ Mobile 390×844 ═════ */
+@media (max-width: 560px){
+  :root{ --rail-h: 34px; --u: .31px; --base: 7.4px; }
+  .mark{ left:18px; font-size:15px; top: calc(var(--rail-h) + 16px); }
+  .corner{ right:18px; font-size:8px; letter-spacing:.16em; top: calc(var(--rail-h) + 18px); }
+  .reel{ right:18px; bottom: calc(var(--rail-h) + 16px); gap:10px; }
+  .reel svg{ width:52px; height:52px; }
+  .reel .cnt{ font-size:15px; }
+  .holes{ height:18px; margin-top:-9px;
+    -webkit-mask-size:40px 18px; mask-size:40px 18px; }
+  .amorce h1{ font-size: 6.4em; }
+  .amorce{ padding: 0 3em; }
+  .manif blockquote{ font-size:3.4em; }
+  .f-cap{ left:2.2em; right:2.2em; bottom:5.4em; }
+  .f-cap h2{ font-size:2.5em; }
+  .f-split{ flex-direction:column; }
+  .f-split .txt{ flex:0 0 auto; padding:3em 2em 2em; border-right:0; border-bottom:1px solid #2b241c; }
+  .f-split .im{ flex:1; }
+  .credo{ flex-direction:column; }
+  .credo .im{ flex:0 0 26%; }
+  .credo .txt{ padding:2.6em 2.2em; }
+  .credo li{ font-size:1.7em; }
+  .clients .grid{ grid-template-columns:repeat(2,1fr); }
+  .jobs .row{ grid-template-columns:3em 1fr; }
+  .jobs .row p{ grid-column:2; }
+  .contact h2{ font-size:3.6em; }
+  .contact .lines em{ flex:0 0 7em; }
+  .corner{ display:none; }
+  .jobs{ flex-direction:column; }
+  .jobs .band{ flex:0 0 22%; border-left:0; border-top:1px solid #d6cfbf; }
+  .jobs .col{ padding:2.4em 2em; }
+  .veil.t{ height:86px; }
+  .veil.b{ height:104px; }
+  .amorce .base{ white-space:normal; font-size:1.15em; }
+  .amorce .kick{ font-size:.58em; letter-spacing:.12em; margin-bottom:2em; }
+  .amorce .kick i{ width:1.6em; }
+  .hint{ font-size:.62em; }
+  .f-framed .meta, .f-split .txt .meta, .f-cap .meta{ font-size:.6em; letter-spacing:.1em; }
+  .pnum{ display:none; }
+  .clients .grid{ grid-template-columns:1fr; }
+  .clients .grid div{ height:6.4em; }
+}
+</style>
+
+<div id="app">
+
+  <div class="gate">
+    <div class="strip" id="strip">
+
+      <!-- 01 · AMORCE -->
+      <section class="panel p-cream amorce" style="--w:1180">
+        <div class="kick cond"><i></i>Studio de production vidéo — Bordeaux</div>
+        <h1 class="wide">Mauvais<br>Grain<span class="dot">.</span></h1>
+        <p class="base">L'image au service de votre histoire.</p>
+        <div class="hint cond"><b>Défilez</b><span class="arw"></span></div>
+        <div class="edge"></div>
+        <div class="pnum cond">01</div>
+      </section>
+
+      <!-- 02 · MANIFESTE -->
+      <section class="panel p-cream manif" style="--w:940">
+        <div class="lbl cond">Le manifeste</div>
+        <blockquote class="wide">Une histoire bien <em>racontée</em> ne s'oublie pas.</blockquote>
+        <p class="who">Studio de production vidéo, Bordeaux. Fondé en 2022 par Timéo&nbsp;Taris.</p>
+        <div class="pnum cond">02</div>
+      </section>
+
+      <!-- 03 · THE SOUND OF DISCOVERY -->
+      <section class="panel p-dark" style="--w:1440">
+        <img class="ph" src="img/the-sound-of-discovery-1.jpg" alt="">
+        <div class="scrim"></div>
+        <div class="f-cap">
+          <div class="meta cond"><s>01</s>Autoproduit — Tourisme — 2026</div>
+          <h2 class="wide">The Sound of Discovery</h2>
+          <p class="appr">« Observer sans intervenir. Laisser les rencontres, les ambiances et la lumière naturelle guider le récit. »</p>
+        </div>
+        <div class="pnum cond" style="color:#c8bfae">03</div>
+      </section>
+
+      <!-- 04 · SILHOUETTE -->
+      <section class="panel p-dark f-framed" style="--w:700">
+        <div class="meta cond"><s>02</s>Clip — 2026</div>
+        <div class="frame"><img src="img/silhouette-2.jpg" alt=""></div>
+        <h2 class="wide">Silhouette</h2>
+        <p class="appr">« Construire le film autour de plans fixes. Le mouvement naît uniquement de la danseuse. »</p>
+        <div class="pnum cond">04</div>
+      </section>
+
+      <!-- 05 · THE SHAPE OF VASTNESS -->
+      <section class="panel p-dark" style="--w:1240">
+        <img class="ph" src="img/the-shape-of-vastness-1.jpg" alt="">
+        <div class="scrim"></div>
+        <div class="f-cap">
+          <div class="meta cond"><s>03</s>Autoproduit — Tourisme — 2025</div>
+          <h2 class="wide">The Shape<br>of Vastness</h2>
+          <p class="appr">« Prendre le temps d'observer. Un film contemplatif où chaque plan laisse respirer le paysage. »</p>
+        </div>
+        <div class="pnum cond" style="color:#c8bfae">05</div>
+      </section>
+
+      <!-- 06 · GONE COLORS -->
+      <section class="panel p-dark" style="--w:720">
+        <img class="ph" src="img/delaurentis-gone-colors-1.jpg" alt="">
+        <div class="scrim"></div>
+        <div class="f-cap">
+          <div class="meta cond"><s>04</s>DeLaurentis — Clip</div>
+          <h2 class="wide" style="font-size:2.9em">Gone Colors</h2>
+          <p class="appr">« Tourner durant les dernières minutes du jour, pour une lumière douce et chaleureuse. »</p>
+        </div>
+        <div class="pnum cond" style="color:#c8bfae">06</div>
+      </section>
+
+      <!-- 07 · GRADUATION -->
+      <section class="panel p-dark f-split" style="--w:1240">
+        <div class="im"><img src="img/graduation-1.jpg" alt=""></div>
+        <div class="txt">
+          <div class="num cond">05</div>
+          <div class="meta cond">COB — Événementiel — 2024</div>
+          <h2 class="wide">Graduation</h2>
+          <p class="appr">« Une approche immersive, au plus près des étudiants, pour saisir les instants spontanés. »</p>
+        </div>
+        <div class="pnum cond">07</div>
+      </section>
+
+      <!-- 08 · LA MÉDOCAINE -->
+      <section class="panel p-dark f-framed" style="--w:860">
+        <div class="meta cond"><s>06</s>La Médocaine — Événementiel — 2024</div>
+        <div class="frame"><img src="img/la-medocaine-1.jpg" alt=""></div>
+        <h2 class="wide">La Médocaine</h2>
+        <p class="appr">« Se mêler au public : concerts, DJ, jeux de lumière et feu d'artifice. »</p>
+        <div class="pnum cond">08</div>
+      </section>
+
+      <!-- 09 · PARTIS PRIS -->
+      <section class="panel p-cream credo" style="--w:1000">
+        <div class="im"><img src="img/studio.jpg" alt=""></div>
+        <div class="txt">
+          <div class="lbl cond">Les partis pris du fondateur</div>
+          <ol>
+            <li><span>—</span>Observer plutôt que mettre en scène.</li>
+            <li><span>—</span>Accompagner plutôt que diriger.</li>
+            <li><span>—</span>Raconter plutôt que vendre.</li>
+          </ol>
+          <p class="sig">Timéo Taris, fondateur — Bordeaux, depuis 2022.</p>
+        </div>
+        <div class="pnum cond">09</div>
+      </section>
+
+      <!-- 10 · CLIENTS -->
+      <section class="panel p-cream clients" style="--w:760">
+        <div class="lbl cond">Les clients</div>
+        <div class="grid">
+          <div><img src="img/beauty-success.png" alt="Beauty Success"></div>
+          <div><img src="img/cob.png" alt="COB"></div>
+          <div><img src="img/cra.png" alt="CRA"></div>
+          <div><img src="img/delaurentis.png" alt="DeLaurentis"></div>
+          <div><img src="img/nebopan.png" alt="Nebopan"></div>
+          <div><img src="img/oh.png" alt="OH"></div>
+          <div><img src="img/partedis.png" alt="Partedis"></div>
+          <div><img src="img/wimco.png" alt="Wimco"></div>
+        </div>
+        <div class="pnum cond">10</div>
+      </section>
+
+      <!-- 11 · MÉTIERS -->
+      <section class="panel p-cream jobs" style="--w:1340">
+        <div class="col">
+        <div class="lbl cond">Les métiers</div>
+        <h3>Les cinq métiers<span class="dot">.</span></h3>
+        <div class="row"><b>01</b><strong>Corporate</strong><p>« Votre stratégie mérite mieux qu'une vidéo. Elle mérite un film. »</p></div>
+        <div class="row"><b>02</b><strong>Événementiel</strong><p>« Un événement ne dure qu'un soir. Son film, beaucoup plus longtemps. »</p></div>
+        <div class="row"><b>03</b><strong>Immobilier</strong><p>« Un bien se visite. Un lieu, ça se ressent. »</p></div>
+        <div class="row"><b>04</b><strong>Tourisme</strong><p>« Mettre en lumière vos paysages, vos expériences et l'identité d'un territoire. »</p></div>
+        <div class="row"><b>05</b><strong>Clip</strong><p>« Donner une image à votre musique. »</p></div>
+        </div>
+        <div class="band"><img src="img/the-sound-of-discovery-4.jpg" alt=""></div>
+        <div class="pnum cond">11</div>
+      </section>
+
+      <!-- 12 · CONTACT -->
+      <section class="panel p-cream contact" style="--w:1080">
+        <div class="lbl cond">Contact</div>
+        <h2 class="wide">Mauvais Grain<span class="dot">.</span></h2>
+        <p class="base">L'image au service de votre histoire.</p>
+        <div class="lines">
+          <a href="#"><em>Email</em>timeotaris@mauvaisgrain.com</a>
+          <a href="#"><em>Téléphone</em>06 52 06 53 89</a>
+          <p><em>Atelier</em>94 quai des Chartrons, 33000 Bordeaux</p>
+        </div>
+        <div class="cta">
+          <a class="btn" href="#">Demander un devis<span></span></a>
+          <div class="soc"><a href="#">Instagram</a><a href="#">YouTube</a></div>
+        </div>
+        <div class="pnum cond">12</div>
+      </section>
+
+    </div>
+  </div>
+
+  <div class="rail t"><div class="holes" id="holesT"></div></div>
+  <div class="rail b"><div class="holes" id="holesB"></div></div>
+
+  <div class="mark wide">Mauvais Grain<span class="dot">.</span></div>
+  <div class="corner">Bordeaux · depuis 2022</div>
+
+  <div class="prog"><i id="progBar"></i></div>
+
+  <div class="reel" id="reel">
+    <div class="read">
+      <div class="cnt"><span id="cntNow">01</span> <i>/ 12</i></div>
+      <div class="cap">Bobine</div>
+    </div>
+    <svg viewBox="0 0 100 100" aria-hidden="true">
+      <circle class="rl-out" cx="50" cy="50" r="46.5"/>
+      <circle class="rl-film" id="rlFilm" cx="50" cy="50" r="34" stroke-width="25"/>
+      <g class="rl-sp" id="rlSp">
+        <path class="rl-tick" d="M50 6.5 L50 15"/>
+        <circle cx="50" cy="34" r="4.2"/>
+        <circle cx="63.9" cy="58" r="4.2"/>
+        <circle cx="36.1" cy="58" r="4.2"/>
+        <circle class="rl-hub" cx="50" cy="50" r="5.4"/>
+      </g>
+    </svg>
+  </div>
+
+</div>
+<div class="grain"></div>
+
+<script>
+(function(){
+  var app   = document.getElementById('app');
+  var strip = document.getElementById('strip');
+  var panels = [].slice.call(strip.children);
+  var hT = document.getElementById('holesT'), hB = document.getElementById('holesB');
+  var cnt = document.getElementById('cntNow'), bar = document.getElementById('progBar');
+  var film = document.getElementById('rlFilm'), spokes = document.getElementById('rlSp');
+  var mark = document.querySelector('.mark'), corner = document.querySelector('.corner');
+  var reel = document.getElementById('reel');
+  var imgs = [].slice.call(strip.querySelectorAll('img'));
+
+  var geo = [], max = 0, vw = 0;
+  var x = 0, target = 0, raf = null;
+
+  function measure(){
+    vw = window.innerWidth;
+    geo = panels.map(function(p){ return { el:p, left:p.offsetLeft, w:p.offsetWidth,
+                                           dark:p.classList.contains('p-dark') }; });
+    var last = geo[geo.length-1];
+    max = Math.max(1, last.left + last.w - vw);
+    x = Math.min(x, max); target = Math.min(target, max);
+    render();
+  }
+
+  function render(){
+    strip.style.transform = 'translate3d(' + (-x) + 'px,0,0)';
+    var mp = (-x % 62) + 'px center';
+    hT.style.webkitMaskPosition = mp; hT.style.maskPosition = mp;
+    hB.style.webkitMaskPosition = mp; hB.style.maskPosition = mp;
+
+    var p = x / max;
+    bar.style.width = (p * 100) + '%';
+
+    /* la bobine se dévide : l'anneau de film s'amincit */
+    var sw = 25 - 21 * p;
+    film.setAttribute('stroke-width', sw.toFixed(2));
+    film.setAttribute('r', (46.5 - sw / 2).toFixed(2));
+    spokes.style.transform = 'rotate(' + (x * 0.16).toFixed(2) + 'deg)';
+
+    /* photogramme sous un point de l'écran */
+    function at(px){
+      var c = x + px, k = 0;
+      for (var i = 0; i < geo.length; i++){ if (c >= geo[i].left) k = i; }
+      return k;
+    }
+    var idx = at(vw * 0.42);
+    var n = idx + 1;
+    cnt.textContent = (n < 10 ? '0' : '') + n;
+    app.classList.toggle('is-dark', geo[idx].dark);
+
+    /* chaque élément de chrome adopte le ton de ce qu'il surplombe */
+    var dl = geo[at(96)].dark, dr = geo[at(vw - 130)].dark;
+    mark.classList.toggle('on-dark', dl);
+    corner.classList.toggle('on-dark', dr);
+    reel.classList.toggle('on-dark', dr);
+    app.classList.toggle('moved', x > 24);
+
+    /* parallaxe douce sur les photogrammes */
+    for (var j = 0; j < imgs.length; j++){
+      var im = imgs[j], host = im.closest('.panel');
+      var d = (host.offsetLeft + host.offsetWidth / 2) - (x + vw / 2);
+      im.style.transform = 'translate3d(' + (d * -0.035).toFixed(1) + 'px,0,0)';
+    }
+  }
+
+  function loop(){
+    var d = target - x;
+    if (Math.abs(d) < 0.4){ x = target; render(); raf = null; return; }
+    x += d * 0.14; render();
+    raf = requestAnimationFrame(loop);
+  }
+  function to(v){
+    target = Math.max(0, Math.min(max, v));
+    if (!raf) raf = requestAnimationFrame(loop);
+  }
+
+  /* molette → horizontal */
+  window.addEventListener('wheel', function(e){
+    e.preventDefault();
+    var d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    to(target + d * 1.5);
+  }, { passive:false });
+
+  /* clavier */
+  window.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowRight') to(target + 320);
+    else if (e.key === 'ArrowLeft') to(target - 320);
+    else if (e.key === 'Home') to(0);
+    else if (e.key === 'End') to(max);
+    else if (e.key === ' ') { e.preventDefault(); to(target + 700); }
+  });
+
+  /* glisser */
+  var down = false, px = 0;
+  window.addEventListener('pointerdown', function(e){ down = true; px = e.clientX; });
+  window.addEventListener('pointermove', function(e){
+    if (!down) return;
+    var dx = e.clientX - px; px = e.clientX;
+    target = Math.max(0, Math.min(max, target - dx));
+    x = target; render();
+  });
+  window.addEventListener('pointerup', function(){ down = false; });
+  window.addEventListener('pointercancel', function(){ down = false; });
+
+  window.addEventListener('resize', measure);
+
+  /* états de capture — synchrones */
+  window.mgState = function(n){
+    if (raf){ cancelAnimationFrame(raf); raf = null; }
+    measure();
+    var v = 0;
+    if (n === 1){
+      var g = geo[5];                       // Gone Colors au centre
+      v = g.left - (vw - g.w) / 2;
+    } else if (n === 2){
+      v = max;
+    }
+    x = target = Math.max(0, Math.min(max, v));
+    render();
+    return x;
+  };
+
+  measure();
+  window.addEventListener('load', measure);
+})();
+</script>
