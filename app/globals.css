@@ -4187,3 +4187,30 @@ html[data-header-tone="dark"] [data-header] {
     letter-spacing: 0.1em;
   }
 }
+
+/* ── LA PELLICULE — l'invitation suit le sens de la bande ─────────────
+   Sous 768 px la bande bascule en vertical : la flèche doit pointer vers
+   le bas, pas vers la droite, et l'invitation s'effacer vers le haut. */
+@media (max-width: 767.98px) {
+  .pel-hint .pel-arw {
+    width: 1.3em;
+    height: 1.3em;
+    background: none;
+  }
+  /* Le trait qui balaie n'a plus de sens sans ligne à parcourir. */
+  .pel-hint .pel-arw::before {
+    display: none;
+  }
+  .pel-hint .pel-arw::after {
+    right: auto;
+    left: 50%;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    /* 135° : le chevron composé des bords haut et droit pointe vers le bas. */
+    transform: translate(-50%, -60%) rotate(135deg);
+  }
+  .pel-root[data-moved="true"] .pel-hint {
+    transform: translateY(-10px);
+  }
+}
