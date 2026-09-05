@@ -27,3 +27,22 @@ qu'elle coûte.
 
 Ce sont des maquettes d'écran, pas des pages de production : un seul écran par
 piste, pas de parcours complet, pas de référencement, pas de formulaire.
+
+---
+
+# Seconde série — cinq mondes visuels
+
+La première série partageait un même ADN (noir, viseur, instrumentation de
+caméra). Celle-ci part dans cinq mondes distincts, même charte, avec des
+références nommées et des interdits explicites. Le téléphone y est dessiné,
+pas transposé.
+
+| Fichier | Direction | Le monde | Références |
+| --- | --- | --- | --- |
+| `d1.html` | Manifeste | Un mot géant par écran, grille suisse, images rares | Loewe · Aesop · Studio Feixen |
+| `d2.html` | Terracotta | La couleur en aplats pleins, chiffres énormes, rubans | Basement Studio · Pentagram |
+| `d3.html` | Plein cadre | Showreel sans chrome, titres qui débordent, rideau | Immersive Garden · Lusion |
+| `d4.html` | Index | Tableau brutaliste, survol qui bascule l'écran | Obys · Bureau Borsche |
+| `d5.html` | Atelier | Tirages posés de biais, annotations à la main | Kinfolk · Cereal |
+
+Dossier : `MauvaisGrain-5-directions.pdf`.

@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mauvais Grain — Atelier</title>
+<link rel="stylesheet" href="_base.css">
+<style>
+/* ══════════════════════════════════════════════════════════════
+   D5 — « ATELIER »
+   Des tirages posés sur une table, des notes au stylo terracotta.
+   ══════════════════════════════════════════════════════════════ */
+
+:root{
+  --paper:#f5f0e6;           /* crème chaud, un rien plus chaud que --ink */
+  --paper-deep:#ece5d6;
+  --white:#fcfaf5;           /* liseré du tirage papier */
+  --shadow: 0 30px 60px -20px rgba(58,38,18,.28), 0 2px 4px rgba(58,38,18,.06), 0 12px 20px -14px rgba(58,38,18,.18);
+  --shadow-up: 0 46px 80px -24px rgba(58,38,18,.34), 0 3px 6px rgba(58,38,18,.05), 0 20px 30px -18px rgba(58,38,18,.2);
+  --gutter: clamp(20px, 5.5vw, 84px);
+}
+
+html{ scroll-behavior:auto; }
+body{
+  background:var(--paper);
+  color:var(--bone);
+  font-family:var(--sans);
+  font-weight:380;
+  font-size:1.1rem;
+  line-height:1.8;
+  overflow-x:hidden;
+  background-image:
+    radial-gradient(120% 70% at 12% 0%, rgba(168,95,60,.07), transparent 60%),
+    radial-gradient(90% 60% at 100% 100%, rgba(120,90,50,.06), transparent 60%);
+  background-attachment:fixed;
+}
+
+/* Texture papier — bruit très fin, 4 % */
+.paper{
+  position:fixed; inset:0; z-index:300; pointer-events:none; opacity:.045;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.25 0 0 0 0 0.17 0 0 0 0 0.08 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ─── Typo ─── */
+h1,h2,h3{ font-family:var(--wide); font-weight:400; margin:0; letter-spacing:-.012em; line-height:1.04; }
+h1 em, h2 em, h3 em, .tilt{
+  font-style:normal;
+  color:var(--terra);
+  display:inline-block;
+  transform:skewX(-8deg);
+  transform-origin:50% 90%;
+}
+p{ margin:0; }
+a{ color:inherit; text-decoration:none; }
+.wrap{ padding-left:var(--gutter); padding-right:var(--gutter); }
+.narrow{ max-width:46ch; }
+.dim{ color:var(--bone-dim); }
+
+/* Notes à la main — Gloock terracotta, un peu de biais */
+.hand{
+  font-family:var(--wide);
+  color:var(--terra);
+  font-size:1.15rem;
+  line-height:1.25;
+  letter-spacing:.005em;
+  display:inline-block;
+  transform:rotate(-3deg);
+  white-space:nowrap;
+}
+.hand.a{ transform:rotate(-5deg); }
+.hand.b{ transform:rotate(2.5deg); }
+.ink{ stroke:var(--terra); fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+.ink.thin{ stroke-width:1.3; }
+
+/* Traits qui se dessinent à l'arrivée */
+.draw path{
+  stroke-dasharray:600; stroke-dashoffset:600;
+  animation:draw 1.1s var(--soft) forwards;
+}
+.draw path:nth-child(2){ animation-delay:.55s; }
+.draw path:nth-child(3){ animation-delay:.7s; }
+.draw.wait path{ animation-play-state:paused; }
+.draw.go path, .settled .draw path{ animation-play-state:running; }
+.settled .draw path{ animation-duration:.01s; animation-delay:0s; }
+@keyframes draw{ to{ stroke-dashoffset:0; } }
+
+/* ─── Le tirage ─── */
+.print{
+  --r:0deg;
+  position:relative;
+  background:var(--white);
+  padding:9px 9px 10px;
+  border-radius:2px;
+  box-shadow:var(--shadow);
+  transform:rotate(var(--r));
+  transition:transform .7s var(--expo), box-shadow .7s var(--expo);
+  will-change:transform;
+}
+.print img{ width:100%; height:auto; border-radius:1px; display:block; }
+.print::after{ /* infime relief du bord papier */
+  content:""; position:absolute; inset:0; border-radius:2px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.6), inset 0 0 0 1.5px rgba(80,60,30,.05);
+  pointer-events:none;
+}
+.cap{
+  font-family:var(--cond);
+  font-weight:500;
+  font-size:.62rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--bone-faint);
+  margin-top:14px;
+  line-height:1.6;
+  transition:color .5s var(--soft);
+}
+.cap b{ font-weight:600; color:var(--bone-dim); transition:color .5s var(--soft); }
+
+/* ══════════ 1. HAUT DE PAGE ══════════ */
+header.top{
+  display:flex; justify-content:space-between; align-items:baseline;
+  padding-top:34px; padding-bottom:10px;
+}
+.logo{ font-family:var(--wide); font-size:clamp(28px,3vw,44px); line-height:1; letter-spacing:-.01em; }
+.logo .dot{ color:var(--terra); }
+nav.menu{ display:flex; gap:2.2em; font-size:.95rem; font-weight:400; color:var(--bone-dim); }
+nav.menu a{ position:relative; }
+nav.menu a:hover{ color:var(--terra); }
+.tagline{ font-size:.95rem; color:var(--bone-dim); }
+
+.hero{ padding-top:clamp(40px,7vh,90px); }
+.hero h1{
+  font-size:clamp(40px,5vw,72px);
+  position:relative;
+}
+.hero h1 .u{ position:relative; display:inline-block; }
+.hero h1 .u svg{ position:absolute; left:-2%; right:-2%; bottom:-.16em; width:104%; height:.22em; overflow:visible; }
+.hero .row{ display:flex; justify-content:space-between; align-items:flex-end; gap:40px; flex-wrap:wrap; }
+.hero .lead{
+  max-width:30ch;
+  color:var(--bone-dim);
+  padding-bottom:.35em;
+}
+
+/* deux tirages posés de biais */
+.stack{
+  position:relative;
+  height:clamp(360px,40vw,580px);
+  margin-top:clamp(36px,5vw,72px);
+}
+.stack .print{ position:absolute; }
+.stack .p1{ left:0; top:0; width:min(58%,760px); --r:-1.6deg; z-index:1; }
+.stack .p2{ left:44%; top:26%; width:min(40%,520px); --r:2.1deg; z-index:2; }
+.stack .p2 .cap{ position:absolute; left:0; top:100%; }
+.stack .p1 .cap{ position:absolute; left:0; top:100%; }
+
+.stack .note1{ position:absolute; left:calc(min(58%,760px) + 1.8vw); top:1.5vw; z-index:3; }
+.stack .note1 .hand{ display:block; margin-left:44px; margin-top:-8px; }
+.stack .note1 svg{ width:130px; height:96px; display:block; margin-left:-14px; }
+.stack .note2{ position:absolute; right:-4px; top:calc(100% + 10px); z-index:3; }
+
+/* ══════════ 2. LA TABLE ══════════ */
+.table{ padding-top:clamp(120px,16vh,200px); }
+.table .head{ display:flex; justify-content:space-between; align-items:flex-end; gap:24px; flex-wrap:wrap; }
+.table h2{ font-size:clamp(34px,3.6vw,54px); }
+.table .hint{ font-size:.95rem; color:var(--bone-dim); max-width:30ch; padding-bottom:.3em; }
+.table .hint{ text-align:right; }
+.table .hint .hand{ font-size:1.1rem; transform:rotate(-2deg); margin-bottom:.15em; }
+@media (max-width:760px){ .table .hint{ text-align:left; } }
+
+.rail{
+  margin-top:clamp(36px,4vw,60px);
+  overflow-x:auto; overflow-y:visible;
+  scroll-snap-type:x mandatory;
+  scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
+  padding:60px var(--gutter) 90px;   /* de la place pour les ombres et le relevé */
+  display:flex;
+  align-items:flex-start;
+  gap:clamp(28px,4vw,64px);
+  cursor:grab;
+  position:relative;
+}
+.rail::-webkit-scrollbar{ display:none; }
+.rail.grabbing{ cursor:grabbing; scroll-snap-type:none; }
+.rail .item{
+  flex:0 0 auto;
+  width:clamp(300px,34vw,520px);
+  scroll-snap-align:center;
+  scroll-snap-stop:always;
+}
+.rail .item:nth-child(2){ margin-top:52px; }
+.rail .item:nth-child(3){ margin-top:8px; }
+.rail .item:nth-child(4){ margin-top:64px; }
+.rail .item:nth-child(5){ margin-top:20px; }
+.rail .item:nth-child(6){ margin-top:44px; }
+.rail .item:nth-child(1) .print{ --r:-1.8deg; }
+.rail .item:nth-child(2) .print{ --r:1.4deg; }
+.rail .item:nth-child(3) .print{ --r:-.9deg; }
+.rail .item:nth-child(4) .print{ --r:2deg; }
+.rail .item:nth-child(5) .print{ --r:-1.5deg; }
+.rail .item:nth-child(6) .print{ --r:1.1deg; }
+.rail .item::after{ content:""; display:block; height:1px; } /* garde le snap propre */
+
+/* LE GESTE : on prend le tirage en main */
+.item:hover .print, .item.held .print{
+  transform:rotate(0deg) translateY(-8px);
+  box-shadow:var(--shadow-up);
+}
+.item:hover .cap, .item.held .cap, .item:hover .cap b, .item.held .cap b{ color:var(--terra); }
+.item .apr{
+  font-size:.92rem; line-height:1.65; color:var(--bone-dim);
+  margin-top:10px; max-width:34ch;
+  opacity:.75; transition:opacity .5s var(--soft);
+}
+.item:hover .apr, .item.held .apr{ opacity:1; }
+
+/* le bord de la table : un trait, pas tout à fait droit */
+.edge{ height:22px; margin:-60px var(--gutter) 0; opacity:.55; }
+.edge svg{ width:100%; height:100%; display:block; }
+.edge path{ stroke:var(--line); stroke-width:1.2; fill:none; }
+
+/* ══════════ 3. PARTIS PRIS ══════════ */
+.ethos{ padding-top:clamp(120px,16vh,200px); display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr); gap:clamp(40px,6vw,110px); align-items:center; }
+.ethos .kicker{ font-size:.95rem; color:var(--bone-dim); margin-bottom:2.2em; }
+.ethos h2{ font-size:clamp(30px,3vw,46px); line-height:1.15; }
+.ethos h2 + h2{ margin-top:.55em; }
+.ethos .who{ margin-top:2.6em; max-width:40ch; color:var(--bone-dim); }
+.ethos .who strong{ font-weight:500; color:var(--bone); }
+
+.portrait{ position:relative; padding:40px 30px 60px 26px; }
+.portrait .print{ --r:2deg; width:100%; }
+.portrait .ring{ position:absolute; left:-7%; right:-7%; top:-9%; bottom:6%; pointer-events:none; }
+.portrait .ring svg{ width:100%; height:100%; display:block; overflow:visible; }
+.portrait .note{ position:absolute; right:-6px; bottom:-6px; }
+.portrait .note .hand{ transform:rotate(-4deg); }
+.portrait .cap{ margin-top:12px; margin-left:4px; }
+
+/* ══════════ 4. MÉTIERS ══════════ */
+.crafts{ padding-top:clamp(120px,16vh,200px); }
+.crafts h2{ font-size:clamp(34px,3.6vw,54px); }
+.crafts .sub{ color:var(--bone-dim); margin-top:1em; max-width:42ch; }
+.crafts ol{ list-style:none; margin:clamp(36px,4vw,60px) 0 0; padding:0; max-width:900px; }
+.crafts li{
+  display:grid; grid-template-columns:64px minmax(180px,.55fr) minmax(0,1fr); gap:20px 28px; align-items:baseline;
+  padding:26px 0; border-top:1px solid var(--line-soft);
+}
+.crafts li:last-child{ border-bottom:1px solid var(--line-soft); }
+.crafts li svg{ width:52px; height:22px; display:block; position:relative; top:2px; overflow:visible; }
+.crafts li:nth-child(2) svg{ transform:rotate(3deg); }
+.crafts li:nth-child(3) svg{ transform:rotate(-2deg) translateX(3px); }
+.crafts li:nth-child(4) svg{ transform:rotate(1.5deg); }
+.crafts li:nth-child(5) svg{ transform:rotate(-3.5deg) translateX(2px); }
+.crafts li h3{ font-size:clamp(24px,2vw,30px); }
+.crafts li p{ color:var(--bone-dim); font-size:1.02rem; line-height:1.7; }
+.crafts li:hover h3{ color:var(--terra); }
+
+/* logos — de petits cachets sur la table */
+.stamps{ margin-top:clamp(60px,7vw,100px); display:flex; align-items:center; gap:clamp(12px,3vw,44px); flex-wrap:wrap; }
+.stamps .lbl{ font-size:.9rem; color:var(--bone-dim); margin-right:1em; }
+.stamps img{ height:78px; width:auto; opacity:.78; filter:brightness(.32) sepia(.6); mix-blend-mode:multiply; }
+.stamps img:nth-child(odd){ transform:rotate(-2deg); }
+.stamps img:nth-child(even){ transform:rotate(1.5deg); }
+
+/* ══════════ 5. CONTACT ══════════ */
+.contact{ padding-top:clamp(140px,18vh,220px); padding-bottom:clamp(60px,8vh,100px); position:relative; }
+.contact h2{ font-size:clamp(44px,5vw,76px); }
+.contact .mail{
+  display:inline-block; margin-top:.5em; position:relative;
+  font-family:var(--wide); font-size:clamp(20px,2.2vw,32px); letter-spacing:-.01em; line-height:1.3;
+}
+.contact .mail svg{ position:absolute; left:-1%; width:102%; height:.34em; bottom:-.2em; overflow:visible; }
+.contact .mail:hover{ color:var(--terra); }
+.contact .coords{ margin-top:2.4em; color:var(--bone-dim); line-height:2; }
+.contact .coords span{ display:block; }
+.contact .last{ position:absolute; left:clamp(300px,40vw,600px); top:clamp(210px,27vh,300px); }
+.contact .last svg{ width:150px; height:110px; display:block; }
+.contact .last .hand{ display:block; margin-left:90px; margin-top:-30px; transform:rotate(-6deg); }
+
+footer{
+  display:flex; justify-content:space-between; align-items:baseline; gap:24px; flex-wrap:wrap;
+  padding-top:40px; padding-bottom:44px; border-top:1px solid var(--line-soft);
+  font-size:.92rem; color:var(--bone-dim);
+}
+footer .logo{ font-size:1.3rem; color:var(--bone); }
+footer nav{ display:flex; gap:2em; }
+footer a:hover{ color:var(--terra); }
+
+/* ══════════ TÉLÉPHONE ══════════ */
+@media (max-width:760px){
+  body{ font-size:1.02rem; line-height:1.72; }
+  header.top{ padding-top:24px; flex-direction:column; align-items:flex-start; gap:6px; }
+  nav.menu{ display:none; }
+  .logo{ font-size:26px; }
+  .tagline{ font-size:.82rem; }
+  .hero{ padding-top:44px; }
+  .hero h1{ font-size:11.5vw; }
+  .hero h1 br{ display:none; }
+  .hero .row{ display:block; }
+  .hero .lead{ margin-top:1.4em; font-size:1rem; max-width:none; }
+  .stack{ height:106vw; margin-top:84px; }
+  .stack .p1{ width:82%; left:0; top:0; }
+  .stack .p2{ width:66%; left:30%; top:44%; --r:2.4deg; }
+  .stack .note1{ left:auto; right:0; top:-74px; }
+  .stack .note1 svg{ width:86px; height:64px; }
+  .stack .note1 .hand{ font-size:.98rem; margin-left:22px; margin-top:-4px; }
+  .stack .note2{ right:0; top:calc(100% + 38px); }
+  .hand{ font-size:1rem; }
+
+  .table{ padding-top:96px; }
+  .table .hint{ font-size:.9rem; }
+  .rail{ padding:44px var(--gutter) 60px; gap:26px; margin-top:24px; }
+  .rail .item{ width:78vw; scroll-snap-align:center; }
+  .rail .item:nth-child(n){ margin-top:0; }
+  .rail .item:nth-child(even){ margin-top:22px; }
+  .edge{ margin-top:-40px; }
+
+  .ethos{ grid-template-columns:1fr; gap:40px; padding-top:96px; }
+  .ethos h2{ font-size:7.4vw; }
+  .portrait{ padding:28px 22px 50px 18px; width:88%; }
+  .portrait .note{ right:-8px; bottom:-2px; }
+
+  .crafts{ padding-top:96px; }
+  .crafts li{ grid-template-columns:44px 1fr; gap:6px 14px; padding:20px 0; }
+  .crafts li p{ grid-column:2; font-size:.95rem; }
+  .crafts li svg{ width:38px; height:16px; }
+  .stamps img{ height:48px; }
+
+  .contact{ padding-top:110px; padding-bottom:40px; }
+  .contact h2{ font-size:12vw; }
+  .contact .mail{ font-size:5.2vw; }
+  .contact .last{ position:relative; left:auto; top:auto; margin:22px 0 0 8px; display:flex; align-items:flex-end; gap:6px; }
+  .contact .last svg{ width:72px; height:54px; }
+  .contact .last .hand{ margin:0 0 6px 0; font-size:1rem; transform:rotate(-3deg); }
+  footer{ padding-top:28px; padding-bottom:32px; font-size:.86rem; }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .draw path{ animation:none; stroke-dashoffset:0; }
+  .print{ transition:none; }
+}
+</style>
+</head>
+<body>
+<div class="paper" aria-hidden="true"></div>
+
+<!-- ═══════════ 1. HAUT ═══════════ -->
+<header class="top wrap">
+  <a class="logo" href="#">Mauvais Grain<span class="dot">.</span></a>
+  <nav class="menu">
+    <a href="#films">Films</a>
+    <a href="#studio">Studio</a>
+    <a href="#metiers">Métiers</a>
+    <a href="#contact">Contact</a>
+  </nav>
+  <p class="tagline">Studio de production vidéo — Bordeaux</p>
+</header>
+
+<section class="hero wrap">
+  <div class="row">
+  <h1>Une histoire bien<br><span class="u"><em>racontée</em>
+    <svg viewBox="0 0 200 12" preserveAspectRatio="none" class="draw" aria-hidden="true">
+      <path class="ink" d="M3 7.5 C 30 4.5, 62 9.6, 98 6.2 S 160 8.4, 197 4.6"/>
+    </svg></span> ne s'oublie pas.</h1>
+  <p class="lead">L'image au service de votre histoire. Films de tourisme, clips, événements, corporate — tournés à Bordeaux et ailleurs, depuis 2022.</p>
+  </div>
+
+  <div class="stack">
+    <figure class="print p1" style="margin:0">
+      <img src="img/the-sound-of-discovery-1.jpg" alt="The Sound of Discovery — plan large, ruines et lumière de midi">
+      <figcaption class="cap"><b>01</b> / The Sound of Discovery, 2026</figcaption>
+    </figure>
+    <figure class="print p2" style="margin:0">
+      <img src="img/silhouette-2.jpg" alt="Silhouette — danseuse dans un parking, noir et blanc">
+      <figcaption class="cap"><b>02</b> / Silhouette, 2026</figcaption>
+      <div class="note2" aria-hidden="true"><span class="hand b">↑ 2026, plans fixes</span></div>
+    </figure>
+
+    <div class="note1" aria-hidden="true">
+      <svg viewBox="0 0 130 96" class="draw" fill="none">
+        <path class="ink" d="M118 10 C 96 14, 70 22, 46 46 C 34 58, 24 70, 14 84"/>
+        <path class="ink thin" d="M13 66 C 13.5 72, 13.8 78, 14 85 C 19 82, 25 80, 31 79"/>
+      </svg>
+      <span class="hand a">observer sans intervenir</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 2. LA TABLE ═══════════ -->
+<section class="table" id="films">
+  <div class="wrap head">
+    <h2>Six films, posés <em>là</em>.</h2>
+    <p class="hint"><span class="hand">→ faites glisser</span><br>Chaque tirage se prend en main.</p>
+  </div>
+
+  <div class="rail" id="rail">
+    <div class="item">
+      <figure class="print" style="margin:0"><img src="img/the-sound-of-discovery-3.jpg" alt="The Sound of Discovery"></figure>
+      <p class="cap"><b>01</b> / The Sound of Discovery, 2026<br>Tourisme · Autoproduit</p>
+      <p class="apr">Observer sans intervenir. Laisser les rencontres, les ambiances et la lumière naturelle guider le récit.</p>
+    </div>
+    <div class="item">
+      <figure class="print" style="margin:0"><img src="img/silhouette-1.jpg" alt="Silhouette"></figure>
+      <p class="cap"><b>02</b> / Silhouette, 2026<br>Clip · Autoproduit</p>
+      <p class="apr">Construire le film autour de plans fixes. Le mouvement naît uniquement de la danseuse.</p>
+    </div>
+    <div class="item">
+      <figure class="print" style="margin:0"><img src="img/the-shape-of-vastness-2.jpg" alt="The Shape of Vastness"></figure>
+      <p class="cap"><b>03</b> / The Shape of Vastness, 2025<br>Tourisme · Autoproduit</p>
+      <p class="apr">Prendre le temps d'observer. Un film contemplatif où chaque plan laisse respirer le paysage.</p>
+    </div>
+    <div class="item">
+      <figure class="print" style="margin:0"><img src="img/delaurentis-gone-colors-1.jpg" alt="Gone Colors — DeLaurentis"></figure>
+      <p class="cap"><b>04</b> / Gone Colors, 2024<br>Clip · DeLaurentis</p>
+      <p class="apr">Tourner durant les dernières minutes du jour, pour une lumière douce et chaleureuse.</p>
+    </div>
+    <div class="item">
+      <figure class="print" style="margin:0"><img src="img/graduation-1.jpg" alt="Graduation — COB"></figure>
+      <p class="cap"><b>05</b> / Graduation, 2024<br>Événementiel · COB</p>
+      <p class="apr">Une approche immersive, au plus près des étudiants, pour saisir les instants spontanés.</p>
+    </div>
+    <div class="item">
+      <figure class="print" style="margin:0"><img src="img/la-medocaine-1.jpg" alt="La Médocaine"></figure>
+      <p class="cap"><b>06</b> / La Médocaine, 2024<br>Événementiel · La Médocaine</p>
+      <p class="apr">Se mêler au public : concerts, DJ, jeux de lumière et feu d'artifice.</p>
+    </div>
+  </div>
+  <div class="edge" aria-hidden="true">
+    <svg viewBox="0 0 1400 22" preserveAspectRatio="none"><path d="M0 12 C 200 10.5, 420 13, 700 11.5 S 1150 12.8, 1400 11"/></svg>
+  </div>
+</section>
+
+<!-- ═══════════ 3. PARTIS PRIS ═══════════ -->
+<section class="ethos wrap" id="studio">
+  <div>
+    <p class="kicker">Ce à quoi on tient</p>
+    <h2>Observer plutôt que <em>mettre en scène</em>.</h2>
+    <h2>Accompagner plutôt que <em>diriger</em>.</h2>
+    <h2>Raconter plutôt que <em>vendre</em>.</h2>
+    <p class="who">Mauvais Grain est un studio de production vidéo fondé à Bordeaux en 2022 par <strong>Timéo Taris</strong>. On filme ce qui se passe, on laisse la lumière faire, et on garde ce qui compte.</p>
+  </div>
+
+  <div class="portrait">
+    <figure class="print" style="margin:0">
+      <img src="img/studio.jpg" alt="Timéo Taris en tournage, à contre-jour">
+      <figcaption class="cap"><b>Timéo Taris</b> / en tournage</figcaption>
+    </figure>
+    <div class="ring" aria-hidden="true">
+      <svg viewBox="0 0 400 300" class="draw wait">
+        <path class="ink" d="M40 150 C 22 72, 140 14, 236 20 C 340 26, 392 96, 378 176 C 364 256, 236 296, 130 282 C 50 270, 6 214, 26 150 C 36 118, 64 92, 96 74"/>
+      </svg>
+    </div>
+    <div class="note" aria-hidden="true"><span class="hand">↑ le fondateur, depuis 2022</span></div>
+  </div>
+</section>
+
+<!-- ═══════════ 4. MÉTIERS ═══════════ -->
+<section class="crafts wrap" id="metiers">
+  <h2>Ce qu'on <em>sait</em> faire.</h2>
+  <p class="sub">Cinq façons de filmer, une seule manière de regarder.</p>
+  <ol>
+    <li>
+      <svg viewBox="0 0 60 24" class="draw wait" aria-hidden="true"><path class="ink" d="M3 13.5 C 16 10.5, 30 12.5, 52 11.4"/><path class="ink thin" d="M44 5 C 47.5 8, 50 10, 53.5 11.5 C 49.5 13.5, 46.5 16, 44.5 19.5"/></svg>
+      <h3>Corporate</h3>
+      <p>Votre stratégie mérite mieux qu'une vidéo. Elle mérite un film.</p>
+    </li>
+    <li>
+      <svg viewBox="0 0 60 24" class="draw wait" aria-hidden="true"><path class="ink" d="M4 12 C 18 13.5, 32 10, 51 12.2"/><path class="ink thin" d="M43 5.5 C 47 8.5, 50.5 10.5, 53 12.2 C 49 14, 46 17, 44 20"/></svg>
+      <h3>Événementiel</h3>
+      <p>Un événement ne dure qu'un soir. Son film, beaucoup plus longtemps.</p>
+    </li>
+    <li>
+      <svg viewBox="0 0 60 24" class="draw wait" aria-hidden="true"><path class="ink" d="M3 11 C 20 9.5, 28 14, 52 12"/><path class="ink thin" d="M45 4.5 C 48 8, 51 10.5, 53.5 12 C 50 13.5, 47 16.5, 45 19"/></svg>
+      <h3>Immobilier</h3>
+      <p>Un bien se visite. Un lieu, ça se ressent.</p>
+    </li>
+    <li>
+      <svg viewBox="0 0 60 24" class="draw wait" aria-hidden="true"><path class="ink" d="M3 13 C 14 11, 36 11.5, 52 12"/><path class="ink thin" d="M44 6 C 48 9, 51 11, 53.5 12 C 50 14, 47 16.5, 44.5 19"/></svg>
+      <h3>Tourisme</h3>
+      <p>Mettre en lumière vos paysages, vos expériences et l'identité d'un territoire.</p>
+    </li>
+    <li>
+      <svg viewBox="0 0 60 24" class="draw wait" aria-hidden="true"><path class="ink" d="M4 12.5 C 22 13.5, 34 10, 51.5 11.8"/><path class="ink thin" d="M43.5 5 C 47 8.5, 50 10.5, 53 12 C 49.5 13.5, 46.5 16, 44 19.5"/></svg>
+      <h3>Clip</h3>
+      <p>Donner une image à votre musique.</p>
+    </li>
+  </ol>
+
+  <div class="stamps" aria-label="Ils nous ont fait confiance">
+    <span class="lbl">Ils nous ont fait confiance</span>
+    <img src="img/cob.png" alt="COB"><img src="img/delaurentis.png" alt="DeLaurentis"><img src="img/beauty-success.png" alt="Beauty Success"><img src="img/cra.png" alt="CRA"><img src="img/nebopan.png" alt="Nebopan"><img src="img/oh.png" alt="OH"><img src="img/partedis.png" alt="Partedis"><img src="img/wimco.png" alt="Wimco">
+  </div>
+</section>
+
+<!-- ═══════════ 5. CONTACT ═══════════ -->
+<section class="contact wrap" id="contact">
+  <h2>Écrivez-<em>nous</em>.</h2>
+  <a class="mail" href="mailto:timeotaris@mauvaisgrain.com">timeotaris@mauvaisgrain.com
+    <svg viewBox="0 0 200 12" preserveAspectRatio="none" class="draw wait" aria-hidden="true">
+      <path class="ink thin" d="M2 6.5 C 40 3.8, 75 9.2, 118 5.5 S 170 8.6, 198 5"/>
+      <path class="ink thin" style="opacity:.55" d="M6 9.5 C 50 7.5, 90 11, 130 8.4 S 185 10.5, 195 8.5"/>
+    </svg>
+  </a>
+  <div class="coords">
+    <span>06 52 06 53 89</span>
+    <span>94 quai des Chartrons, 33000 Bordeaux</span>
+  </div>
+  <div class="last" aria-hidden="true">
+    <svg viewBox="0 0 150 110" class="draw wait" fill="none">
+      <path class="ink" d="M136 96 C 120 82, 96 66, 66 54 C 44 45, 26 38, 10 30"/>
+      <path class="ink thin" d="M26 26 C 21 27.5, 15 29, 9.5 30 C 12 35, 14.5 40, 16 45"/>
+    </svg>
+    <span class="hand">on répond sous 24 h</span>
+  </div>
+</section>
+
+<footer class="wrap">
+  <span class="logo">Mauvais Grain<span class="dot">.</span></span>
+  <span>L'image au service de votre histoire.</span>
+  <nav><a href="#">Instagram</a><a href="#">YouTube</a></nav>
+</footer>
+
+<script>
+(function(){
+  var rail = document.getElementById('rail');
+  var items = rail.querySelectorAll('.item');
+  var mobile = function(){ return window.innerWidth <= 760; };
+
+  /* Molette verticale → défilement de la table (on laisse passer aux bords) */
+  rail.addEventListener('wheel', function(e){
+    if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+    var max = rail.scrollWidth - rail.clientWidth;
+    var atStart = rail.scrollLeft <= 0 && e.deltaY < 0;
+    var atEnd = rail.scrollLeft >= max - 1 && e.deltaY > 0;
+    if (atStart || atEnd) return;
+    e.preventDefault();
+    rail.scrollLeft += e.deltaY;
+  }, { passive:false });
+
+  /* Glisser à la souris */
+  var drag = null;
+  rail.addEventListener('pointerdown', function(e){
+    if (e.pointerType !== 'mouse') return;
+    drag = { x:e.clientX, left:rail.scrollLeft, moved:false };
+    rail.classList.add('grabbing');
+  });
+  window.addEventListener('pointermove', function(e){
+    if (!drag) return;
+    var dx = e.clientX - drag.x;
+    if (Math.abs(dx) > 3) drag.moved = true;
+    rail.scrollLeft = drag.left - dx;
+  });
+  window.addEventListener('pointerup', function(){ drag = null; rail.classList.remove('grabbing'); });
+
+  /* Les traits se dessinent quand on arrive dessus */
+  var waits = document.querySelectorAll('.draw.wait');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){ if (en.isIntersecting){ en.target.classList.add('go'); io.unobserve(en.target); } });
+    }, { threshold:.4 });
+    waits.forEach(function(el){ io.observe(el); });
+  } else { waits.forEach(function(el){ el.classList.add('go'); }); }
+
+  function centerItem(i){
+    var it = items[i]; if (!it) return;
+    var target = it.offsetLeft + it.offsetWidth/2 - rail.clientWidth/2;
+    rail.scrollLeft = Math.max(0, target);
+  }
+
+  /* ─── États pour la capture ─── */
+  window.mgState = function(n){
+    n = +n || 0;
+    document.body.classList.add('settled');
+    items.forEach(function(it){ it.classList.remove('held'); });
+    waits.forEach(function(el){ el.classList.add('go'); });
+    var top = 0;
+    if (n === 1){
+      var head = document.querySelector('.table .head');
+      top = head.getBoundingClientRect().top + window.scrollY - (mobile() ? 56 : 96);
+      var k = mobile() ? 1 : 2;
+      items[k].classList.add('held');
+      centerItem(k);
+    } else if (n === 2){
+      var st = document.querySelector('.ethos .kicker');
+      top = st.getBoundingClientRect().top + window.scrollY - (mobile() ? 56 : 120);
+      rail.scrollLeft = 0;
+    } else {
+      rail.scrollLeft = 0;
+    }
+    window.scrollTo(0, top);
+    return n;
+  };
+})();
+</script>
+</body>
+</html>
