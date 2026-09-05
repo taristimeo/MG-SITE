@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FilmCanvas, type FilmCanvasHandle } from "./gl/FilmCanvas";
+import { Amorce } from "@/components/motion/Amorce";
+import { Curseur } from "@/components/motion/Curseur";
 import { projectPreview, projectThumb, projects, site } from "@/lib/site";
 import { ViseurOverlay } from "./ViseurOverlay";
 import {
@@ -430,6 +432,13 @@ export function Viseur() {
         {site.name} — le viseur : {p.title}
       </h1>
 
+      {/* L'amorce de bobine tient lieu de chargement, une fois par session ;
+          le curseur du site vit sur le body et ne prend donc pas le ton de
+          la page — d'où le `tone` explicite. Les deux sont inertes en
+          mouvement réduit et au doigt. */}
+      <Amorce />
+      <Curseur tone="dark" />
+
       {/* ── Les plans ─────────────────────────────────────────────────
           Le projecteur WebGL rend le plan courant : grain, souffle de lampe,
           aberration d'objectif, et transition par déplacement d'un film à
@@ -588,6 +597,7 @@ export function Viseur() {
         <Link
           className="vs-btn"
           href={`/viseur/${p.slug}`}
+          data-cursor="open"
           tabIndex={st === 2 ? 0 : -1}
         >
           Voir le film <u aria-hidden>→</u>
@@ -636,7 +646,7 @@ export function Viseur() {
           />
         </svg>
 
-        <div className="vs-ring">
+        <div className="vs-ring" data-cursor="drag">
           {projects.map((f, i) => (
             <button
               key={f.slug}
@@ -645,6 +655,7 @@ export function Viseur() {
                 labelEls.current[i] = el;
               }}
               className="vs-lbl"
+              data-cursor="open"
               aria-current={i === active ? "true" : undefined}
               onClick={() => goTo(i)}
               onFocus={() => {

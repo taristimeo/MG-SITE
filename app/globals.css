@@ -580,15 +580,19 @@ html {
   animation: play-pulse 2.4s var(--ease-out-expo) infinite;
 }
 
-/* ---- Transition d'entrée de page : léger fondu + montée (template.tsx) ---- */
+/* ---- Transition d'entrée de page (template.tsx) ----
+   FONDU SEUL, volontairement. Une animation de `transform`, même terminée
+   sur `none`, fait du conteneur le référentiel de tous ses descendants en
+   `position: fixed` pendant toute sa durée — en-tête fixe, calques plein
+   écran du viseur, amorce : tout se décalait le temps de l'animation. Ne pas
+   réintroduire de montée ici ; si un jour on en veut une, elle doit vivre
+   sur un enfant qui ne contient aucun calque fixe. */
 @keyframes page-enter {
   from {
     opacity: 0;
-    transform: translateY(12px);
   }
   to {
     opacity: 1;
-    transform: none;
   }
 }
 .page-enter {
