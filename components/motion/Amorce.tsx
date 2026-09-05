@@ -83,9 +83,9 @@ export function Amorce({
   force = false,
   label,
 }: AmorceProps) {
-  // Le rendu serveur montre toujours le premier temps : l'amorce couvre
-  // l'écran dès le premier octet, et c'est l'effet de mise en page qui la
-  // retire — avant peinture — pour ceux qui l'ont déjà vue.
+  // La décision (jouer ou passer) est prise dans un effet de MISE EN PAGE :
+  // elle est donc appliquée avant la première peinture du calque, et ceux
+  // qui ont déjà vu l'amorce ne voient jamais un seul de ses instants.
   const [phase, setPhase] = useState<Phase>("compte");
   const [n, setN] = useState(PREMIER);
   const [hote, setHote] = useState<HTMLElement | null>(null);
@@ -209,7 +209,7 @@ export function Amorce({
 
       <div className="mg-am-core">
         <svg className="mg-am-svg" viewBox="0 0 220 220" aria-hidden="true">
-          {/* La croix de visée, d'un bord à l'autre du cadre. */}
+          {/* Les mires du disque, dans le prolongement de la croix d'écran. */}
           <line className="mg-am-hair" x1="110" y1="0" x2="110" y2="220" />
           <line className="mg-am-hair" x1="0" y1="110" x2="220" y2="110" />
 
