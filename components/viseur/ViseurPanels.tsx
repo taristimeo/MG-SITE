@@ -46,7 +46,7 @@ export function IndexPanelBody({
               {p.year}
             </span>
           </button>
-          <Link href={`/realisations/${p.slug}`} className="vs-card-link">
+          <Link href={`/viseur/${p.slug}`} className="vs-card-link">
             Voir le film →
           </Link>
         </div>

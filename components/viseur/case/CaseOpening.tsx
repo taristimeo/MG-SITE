@@ -38,7 +38,9 @@ export function CaseOpening({
         <p className="vsc-kicker" data-reveal>
           Étude de cas
           <em aria-hidden />
-          {n(index + 1)} / {n(total)}
+          <b>
+            {n(index + 1)} / {n(total)}
+          </b>
         </p>
 
         <h1 className="vsc-ttl" data-reveal>

@@ -24,6 +24,7 @@ export function CaseStills({
 }) {
   const total = stills.length;
   const railRef = useRef<HTMLDivElement>(null);
+  const progRef = useRef<HTMLDivElement>(null);
   const btnRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const zoomRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState<number | null>(null);
@@ -49,6 +50,37 @@ export function CaseStills({
     };
     rail.addEventListener("wheel", onWheel, { passive: false });
     return () => rail.removeEventListener("wheel", onWheel);
+  }, []);
+
+  // ── L'avancement dans la bande — écrit hors React ─────────────────
+  // Les barres de défilement des navigateurs s'escamotent : sur une bande
+  // qu'on pousse, il faut un repère qui reste. Un filet terracotta dit à la
+  // fois où l'on est et combien il reste.
+  useEffect(() => {
+    const rail = railRef.current;
+    const bar = progRef.current;
+    if (!rail || !bar) return;
+    let raf = 0;
+    const write = () => {
+      raf = 0;
+      const vis = rail.clientWidth / rail.scrollWidth;
+      const max = rail.scrollWidth - rail.clientWidth;
+      const at = max > 0 ? Math.min(1, Math.max(0, rail.scrollLeft / max)) : 0;
+      const w = Math.min(1, vis);
+      bar.style.width = `${(w * 100).toFixed(3)}%`;
+      bar.style.left = `${(at * (1 - w) * 100).toFixed(3)}%`;
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(write);
+    };
+    write();
+    rail.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      rail.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
   }, []);
 
   // ── Le clavier dans la bande : on passe d'un photogramme à l'autre ─
@@ -193,6 +225,12 @@ export function CaseStills({
             <span className="vsc-still-veil" aria-hidden />
           </button>
         ))}
+      </div>
+
+      <div className="vsc-rail-prog" aria-hidden>
+        <div className="vsc-rail-prog-track">
+          <div ref={progRef} className="vsc-rail-prog-bar" />
+        </div>
       </div>
 
       {/* ── L'agrandissement ──────────────────────────────────────── */}

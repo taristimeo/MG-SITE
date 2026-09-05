@@ -4259,3 +4259,1690 @@ html[data-header-tone="dark"] [data-header] {
     transition: none;
   }
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LE VISEUR — ÉTUDES DE CAS
+   ─────────────────────────────────────────────────────────────────────
+   Le viseur donne à voir ; l'étude de cas donne à comprendre. Elle se
+   déplie PAR-DESSUS lui, sur sa propre adresse (/viseur/<slug>), et garde
+   sa grammaire : le noir de la charte, les repères d'angle, le monospace
+   du HUD, la terracotta employée comme une ponctuation — jamais en aplat.
+
+   Comme le viseur, elle est un CALQUE FIXE qui porte son propre
+   défilement : ni `body` ni `html` ne sont touchés, les trois brouillons
+   partagent le même document. Elle se tient sous le grain (60) et sous le
+   sélecteur de brouillon (90).
+
+   Aucune couleur en dur : tout vient des variables de la charte, les
+   voiles posés sur les photographies étant des color-mix de --color-ink.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Le voile d'entrée de page laisse une matrice identité sur son conteneur,
+   et tout élément transformé devient le bloc conteneur des `position: fixed`
+   qu'il abrite — l'étude de cas s'y retrouverait haute de 0 pixel. Même
+   neutralisation que pour le viseur : elle a sa propre entrée. */
+.page-enter:has(> .vsc-root) {
+  animation: none;
+  transform: none;
+}
+
+/* ── Le calque ─────────────────────────────────────────────────────── */
+.vsc-root {
+  position: fixed;
+  inset: 0 auto auto 0;
+  width: 100vw;
+  height: 100dvh;
+  z-index: 20;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  background: var(--color-ink);
+  color: var(--color-bone);
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--color-bone) 20%, transparent)
+    transparent;
+
+  /* Marges de composition. La gouttière GAUCHE est traitée à part : la
+     languette du sélecteur de brouillon (1,9 rem, bord gauche, mi-hauteur)
+     doit pouvoir passer sans mordre sur le texte au format téléphone. */
+  --vsc-pad: clamp(24px, 5vw, 64px);
+  --vsc-padl: var(--vsc-pad);
+  --vsc-max: 1440px;
+  /* Hauteur de la barre haute — sert de repère aux éléments collants. */
+  --vsc-hud: 49px;
+}
+/* Le calque prend le focus au montage pour être défilable au clavier : ce
+   n'est pas un arrêt de tabulation, il ne porte donc pas d'anneau. */
+.vsc-root:focus {
+  outline: none;
+}
+.vsc-root::-webkit-scrollbar {
+  width: 9px;
+}
+.vsc-root::-webkit-scrollbar-track {
+  background: color-mix(in srgb, var(--color-bone) 5%, transparent);
+}
+.vsc-root::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--color-bone) 20%, transparent);
+}
+.vsc-root::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--color-bone) 34%, transparent);
+}
+
+/* Largeur de composition commune, gouttières comprises. */
+.vsc-wrap,
+.vsc-film,
+.vsc-story,
+.vsc-open-in,
+.vsc-stills-head,
+.vsc-next-in,
+.vsc-foot {
+  width: 100%;
+  max-width: var(--vsc-max);
+  margin-inline: auto;
+  padding-right: var(--vsc-pad);
+  padding-left: var(--vsc-padl);
+}
+
+/* ── La révélation au défilement ───────────────────────────────────── */
+.vsc-root [data-reveal] {
+  opacity: 0;
+  transform: translateY(20px);
+  filter: blur(3px);
+  transition:
+    opacity 0.9s var(--ease-out-soft),
+    transform 1.05s var(--ease-out-expo),
+    filter 0.9s var(--ease-out-soft);
+  will-change: opacity, transform;
+}
+.vsc-root [data-reveal].is-in {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+/* ── La barre haute : le HUD du viseur, tenu ───────────────────────── */
+.vsc-hud {
+  position: sticky;
+  top: 0;
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 15px var(--vsc-pad) 14px var(--vsc-padl);
+  background: color-mix(in srgb, var(--color-ink) 74%, transparent);
+  -webkit-backdrop-filter: blur(20px) saturate(0.85);
+  backdrop-filter: blur(20px) saturate(0.85);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-bone) 10%, transparent);
+}
+.vsc-back,
+.vsc-hud-n,
+.vsc-hud-mid {
+  font-family: var(--font-cond);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin: 0;
+}
+.vsc-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: color-mix(in srgb, var(--color-bone) 66%, transparent);
+  transition: color 0.35s var(--ease-out-soft);
+  flex: none;
+}
+.vsc-back-arw {
+  display: inline-block;
+  color: var(--color-terra);
+  transition: transform 0.45s var(--ease-out-expo);
+}
+.vsc-back:hover {
+  color: var(--color-bone);
+}
+.vsc-back:hover .vsc-back-arw {
+  transform: translateX(-4px);
+}
+.vsc-hud-mid {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  color: color-mix(in srgb, var(--color-bone) 52%, transparent);
+}
+.vsc-hud-tag {
+  color: var(--color-terra);
+  flex: none;
+}
+.vsc-hud-mid em {
+  font-style: normal;
+  width: 16px;
+  height: 1px;
+  flex: none;
+  background: color-mix(in srgb, var(--color-bone) 26%, transparent);
+}
+.vsc-hud-ttl {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.vsc-hud-n {
+  color: color-mix(in srgb, var(--color-bone) 58%, transparent);
+  flex: none;
+}
+.vsc-hud-n i {
+  font-style: normal;
+  color: var(--color-terra);
+  margin: 0 5px;
+}
+/* Le fil de progression — la seule mesure du chemin parcouru. */
+.vsc-prog {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  pointer-events: none;
+}
+.vsc-prog-bar {
+  height: 100%;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  background: var(--color-terra);
+}
+
+/* ── 1. L'OUVERTURE ────────────────────────────────────────────────── */
+.vsc-open {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: min(82svh, 820px);
+  padding-top: clamp(90px, 16vh, 180px);
+  padding-bottom: clamp(48px, 8vh, 96px);
+  overflow: hidden;
+  isolation: isolate;
+}
+.vsc-open-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-size: cover;
+  background-position: center;
+  transform: scale(1.04);
+}
+.vsc-open-veil {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(
+      125% 95% at 50% 36%,
+      color-mix(in srgb, var(--color-ink) 4%, transparent) 24%,
+      color-mix(in srgb, var(--color-ink) 46%, transparent) 100%
+    ),
+    linear-gradient(
+      to top,
+      color-mix(in srgb, var(--color-ink) 95%, transparent) 0%,
+      color-mix(in srgb, var(--color-ink) 82%, transparent) 22%,
+      color-mix(in srgb, var(--color-ink) 42%, transparent) 54%,
+      color-mix(in srgb, var(--color-ink) 26%, transparent) 100%
+    );
+}
+
+/* Les repères d'angle du viseur, tenus dans l'ouverture. */
+.vsc-corner {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border: 1px solid color-mix(in srgb, var(--color-bone) 34%, transparent);
+  pointer-events: none;
+}
+.vsc-corner.tl {
+  top: calc(var(--vsc-hud) + 18px);
+  left: 18px;
+  border-right: 0;
+  border-bottom: 0;
+}
+.vsc-corner.tr {
+  top: calc(var(--vsc-hud) + 18px);
+  right: 18px;
+  border-left: 0;
+  border-bottom: 0;
+}
+.vsc-corner.bl {
+  bottom: 18px;
+  left: 18px;
+  border-right: 0;
+  border-top: 0;
+}
+.vsc-corner.br {
+  bottom: 18px;
+  right: 18px;
+  border-left: 0;
+  border-top: 0;
+}
+
+.vsc-open-in {
+  position: relative;
+}
+/* La cascade d'ouverture — kicker, titre, méta, générique. */
+.vsc-open-in > [data-reveal]:nth-child(2) {
+  transition-delay: 90ms;
+}
+.vsc-open-in > [data-reveal]:nth-child(3) {
+  transition-delay: 175ms;
+}
+.vsc-open-in > [data-reveal]:nth-child(4) {
+  transition-delay: 255ms;
+}
+
+.vsc-kicker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font-family: var(--font-cond);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-terra);
+}
+.vsc-kicker em {
+  font-style: normal;
+  width: 22px;
+  height: 1px;
+  flex: none;
+  background: color-mix(in srgb, var(--color-terra) 65%, transparent);
+}
+
+.vsc-ttl {
+  margin: 22px 0 0;
+  max-width: 15ch;
+  font-family: var(--font-wide);
+  font-weight: 400;
+  font-size: clamp(2.7rem, 7.4vw, 6.2rem);
+  line-height: 0.93;
+  letter-spacing: -0.022em;
+  color: var(--color-bone);
+  text-shadow: 0 2px 60px color-mix(in srgb, var(--color-ink) 88%, transparent);
+}
+
+.vsc-marks {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 28px 0 0;
+  font-family: var(--font-cond);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  color: color-mix(in srgb, var(--color-bone) 66%, transparent);
+}
+.vsc-marks b {
+  font-weight: 500;
+  color: var(--color-terra);
+}
+.vsc-marks em {
+  font-style: normal;
+  width: 14px;
+  height: 1px;
+  flex: none;
+  background: color-mix(in srgb, var(--color-bone) 28%, transparent);
+}
+
+/* Le générique. */
+.vsc-credits {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+  gap: 22px 32px;
+  max-width: 700px;
+  margin: 34px 0 0;
+  padding-top: 22px;
+  border-top: 1px solid color-mix(in srgb, var(--color-bone) 15%, transparent);
+}
+.vsc-credit dt {
+  font-family: var(--font-cond);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-terra);
+}
+.vsc-credit dd {
+  margin: 9px 0 0;
+  font-family: var(--font-sans);
+  font-weight: 300;
+  font-size: 15px;
+  line-height: 1.4;
+  color: color-mix(in srgb, var(--color-bone) 82%, transparent);
+}
+
+/* L'invitation à descendre — un filet qui respire. */
+.vsc-scrollhint {
+  position: absolute;
+  right: var(--vsc-pad);
+  bottom: clamp(48px, 8vh, 96px);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font-family: var(--font-cond);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-bone) 42%, transparent);
+  writing-mode: vertical-rl;
+}
+.vsc-scrollhint-line {
+  width: 1px;
+  height: 46px;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--color-terra) 90%, transparent),
+    color-mix(in srgb, var(--color-bone) 0%, transparent)
+  );
+  animation: vsc-drop 2.6s var(--ease-out-soft) infinite;
+}
+@keyframes vsc-drop {
+  0% {
+    opacity: 0;
+    transform: scaleY(0.2);
+    transform-origin: 50% 0;
+  }
+  40% {
+    opacity: 1;
+    transform: scaleY(1);
+    transform-origin: 50% 0;
+  }
+  100% {
+    opacity: 0;
+    transform: scaleY(1);
+    transform-origin: 50% 100%;
+  }
+}
+
+/* ── L'étiquette de section, commune ───────────────────────────────── */
+.vsc-seclabel {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0;
+  font-family: var(--font-cond);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-terra);
+}
+.vsc-seclabel::before {
+  content: "";
+  width: 30px;
+  height: 1px;
+  flex: none;
+  background: var(--color-terra);
+}
+
+/* ── 2. LE FILM ────────────────────────────────────────────────────── */
+.vsc-film {
+  padding-top: clamp(64px, 10vh, 128px);
+}
+.vsc-screen {
+  position: relative;
+  margin-top: 26px;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--color-ink-2);
+  border: 1px solid color-mix(in srgb, var(--color-bone) 12%, transparent);
+}
+.vsc-iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+.vsc-facade {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  display: block;
+}
+.vsc-facade img,
+.vsc-facade-still {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scale(1.01);
+  transition: transform 1.4s var(--ease-out-expo);
+}
+.vsc-facade:hover img {
+  transform: scale(1.045);
+}
+.vsc-facade-veil {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      52% 62% at 50% 50%,
+      color-mix(in srgb, var(--color-ink) 46%, transparent) 0%,
+      color-mix(in srgb, var(--color-ink) 8%, transparent) 70%
+    ),
+    linear-gradient(
+      to top,
+      color-mix(in srgb, var(--color-ink) 66%, transparent) 0%,
+      color-mix(in srgb, var(--color-ink) 0%, transparent) 40%
+    );
+  transition: opacity 0.6s var(--ease-out-soft);
+}
+.vsc-facade:hover .vsc-facade-veil {
+  opacity: 0.82;
+}
+.vsc-play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: clamp(62px, 6vw, 88px);
+  height: clamp(62px, 6vw, 88px);
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--color-terra) 72%, transparent);
+  background: color-mix(in srgb, var(--color-ink) 40%, transparent);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  color: var(--color-bone);
+  display: grid;
+  place-items: center;
+  transition:
+    transform 0.55s var(--ease-out-expo),
+    background-color 0.45s var(--ease-out-soft),
+    color 0.45s var(--ease-out-soft);
+}
+.vsc-play svg {
+  margin-left: 3px;
+}
+.vsc-facade:hover .vsc-play,
+.vsc-facade:focus-visible .vsc-play {
+  background: var(--color-terra);
+  color: var(--color-on-terra);
+  transform: translate(-50%, -50%) scale(1.07);
+}
+.vsc-facade-cap {
+  position: absolute;
+  left: 18px;
+  bottom: 15px;
+  font-family: var(--font-cond);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-bone) 76%, transparent);
+}
+.vsc-screen-note {
+  margin: 13px 0 0;
+  font-family: var(--font-cond);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-bone) 40%, transparent);
+}
+
+/* ── 3. LE RÉCIT EN TROIS CHAPITRES ────────────────────────────────── */
+.vsc-story {
+  padding-top: clamp(78px, 13vh, 160px);
+}
+.vsc-chapters {
+  list-style: none;
+  /* Le récit ne s'étale pas sur toute la largeur : un bloc de lecture calé
+     à gauche, dont les filets s'arrêtent où s'arrête le texte. */
+  max-width: 1080px;
+  margin: 12px 0 0;
+  padding: 0;
+}
+.vsc-chapter {
+  display: grid;
+  grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+  gap: clamp(24px, 4vw, 76px);
+  padding: clamp(36px, 5vh, 62px) 0;
+  border-top: 1px solid color-mix(in srgb, var(--color-bone) 12%, transparent);
+}
+.vsc-chapter-head {
+  position: sticky;
+  top: calc(var(--vsc-hud) + 34px);
+  align-self: start;
+}
+.vsc-chapter-rule {
+  display: block;
+  width: 36px;
+  height: 1px;
+  background: var(--color-terra);
+  margin-bottom: 18px;
+}
+.vsc-chapter-n {
+  display: block;
+  font-family: var(--font-cond);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  color: var(--color-terra);
+}
+.vsc-chapter-t {
+  margin: 13px 0 0;
+  font-family: var(--font-wide);
+  font-weight: 400;
+  font-size: clamp(1.6rem, 2.9vw, 2.6rem);
+  line-height: 1.04;
+  letter-spacing: -0.018em;
+  color: var(--color-bone);
+}
+.vsc-chapter-b {
+  margin: 0;
+  max-width: 64ch;
+  font-family: var(--font-sans);
+  font-weight: 300;
+  font-size: clamp(16.5px, 1.35vw, 19.5px);
+  line-height: 1.76;
+  color: color-mix(in srgb, var(--color-bone) 78%, transparent);
+}
+
+/* ── 4. LA GALERIE DE PHOTOGRAMMES ─────────────────────────────────── */
+.vsc-stills {
+  padding-top: clamp(78px, 13vh, 160px);
+}
+.vsc-stills-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px 26px;
+}
+.vsc-stills-count {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font-family: var(--font-cond);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-bone) 52%, transparent);
+}
+.vsc-stills-count em {
+  font-style: normal;
+  width: 14px;
+  height: 1px;
+  flex: none;
+  background: color-mix(in srgb, var(--color-bone) 26%, transparent);
+}
+.vsc-stills-cue {
+  color: color-mix(in srgb, var(--color-bone) 38%, transparent);
+}
+
+.vsc-rail {
+  display: flex;
+  align-items: stretch;
+  gap: clamp(12px, 1.5vw, 22px);
+  margin-top: 28px;
+  padding: 0 var(--vsc-pad) 26px var(--vsc-padl);
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--color-terra) 78%, transparent)
+    color-mix(in srgb, var(--color-bone) 13%, transparent);
+}
+.vsc-rail::-webkit-scrollbar {
+  height: 4px;
+}
+.vsc-rail::-webkit-scrollbar-track {
+  background: color-mix(in srgb, var(--color-bone) 13%, transparent);
+}
+.vsc-rail::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--color-terra) 78%, transparent);
+}
+/* La bande est révélée d'un bloc : sa transformation ne doit pas rogner
+   son propre défilement. */
+.vsc-root .vsc-rail[data-reveal] {
+  transform: none;
+  transition:
+    opacity 0.9s var(--ease-out-soft),
+    filter 0.9s var(--ease-out-soft);
+}
+
+.vsc-still {
+  position: relative;
+  flex: none;
+  height: clamp(230px, 44vh, 440px);
+  aspect-ratio: 16 / 9;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--color-bone) 10%, transparent);
+  background: var(--color-ink-2);
+  overflow: hidden;
+  cursor: zoom-in;
+  scroll-snap-align: center;
+  transition: border-color 0.45s var(--ease-out-soft);
+}
+.vsc-still img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 1.1s var(--ease-out-expo);
+}
+.vsc-still:hover,
+.vsc-still:focus-visible {
+  border-color: color-mix(in srgb, var(--color-terra) 70%, transparent);
+}
+.vsc-still:hover img {
+  transform: scale(1.05);
+}
+.vsc-still-veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--color-ink) 88%, transparent) 0%,
+    color-mix(in srgb, var(--color-ink) 34%, transparent) 16%,
+    color-mix(in srgb, var(--color-ink) 0%, transparent) 40%
+  );
+}
+.vsc-still-n {
+  position: absolute;
+  left: 13px;
+  bottom: 11px;
+  font-family: var(--font-cond);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  color: color-mix(in srgb, var(--color-bone) 84%, transparent);
+  pointer-events: none;
+}
+
+/* L'agrandissement plein cadre. Sous le sélecteur de brouillon (90). */
+.vsc-zoom {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(58px, 9vh, 88px) clamp(20px, 5vw, 76px) clamp(84px, 12vh, 110px);
+  background: color-mix(in srgb, var(--color-ink) 93%, transparent);
+  -webkit-backdrop-filter: blur(26px) saturate(0.8);
+  backdrop-filter: blur(26px) saturate(0.8);
+  animation: vsc-zoom-in 0.42s var(--ease-out-soft) both;
+}
+@keyframes vsc-zoom-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.vsc-zoom-fig {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  max-height: 100%;
+  min-height: 0;
+}
+.vsc-zoom-fig img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  animation: vsc-zoom-img 0.55s var(--ease-out-expo) both;
+}
+@keyframes vsc-zoom-img {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.vsc-zoom-close {
+  position: absolute;
+  top: clamp(18px, 3vh, 28px);
+  right: clamp(20px, 5vw, 76px);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  border: 1px solid color-mix(in srgb, var(--color-bone) 18%, transparent);
+  color: color-mix(in srgb, var(--color-bone) 66%, transparent);
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-cond);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition:
+    color 0.35s var(--ease-out-soft),
+    border-color 0.35s var(--ease-out-soft);
+}
+.vsc-zoom-close:hover {
+  color: var(--color-bone);
+  border-color: color-mix(in srgb, var(--color-terra) 70%, transparent);
+}
+.vsc-zoom-bar {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(26px, 4vh, 40px);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.vsc-zoom-nav {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--color-bone) 18%, transparent);
+  background: none;
+  color: color-mix(in srgb, var(--color-bone) 70%, transparent);
+  font-size: 15px;
+  cursor: pointer;
+  transition:
+    color 0.35s var(--ease-out-soft),
+    border-color 0.35s var(--ease-out-soft),
+    background-color 0.35s var(--ease-out-soft);
+}
+.vsc-zoom-nav:hover {
+  color: var(--color-bone);
+  border-color: color-mix(in srgb, var(--color-terra) 70%, transparent);
+  background: color-mix(in srgb, var(--color-terra) 14%, transparent);
+}
+.vsc-zoom-n {
+  margin: 0;
+  min-width: 72px;
+  text-align: center;
+  font-family: var(--font-cond);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  color: color-mix(in srgb, var(--color-bone) 62%, transparent);
+}
+.vsc-zoom-n i {
+  font-style: normal;
+  color: var(--color-terra);
+  margin: 0 7px;
+}
+
+/* ── 5. LE FILM SUIVANT ────────────────────────────────────────────── */
+.vsc-next {
+  margin-top: clamp(84px, 14vh, 170px);
+}
+.vsc-next-link {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: min(68svh, 660px);
+  overflow: hidden;
+  isolation: isolate;
+}
+.vsc-next-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-size: cover;
+  background-position: center;
+  transform: scale(1.02);
+  transition: transform 1.8s var(--ease-out-expo);
+}
+.vsc-next-link:hover .vsc-next-bg {
+  transform: scale(1.07);
+}
+.vsc-next-veil {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--color-ink) 96%, transparent) 0%,
+    color-mix(in srgb, var(--color-ink) 82%, transparent) 32%,
+    color-mix(in srgb, var(--color-ink) 46%, transparent) 72%,
+    color-mix(in srgb, var(--color-ink) 62%, transparent) 100%
+  );
+  transition: opacity 0.8s var(--ease-out-soft);
+}
+.vsc-next-link:hover .vsc-next-veil {
+  opacity: 0.9;
+}
+.vsc-next-in {
+  display: block;
+  padding-top: clamp(80px, 12vh, 140px);
+  padding-bottom: clamp(46px, 8vh, 92px);
+}
+.vsc-next-t {
+  display: block;
+  margin: 20px 0 0;
+  max-width: 15ch;
+  font-family: var(--font-wide);
+  font-weight: 400;
+  font-size: clamp(2.3rem, 6vw, 5rem);
+  line-height: 0.95;
+  letter-spacing: -0.022em;
+  color: var(--color-bone);
+  text-shadow: 0 2px 60px color-mix(in srgb, var(--color-ink) 88%, transparent);
+}
+.vsc-next-m {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+  font-family: var(--font-cond);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-bone) 58%, transparent);
+}
+.vsc-next-m em {
+  font-style: normal;
+  width: 14px;
+  height: 1px;
+  flex: none;
+  background: color-mix(in srgb, var(--color-bone) 28%, transparent);
+}
+.vsc-next-go {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 30px;
+  padding: 13px 20px;
+  border: 1px solid color-mix(in srgb, var(--color-terra) 58%, transparent);
+  font-family: var(--font-cond);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-bone);
+  transition:
+    background-color 0.4s var(--ease-out-soft),
+    border-color 0.4s var(--ease-out-soft);
+}
+.vsc-next-go u {
+  text-decoration: none;
+  color: var(--color-terra);
+  font-size: 13px;
+  transition: transform 0.45s var(--ease-out-expo);
+  display: inline-block;
+}
+.vsc-next-link:hover .vsc-next-go {
+  background: color-mix(in srgb, var(--color-terra) 16%, transparent);
+  border-color: var(--color-terra);
+}
+.vsc-next-link:hover .vsc-next-go u {
+  transform: translateX(5px);
+}
+
+/* ── Le pied ───────────────────────────────────────────────────────── */
+.vsc-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 26px;
+  padding-top: 24px;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  border-top: 1px solid color-mix(in srgb, var(--color-bone) 12%, transparent);
+  font-family: var(--font-cond);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.vsc-foot p,
+.vsc-foot a {
+  margin: 0;
+  color: color-mix(in srgb, var(--color-bone) 46%, transparent);
+  transition: color 0.35s var(--ease-out-soft);
+}
+.vsc-foot a:hover {
+  color: var(--color-terra);
+}
+.vsc-foot-mail {
+  text-transform: none;
+  letter-spacing: 0.1em;
+}
+
+/* ── Formats intermédiaires ────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .vsc-hud-mid {
+    display: none;
+  }
+  .vsc-chapter {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+  .vsc-chapter-head {
+    position: static;
+  }
+  .vsc-scrollhint {
+    display: none;
+  }
+}
+
+/* ── Format téléphone ──────────────────────────────────────────────── */
+@media (max-width: 620px) {
+  .vsc-root {
+    --vsc-pad: 24px;
+    /* La languette du sélecteur de brouillon (1,9 rem au bord gauche, à
+       mi-hauteur) doit passer sans mordre sur le texte. */
+    --vsc-padl: 40px;
+    --vsc-hud: 46px;
+  }
+  .vsc-corner {
+    width: 20px;
+    height: 20px;
+  }
+  .vsc-corner.tl,
+  .vsc-corner.bl {
+    left: 12px;
+  }
+  .vsc-corner.tr,
+  .vsc-corner.br {
+    right: 12px;
+  }
+  .vsc-open {
+    min-height: min(76svh, 720px);
+  }
+  .vsc-ttl {
+    max-width: 100%;
+  }
+  .vsc-credits {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 20px;
+  }
+  .vsc-still {
+    height: 220px;
+  }
+  .vsc-zoom {
+    padding: 56px 10px 92px;
+  }
+  .vsc-zoom-bar {
+    gap: 14px;
+  }
+  .vsc-next-t {
+    max-width: 100%;
+  }
+  .vsc-foot {
+    justify-content: flex-start;
+    gap: 10px 18px;
+  }
+}
+
+/* ── Mouvement réduit ──────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  /* Tout est visible d'emblée : plus de révélation au défilement. */
+  .vsc-root [data-reveal],
+  .vsc-root [data-reveal].is-in {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
+  }
+  .vsc-root *,
+  .vsc-root *::before,
+  .vsc-root *::after,
+  .vsc-zoom,
+  .vsc-zoom * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .vsc-scrollhint-line {
+    animation: none !important;
+    opacity: 1;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CHAÎNE DE GESTES
+   ─────────────────────────────────────────────────────────────────────
+   Cinq primitives de mouvement, réutilisables partout : l'amorce de
+   bobine (mg-am), le curseur (mg-cur), les titres qui se composent
+   (mg-cmp), l'inertie (pas de CSS : une boucle) et l'enchaînement
+   entrée/sortie (mg-tra).
+
+   Trois principes tenus d'un bout à l'autre :
+   · rien ne s'anime hors de `transform` et `opacity` — sauf un `blur`
+     très bref sur les lettres, qui ne recalcule aucune mise en page ;
+   · aucune courbe inventée : --ease-out-expo (arrivée franche),
+     --ease-out-soft (fondus), --ease-out-quart (sorties) ;
+   · `prefers-reduced-motion` coupe TOUT, primitive par primitive, en fin
+     de section.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────
+   1. L'AMORCE — le compte à rebours de bobine
+   ───────────────────────────────────────────────────────────────────── */
+
+.mg-am {
+  position: fixed;
+  inset: 0;
+  z-index: 400; /* au-dessus du grain (60) et du sélecteur (90) */
+  overflow: hidden;
+  background: transparent; /* ce sont les volets qui couvrent */
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: pointer;
+}
+/* Pendant l'ouverture, l'amorce a fini son travail : elle ne prend plus
+   ni les clics ni le pointeur, elle ne fait que terminer son geste. */
+.mg-am.is-out {
+  pointer-events: none;
+}
+
+/* ── Les volets de projection ─────────────────────────────────────── */
+.mg-am-volet {
+  position: absolute;
+  left: -1px;
+  right: -1px;
+  height: 50.5%; /* recouvrement d'un demi-pour-cent : aucune couture */
+  background: var(--color-ink);
+  will-change: transform;
+  /* --ease-out-soft et non expo : sur une course d'un demi-écran, l'expo
+     est franchie à 90 % dans les 80 premières millisecondes — les volets
+     ont disparu avant qu'on ne les ait vus s'ouvrir. */
+  transition: transform var(--am-ouverture) var(--ease-out-soft);
+}
+.mg-am-volet.is-haut {
+  top: 0;
+}
+.mg-am-volet.is-bas {
+  bottom: 0;
+}
+.mg-am.is-out .mg-am-volet.is-haut {
+  transform: translate3d(0, -101%, 0);
+}
+.mg-am.is-out .mg-am-volet.is-bas {
+  transform: translate3d(0, 101%, 0);
+}
+
+/* Le trait de lumière dans la fente, à l'instant où les volets partent. */
+.mg-am-fente {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  opacity: 0;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--color-terra) 22%,
+    var(--color-terra) 78%,
+    transparent
+  );
+  transform: scaleX(0.3);
+  will-change: transform, opacity;
+}
+.mg-am.is-out .mg-am-fente {
+  animation: mg-am-fente var(--am-ouverture) var(--ease-out-quart) both;
+}
+@keyframes mg-am-fente {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.24);
+  }
+  22% {
+    opacity: 0.85;
+    transform: scaleX(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleX(1);
+  }
+}
+
+/* ── La croix de visée, d'un bord à l'autre ───────────────────────── */
+.mg-am-croix {
+  position: absolute;
+  inset: 0;
+  color: var(--color-bone);
+  pointer-events: none;
+}
+.mg-am-croix i {
+  position: absolute;
+  background: color-mix(in srgb, currentColor 17%, transparent);
+  will-change: transform;
+}
+.mg-am-croix .is-h {
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  transform: scaleX(0);
+  animation: mg-am-croix-h 860ms var(--ease-out-expo) both;
+}
+.mg-am-croix .is-v {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  transform: scaleY(0);
+  animation: mg-am-croix-v 860ms var(--ease-out-expo) 60ms both;
+}
+@keyframes mg-am-croix-h {
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes mg-am-croix-v {
+  to {
+    transform: scaleY(1);
+  }
+}
+.mg-am.is-out .mg-am-croix {
+  opacity: 0;
+  transition: opacity 180ms var(--ease-out-quart);
+}
+
+/* ── Le disque ────────────────────────────────────────────────────── */
+.mg-am-core {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-bone);
+  animation: mg-am-entree 460ms var(--ease-out-expo) both;
+  will-change: transform, opacity;
+}
+@keyframes mg-am-entree {
+  from {
+    opacity: 0;
+    transform: scale(0.965);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* Le disque s'efface AVANT que les volets ne s'écartent : on ne doit
+   jamais voir la mire glisser avec eux. */
+.mg-am.is-out .mg-am-core {
+  opacity: 0;
+  transform: scale(1.05);
+  transition:
+    opacity 200ms var(--ease-out-quart),
+    transform var(--am-ouverture) var(--ease-out-expo);
+}
+
+.mg-am-svg {
+  width: min(38vmin, 268px);
+  height: auto;
+  overflow: visible;
+}
+
+.mg-am-hair,
+.mg-am-cercle,
+.mg-am-grad,
+.mg-am-main {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.mg-am-hair {
+  stroke-opacity: 0.14;
+}
+.mg-am-cercle {
+  stroke-opacity: 0.42;
+}
+.mg-am-cercle.is-faible {
+  stroke-opacity: 0.16;
+}
+.mg-am-grad {
+  stroke-opacity: 0.28;
+}
+.mg-am-grad.is-longue {
+  stroke-opacity: 0.5;
+}
+.mg-am-axe {
+  fill: var(--color-terra);
+}
+.mg-am-main {
+  stroke: var(--color-terra);
+  stroke-opacity: 0.9;
+}
+.mg-am-tourne {
+  fill: color-mix(in srgb, var(--color-terra) 15%, transparent);
+  stroke: none;
+}
+
+/* Le balai : un tour par mesure, trois mesures, vitesse constante. */
+.mg-am-balai {
+  transform-box: view-box;
+  transform-origin: 110px 110px;
+  animation: mg-am-balai var(--am-mesure) linear 3 both;
+  will-change: transform;
+}
+@keyframes mg-am-balai {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Le chiffre : remonté à chaque mesure, donc rejoué à chaque mesure. */
+.mg-am-n {
+  fill: var(--color-bone);
+  font-size: 84px;
+  transform-box: view-box;
+  transform-origin: 110px 110px;
+  animation: mg-am-n 340ms var(--ease-out-expo) both;
+  will-change: transform, opacity, filter;
+}
+@keyframes mg-am-n {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+    transform: scale(1.16);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: none;
+  }
+}
+
+/* Posée hors du flux : le disque doit rester exactement au centre de
+   l'écran, sinon la croix pleine largeur ne passe plus par son axe. */
+.mg-am-label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(50% + min(19vmin, 134px) + 30px);
+  margin: 0;
+  text-align: center;
+  font-size: 10px;
+  color: var(--color-bone-dim);
+  animation: mg-am-label 700ms var(--ease-out-soft) 180ms both;
+}
+@keyframes mg-am-label {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   2. LE CURSEUR — un disque qui suit, un mot quand il y a à faire
+   ───────────────────────────────────────────────────────────────────── */
+
+.mg-cur {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 500;
+  pointer-events: none; /* jamais, sous aucun prétexte, dans le chemin d'un clic */
+  opacity: 0;
+  transition: opacity 320ms var(--ease-out-soft);
+  will-change: transform;
+}
+.mg-cur.is-live {
+  opacity: 1;
+}
+
+.mg-cur-ring,
+.mg-cur-dot,
+.mg-cur-mot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+}
+
+.mg-cur-ring {
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  border: 1px solid color-mix(in srgb, var(--color-bone) 55%, transparent);
+  border-radius: 50%;
+  background: transparent;
+  transition:
+    transform 420ms var(--ease-out-expo),
+    border-color 320ms var(--ease-out-soft),
+    background-color 320ms var(--ease-out-soft);
+  will-change: transform;
+}
+.mg-cur-dot {
+  width: 4px;
+  height: 4px;
+  margin: -2px 0 0 -2px;
+  border-radius: 50%;
+  background: var(--color-terra);
+  transition: transform 420ms var(--ease-out-expo);
+}
+
+.mg-cur-mot {
+  width: 120px;
+  margin: -5px 0 0 -60px;
+  text-align: center;
+  font-size: 9px;
+  line-height: 10px;
+  color: var(--color-terra);
+  opacity: 0;
+  transform: translate3d(0, 4px, 0);
+  transition:
+    opacity 300ms var(--ease-out-soft),
+    transform 420ms var(--ease-out-expo);
+}
+
+/* Au survol d'une intention : le disque prend du volume et se teinte. */
+.mg-cur.is-hot .mg-cur-ring {
+  transform: scale(2.05);
+  border-color: var(--color-terra);
+  /* Plein, et non teinté : le mot doit rester lisible sur une photographie
+     comme sur un aplat clair. C'est le seul aplat terracotta mobile du site. */
+  background: color-mix(in srgb, var(--color-terra) 92%, transparent);
+}
+.mg-cur.is-hot .mg-cur-dot {
+  transform: scale(0);
+}
+.mg-cur.is-hot .mg-cur-mot {
+  color: var(--color-on-terra);
+  opacity: 1;
+  transform: none;
+  transition-delay: 70ms;
+}
+
+/* L'appui : le disque se resserre, comme un obturateur. */
+.mg-cur.is-press .mg-cur-ring {
+  transform: scale(0.82);
+}
+.mg-cur.is-hot.is-press .mg-cur-ring {
+  transform: scale(1.82);
+}
+
+/* Curseur système effacé, uniquement si la page le demande. */
+html.mg-cur-none,
+html.mg-cur-none * {
+  cursor: none !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   3. LES TITRES QUI SE COMPOSENT
+   ───────────────────────────────────────────────────────────────────── */
+
+.mg-cmp-in {
+  display: inline;
+}
+/* Le mot ne se coupe pas ; la ligne, elle, peut passer entre deux mots. */
+.mg-cmp-w {
+  display: inline-block;
+  white-space: nowrap;
+}
+/* Le masque. Le fond de caisse descend sous la ligne de base pour laisser
+   passer les jambages (g, p, y) sans les rogner. */
+.mg-cmp-l {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-bottom: 0.2em;
+  margin-bottom: -0.2em;
+}
+.mg-cmp-l > i {
+  display: inline-block;
+  font-style: inherit;
+  opacity: 0;
+  transform: translate3d(0, 108%, 0);
+  filter: blur(7px);
+  transition:
+    transform var(--cmp-dur) var(--ease-out-expo),
+    opacity calc(var(--cmp-dur) * 0.6) var(--ease-out-soft),
+    filter calc(var(--cmp-dur) * 0.48) var(--ease-out-soft);
+  will-change: transform, opacity, filter;
+}
+.mg-cmp.is-on .mg-cmp-l > i {
+  opacity: 1;
+  transform: none;
+  filter: blur(0);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   5. L'ENCHAÎNEMENT — entrée, et surtout SORTIE
+   ───────────────────────────────────────────────────────────────────── */
+
+.mg-tra {
+  opacity: 0;
+  transform: translate3d(0, 12px, 0) scale(0.994);
+  transition:
+    opacity var(--tra-in) var(--ease-out-soft),
+    transform var(--tra-in) var(--ease-out-expo);
+  will-change: transform, opacity;
+}
+.mg-tra.is-in {
+  opacity: 1;
+  transform: none;
+}
+/* On part plus vite qu'on n'arrive, et par le haut : la sortie ne doit
+   jamais ressembler à une entrée jouée à l'envers. */
+.mg-tra.is-out {
+  opacity: 0;
+  transform: translate3d(0, -8px, 0) scale(0.996);
+  transition:
+    opacity var(--tra-out) var(--ease-out-quart),
+    transform var(--tra-out) var(--ease-out-quart);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   MOUVEMENT RÉDUIT — la chaîne entière s'arrête.
+
+   L'amorce est sautée et le curseur démonté côté JavaScript (ils ne
+   rendent rien) ; ici on neutralise ce qui reste : les titres sont
+   lisibles d'emblée, les enchaînements ne durent plus rien.
+   ───────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .mg-am,
+  .mg-am-core,
+  .mg-am-croix i,
+  .mg-am-volet,
+  .mg-am-balai,
+  .mg-am-n,
+  .mg-am-label,
+  .mg-am-fente {
+    animation: none;
+    transition: none;
+    transform: none;
+  }
+
+  .mg-cur,
+  .mg-cur-ring,
+  .mg-cur-dot,
+  .mg-cur-mot {
+    transition: none;
+  }
+
+  .mg-cmp .mg-cmp-l > i,
+  .mg-cmp.is-on .mg-cmp-l > i {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+
+  .mg-tra,
+  .mg-tra.is-in,
+  .mg-tra.is-out {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .mg-tra.is-out {
+    opacity: 0;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   LA PAGE DE DÉMONSTRATION (/motion-demo) — hors production
+   ───────────────────────────────────────────────────────────────────── */
+
+.mgd-zone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 132px;
+  padding: 20px;
+  text-align: center;
+  border: 1px solid var(--color-line);
+  background: var(--color-ink-2);
+  transition:
+    transform 600ms var(--ease-out-expo),
+    border-color 400ms var(--ease-out-soft),
+    background-color 400ms var(--ease-out-soft);
+}
+.mgd-zone:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-terra);
+  background: var(--color-ink-3);
+}
+.mgd-rail {
+  position: relative;
+  height: 54px;
+  border-top: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-line);
+}
+.mgd-rail i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--color-line);
+}
+.mgd-tete {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border: 1px solid var(--color-terra);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-terra) 18%, transparent);
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mgd-zone {
+    transition: none;
+  }
+  .mgd-zone:hover {
+    transform: none;
+  }
+}
+
+/* ── LE VISEUR — ÉTUDES DE CAS : retouches relevées à la capture ──────
+   Les barres de défilement des navigateurs s'escamotent (superposition sur
+   macOS, Chromium sans souris) : la bande de photogrammes se retrouvait sans
+   aucun repère d'avancement. On rend la barre native et on la remplace par
+   un filet terracotta qui dit à la fois où l'on est et combien il reste. */
+.vsc-rail {
+  scrollbar-width: none;
+}
+.vsc-rail::-webkit-scrollbar {
+  height: 0;
+  display: none;
+}
+.vsc-rail-prog {
+  width: 100%;
+  max-width: var(--vsc-max);
+  margin-inline: auto;
+  padding-right: var(--vsc-pad);
+  padding-left: var(--vsc-padl);
+}
+.vsc-rail-prog-track {
+  position: relative;
+  height: 2px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--color-bone) 13%, transparent);
+}
+.vsc-rail-prog-bar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  background: var(--color-terra);
+}
+
+/* Le voile de l'ouverture laisse volontairement respirer la photographie :
+   la méta et le générique, eux, ne peuvent pas dépendre de ce qui passe
+   dessous. Un halo d'encre les décolle du plan sans poser d'aplat. */
+.vsc-open .vsc-kicker,
+.vsc-open .vsc-marks,
+.vsc-open .vsc-credit dt,
+.vsc-open .vsc-credit dd {
+  text-shadow: 0 1px 16px color-mix(in srgb, var(--color-ink) 94%, transparent);
+}
+
+/* Au format téléphone, le bloc de titre occupe la moitié basse d'un cadre
+   beaucoup plus étroit : le voile doit y être plus franc qu'en grand écran,
+   sans pour autant éteindre le ciel. */
+@media (max-width: 620px) {
+  .vsc-open-veil {
+    background:
+      radial-gradient(
+        140% 80% at 50% 26%,
+        color-mix(in srgb, var(--color-ink) 6%, transparent) 20%,
+        color-mix(in srgb, var(--color-ink) 44%, transparent) 100%
+      ),
+      linear-gradient(
+        to top,
+        color-mix(in srgb, var(--color-ink) 96%, transparent) 0%,
+        color-mix(in srgb, var(--color-ink) 91%, transparent) 34%,
+        color-mix(in srgb, var(--color-ink) 60%, transparent) 62%,
+        color-mix(in srgb, var(--color-ink) 24%, transparent) 100%
+      );
+  }
+}
+
+/* Le sur-titre de l'ouverture est le seul repère posé HAUT sur la
+   photographie, là où le voile est le plus léger : la terracotta n'y tient
+   pas le contraste. On rend le mot à l'os de la charte et on garde la
+   terracotta pour ce qu'elle fait le mieux — le filet et le compteur, une
+   ponctuation. */
+.vsc-open .vsc-kicker {
+  color: var(--color-bone);
+}
+.vsc-open .vsc-kicker b {
+  font-weight: 500;
+  color: var(--color-terra);
+}

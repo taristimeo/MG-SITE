@@ -26,6 +26,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: path === "/banc" ? 1 : 0.8,
   }));
 
+  // Les études de cas du brouillon 02 : une page par film, avec son image.
+  const viseurRoutes = projects.map((p) => ({
+    url: `${base}/viseur/${p.slug}`,
+    lastModified,
+    changeFrequency: "yearly" as const,
+    priority: 0.7,
+    images: [`${base}${projectThumb(p)}`],
+  }));
+
   const projectRoutes = projects.map((p) => ({
     url: `${base}/realisations/${p.slug}`,
     lastModified,
@@ -34,5 +43,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     images: [`${base}${projectThumb(p)}`],
   }));
 
-  return [...routes, ...projectRoutes];
+  return [...routes, ...viseurRoutes, ...projectRoutes];
 }

@@ -8,6 +8,7 @@ import {
   useState,
   type CSSProperties,
 } from "react";
+import { createPortal } from "react-dom";
 import { mouvementReduit } from "./useMouvementReduit";
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -22,17 +23,23 @@ import { mouvementReduit } from "./useMouvementReduit";
    arriver en retard. Le mouvement ne touche que `transform` et
    `opacity`.
 
+   Elle est posée par un portail sur le `body` : un calque plein écran ne
+   supporte aucun ancêtre transformé (une simple animation d'entrée de
+   page suffit à redéfinir le référentiel du `position: fixed`). Le
+   contenu de la page reste donc à découvert le temps de l'hydratation :
+   c'est à l'hôte de ne se révéler qu'au `onDone`.
+
    Trois règles :
-   · elle dure ~2,2 s et se joue UNE SEULE FOIS par session ;
+   · elle dure ~2,1 s et se joue UNE SEULE FOIS par session ;
    · elle se passe au clic ou à n'importe quelle touche ;
    · une fois finie elle se démonte — plus rien dans le flux, plus rien
      dans l'arbre d'accessibilité.
    ───────────────────────────────────────────────────────────────────── */
 
-/** Durée d'un chiffre. Trois chiffres = 1560 ms. */
-const MESURE = 520;
+/** Durée d'un chiffre. Trois chiffres = 1440 ms. */
+const MESURE = 480;
 /** Ouverture des volets. */
-const OUVERTURE = 620;
+const OUVERTURE = 640;
 const PREMIER = 3;
 
 /** `useLayoutEffect` côté client (décision avant peinture), `useEffect` au rendu serveur. */
@@ -81,6 +88,7 @@ export function Amorce({
   // retire — avant peinture — pour ceux qui l'ont déjà vue.
   const [phase, setPhase] = useState<Phase>("compte");
   const [n, setN] = useState(PREMIER);
+  const [hote, setHote] = useState<HTMLElement | null>(null);
 
   const phaseRef = useRef<Phase>("compte");
   const minuteries = useRef<number[]>([]);
@@ -108,6 +116,8 @@ export function Amorce({
       window.setTimeout(() => pose("finie"), OUVERTURE),
     );
   }, [arrete, pose]);
+
+  useIso(() => setHote(document.body), []);
 
   useIso(() => {
     // La décision est prise UNE fois par instance : en mode strict l'effet
@@ -170,14 +180,14 @@ export function Amorce({
     onDoneRef.current?.();
   }, [phase]);
 
-  if (phase === "finie") return null;
+  if (phase === "finie" || !hote) return null;
 
   const style = {
     "--am-mesure": `${MESURE}ms`,
     "--am-ouverture": `${OUVERTURE}ms`,
   } as CSSProperties;
 
-  return (
+  return createPortal(
     <div
       className={`mg-am${phase === "ouverture" ? " is-out" : ""}`}
       data-tone="dark"
@@ -189,6 +199,13 @@ export function Amorce({
       <div className="mg-am-volet is-haut" />
       <div className="mg-am-volet is-bas" />
       <div className="mg-am-fente" />
+
+      {/* La croix de visée, tracée d'un bord à l'autre de l'écran : elle
+          prolonge celle du disque et donne sa mesure au cadre. */}
+      <div className="mg-am-croix">
+        <i className="is-h" />
+        <i className="is-v" />
+      </div>
 
       <div className="mg-am-core">
         <svg className="mg-am-svg" viewBox="0 0 220 220" aria-hidden="true">
@@ -237,7 +254,8 @@ export function Amorce({
 
         {label ? <p className="mg-am-label font-cond">{label}</p> : null}
       </div>
-    </div>
+    </div>,
+    hote,
   );
 }
 

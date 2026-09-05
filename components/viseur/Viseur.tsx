@@ -587,7 +587,7 @@ export function Viseur() {
         </p>
         <Link
           className="vs-btn"
-          href={`/realisations/${p.slug}`}
+          href={`/viseur/${p.slug}`}
           tabIndex={st === 2 ? 0 : -1}
         >
           Voir le film <u aria-hidden>→</u>
