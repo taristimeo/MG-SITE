@@ -610,7 +610,8 @@ export function Viseur() {
         <span className="vs-hint-arrow" aria-hidden>
           ‹
         </span>
-        Tournez la bague
+        <span className="vs-hint-fin">Tournez la bague</span>
+        <span className="vs-hint-tac">Faites glisser</span>
         <span className="vs-hint-arrow" aria-hidden>
           ›
         </span>
