@@ -1,10 +1,20 @@
-// Emplacement réservé — la variante « viseur » est en cours de portage.
-export default function Placeholder() {
-  return (
-    <main data-tone="dark" className="flex min-h-[100svh] items-center justify-center">
-      <p className="font-cond text-[11px] tracking-[0.2em] text-[var(--color-bone-faint)]">
-        viseur — en construction
-      </p>
-    </main>
-  );
+import type { Metadata } from "next";
+import { Viseur } from "@/components/viseur/Viseur";
+import { site } from "@/lib/site";
+
+export const metadata: Metadata = {
+  title: "Le viseur",
+  description: `${site.intro} Une variante « viseur » : les films se choisissent à la bague, comme la mise au point d'un objectif.`,
+  alternates: { canonical: "/viseur" },
+};
+
+/**
+ * BROUILLON 02 — « LE VISEUR ».
+ *
+ * Il n'y a ni page ni défilement, seulement des prises : le composant occupe
+ * l'écran entier depuis un calque fixe, sans jamais toucher au `body` (les
+ * deux autres brouillons partagent le même document).
+ */
+export default function ViseurPage() {
+  return <Viseur />;
 }
