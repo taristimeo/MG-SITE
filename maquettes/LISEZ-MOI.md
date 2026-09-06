@@ -91,3 +91,27 @@ ce que personne ne fait), puis cinq pages par concept (ouverture, l'idée,
 architecture et gestes, écrans bureau, téléphone et mise en œuvre), puis la
 grille de comparaison et la recommandation. Il se régénère avec
 `veille/dossier4.mjs` (contenu dans `veille/dossier4-content.mjs`).
+
+---
+
+# Troisième série, seconde édition — Montage approfondi, deux nouvelles pistes
+
+Montage est retenu ; Le point (`f2`) et Découpage (`f3`) sont écartés mais
+conservés ici pour mémoire. Deux nouvelles pistes viennent des meilleurs sites
+de la veille.
+
+| Fichier | Concept | Le geste | Vient de |
+| --- | --- | --- | --- |
+| `f1.html` | Montage (approfondi) | 6 états bureau, 6 états iPhone : rythme, appui long, édition de la timeline, chutier complet, contact avec EDL | — |
+| `f4.html` | Plan-séquence | Un film de 90 s est tout le site : on le scrubbe, l'URL porte le timecode, le filtre métier re-coupe le film | KAI, Önnu Jónu Son, Iconoclast, Ian Coad |
+| `f5.html` | Repérage | Carte de la Gironde à l'encre, lieux tournés épinglés, molette de lumière qui ré-étalonne le site (heure réelle par défaut) | Bloom, Ligthelm |
+
+Chaque maquette déclare `window.mgStates = { d, m }` et expose
+`window.mgState(n)`. Les lieux de tournage utilisés dans `f5` sont une
+hypothèse à confirmer.
+
+**Le dossier** : `MauvaisGrain-veille-montage.pdf` (31 pages, A4 paysage) —
+la veille, puis Montage sur neuf pages (dont trois pour l'iPhone : les six
+états, l'anatomie annotée et les gestes, Safari et performance), puis cinq
+pages par nouvelle piste, puis la grille de comparaison. Il se régénère avec
+`veille/dossier5.mjs` (contenu dans `veille/dossier5-content.mjs`).

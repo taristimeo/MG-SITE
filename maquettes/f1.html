@@ -18,6 +18,7 @@
     --tl: 196px;
     --pad: 24px;
     --sab: env(safe-area-inset-bottom, 0px);
+    --sat: env(safe-area-inset-top, 0px);
   }
   html { overflow-x: hidden; }
   html, body { height: 100%; overflow: hidden; }
@@ -40,7 +41,7 @@
   .logo { font-size: 22px; white-space: nowrap; }
   .menu { display: flex; gap: 22px; }
   .menu button { position: relative; padding: 6px 0; color: var(--bone-faint); transition: color .3s; }
-  .menu button:hover { color: var(--bone); }
+  @media (hover: hover) { .menu button:hover { color: var(--bone); } }
   .menu button.on { color: var(--bone); }
   .menu button.on::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: var(--terra); }
   .top-r { margin-left: auto; display: flex; align-items: center; gap: 18px; color: var(--bone-dim); }
@@ -82,13 +83,13 @@
   .ch-head b { font-weight: 500; color: var(--bone); }
   .filters { display: flex; flex-wrap: wrap; gap: 6px; }
   .filters button { padding: 6px 10px; border: 1px solid var(--line); border-radius: 999px; color: var(--bone-dim); transition: all .25s; }
-  .filters button:hover { border-color: var(--bone-faint); color: var(--bone); }
+  @media (hover: hover) { .filters button:hover { border-color: var(--bone-faint); color: var(--bone); } }
   .filters button.on { border-color: var(--terra); color: var(--terra); }
   .ch-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px 8px; align-content: start; overflow: auto; padding: 2px 2px 8px; scrollbar-width: thin; }
-  .rush { position: relative; cursor: grab; touch-action: pan-y; -webkit-user-select: none; user-select: none; }
+  .rush { position: relative; cursor: grab; touch-action: pan-y; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
   .rush figure { margin: 0; aspect-ratio: 16 / 9; overflow: hidden; border: 1px solid var(--line); background: var(--ink-3); transition: border-color .2s, opacity .3s, transform .3s var(--expo); }
   .rush img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-  .rush:hover figure { border-color: var(--bone); }
+  @media (hover: hover) { .rush:hover figure { border-color: var(--bone); } }
   .rush.used figure { opacity: .45; }
   .rush.sel figure { border-color: var(--terra); box-shadow: 0 0 0 1px var(--terra); }
   .rush .lab { display: flex; justify-content: space-between; margin-top: 4px; color: var(--bone-faint); font-size: 8.5px; }
@@ -114,7 +115,7 @@
   .tl-head b { font-weight: 500; color: var(--bone); }
   .tl-head .hand { margin-left: auto; display: flex; gap: 14px; }
   .tl-head .hand button { color: var(--bone-faint); border-bottom: 1px solid transparent; }
-  .tl-head .hand button:hover { color: var(--bone); border-color: var(--bone); }
+  @media (hover: hover) { .tl-head .hand button:hover { color: var(--bone); border-color: var(--bone); } }
   .tl-scroll { overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
   .tl-scroll::-webkit-scrollbar { display: none; }
   .tl-inner { position: relative; min-width: 100%; width: max-content; padding-right: 120px; }
@@ -124,7 +125,19 @@
   .ruler i span { position: absolute; left: 4px; top: -18px; font-family: var(--cond); font-size: 9px; letter-spacing: .08em; color: var(--bone-faint); white-space: nowrap; }
   .track { position: relative; height: 86px; margin-top: 8px; border-top: 1px dotted var(--line); border-bottom: 1px dotted var(--line); }
   .clips { position: absolute; inset: 6px 0; display: flex; gap: 3px; }
-  .clip { position: relative; height: 100%; flex: none; border: 1px solid var(--bone); background: var(--ink-3) center / cover no-repeat; cursor: grab; transition: width .35s var(--expo); }
+  .clip { position: relative; height: 100%; flex: none; border: 1px solid var(--bone); background: var(--ink-3) center / cover no-repeat; cursor: grab; transition: width .35s var(--expo), transform .3s var(--expo), box-shadow .3s; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: pan-x; }
+  .clip.lift { transform: translateY(-5px) scale(1.04); box-shadow: 0 12px 26px rgba(32,26,18,.28); z-index: 6; border-color: var(--terra); }
+  /* rythme nerveux : plans serrés, coupes marquées d'un trait terracotta */
+  .timeline.nerveux .clips { gap: 1px; }
+  .timeline.nerveux .clip { border-left: 2px solid var(--terra); }
+  .timeline.nerveux .clip .d { display: none; }
+  .tl-head .rythme-tag { color: var(--terra); }
+  .tl-head .rythme-tag::before { content: "·"; color: var(--bone-faint); margin-right: 10px; }
+  /* zones de dépôt (mode déplacer) */
+  .dz { position: relative; flex: none; width: 24px; margin: 4px 0; border: 1px dashed var(--terra); opacity: .55; transition: opacity .2s, background .2s; }
+  .dz::before { content: ""; position: absolute; inset: -10px -8px; }
+  .dz::after { content: "+"; position: absolute; inset: 0; display: grid; place-items: center; color: var(--terra); font-family: var(--cond); font-size: 12px; }
+  .dz.hot { opacity: 1; background: rgba(168,95,60,.12); }
   .clip.pop { animation: pop .5s var(--expo) both; }
   @keyframes pop { from { transform: translateY(-16px) scale(.9); opacity: 0; } }
   .clip.sel { border-color: var(--terra); box-shadow: 0 0 0 1px var(--terra); z-index: 2; }
@@ -148,10 +161,16 @@
   .marks { position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: none; pointer-events: none; }
   .table[data-view="studio"] .marks { display: block; }
   .table[data-view="studio"] .clips, .table[data-view="studio"] .playhead, .table[data-view="studio"] .tl-empty { display: none; }
-  .mark { position: absolute; top: 8px; bottom: 8px; border-left: 1px solid var(--terra); padding-left: 10px; display: flex; flex-direction: column; gap: 4px; }
+  .marks { pointer-events: auto; }
+  .mark { position: absolute; top: 6px; bottom: 6px; border-left: 2px solid var(--terra); padding: 4px 12px 4px 10px; display: flex; flex-direction: column; gap: 4px; text-align: left; cursor: pointer; transition: background .25s; }
+  .mark::before { content: ""; position: absolute; left: -6px; top: -7px; border: 5px solid transparent; border-top: 7px solid var(--terra); }
   .mark .cond { color: var(--terra); }
   .mark b { font-family: var(--wide); font-weight: 400; font-size: 20px; line-height: 1.05; white-space: nowrap; }
   .mark small { color: var(--bone-dim); font-size: 12px; }
+  .mark .body { display: none; color: var(--bone-dim); font-size: 13px; line-height: 1.45; max-width: 36ch; }
+  .mark.open { background: var(--ink-2); box-shadow: inset 0 0 0 1px var(--line); }
+  .mark.open .body { display: block; }
+  .mark.open small { display: none; }
 
   /* ── Fantôme de glisser & curseur main ─────────────────────── */
   .ghost { position: fixed; z-index: 60; width: 132px; aspect-ratio: 16 / 9; border: 1px solid var(--terra); box-shadow: 0 0 0 1px var(--terra), 0 14px 30px rgba(32,26,18,.22); background: var(--ink-3) center / cover no-repeat; pointer-events: none; transform: translate(-50%, -50%) rotate(-2deg); }
@@ -165,7 +184,7 @@
   .flist { display: flex; flex-direction: column; min-height: 0; overflow: auto; scrollbar-width: thin; }
   .flist .fh { display: flex; justify-content: space-between; color: var(--bone-dim); padding-bottom: 10px; border-bottom: 1px solid var(--bone); }
   .fband { display: grid; grid-template-columns: 30px 1fr 220px; gap: 16px; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--line); text-align: left; width: 100%; transition: background .2s; }
-  .fband:hover { background: var(--ink-2); }
+  @media (hover: hover) { .fband:hover { background: var(--ink-2); } }
   .fband .no { color: var(--bone-faint); }
   .fband .t { font-size: 20px; }
   .fband .m { color: var(--bone-faint); margin-top: 3px; }
@@ -182,11 +201,12 @@
   .fdetail h2 { font-size: clamp(34px, 3.6vw, 54px); margin: 0; }
   .fdetail .app { font-size: 18px; max-width: 42ch; color: var(--bone-dim); margin: 0; }
   .fdetail .app strong { display: block; font-weight: 500; color: var(--bone); margin-bottom: 4px; }
+  .films .mob-fh { display: none; }
   .fdetail .body { display: flex; flex-direction: column; gap: 18px; overflow: auto; }
   .btn { display: inline-flex; align-items: center; gap: 12px; padding: 12px 18px; border: 1px solid var(--bone); color: var(--bone); transition: all .25s; align-self: flex-start; min-height: 44px; }
-  .btn:hover { background: var(--bone); color: var(--ink); }
+  @media (hover: hover) { .btn:hover { background: var(--bone); color: var(--ink); } }
   .btn.terra { border-color: var(--terra); background: var(--terra); color: var(--ink); }
-  .btn.terra:hover { background: #8f4e2f; }
+  @media (hover: hover) { .btn.terra:hover { background: #8f4e2f; } }
   .btn svg { width: 14px; height: 14px; }
   .btn.done { border-color: var(--terra); color: var(--terra); background: none; }
 
@@ -220,6 +240,7 @@
   .edl pre { margin: 0; font-family: var(--cond); font-size: 11px; letter-spacing: .04em; line-height: 1.8; color: var(--bone-dim); white-space: pre; overflow: auto; }
   .edl pre b { color: var(--bone); font-weight: 500; }
   .edl .coord { color: var(--bone-faint); line-height: 1.8; margin-top: auto; }
+  .edl .fold { display: none; }
   .edl .coord a { border-bottom: 1px solid var(--line); }
   .sent { display: none; padding: 22px 0; color: var(--terra); border-top: 1px solid var(--terra); font-size: 18px; }
   .sent.on { display: block; }
@@ -229,71 +250,141 @@
   .veil.on { opacity: 1; pointer-events: auto; }
   .sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 80; background: var(--ink); border-top: 1px solid var(--bone); padding: 14px 20px calc(18px + var(--sab)); transform: translateY(105%); transition: transform .5s var(--expo); display: grid; gap: 14px; }
   .sheet.on { transform: none; }
-  .sheet .grip { width: 36px; height: 3px; border-radius: 2px; background: var(--line); margin: 0 auto 2px; }
-  .sheet .prev { display: grid; grid-template-columns: 128px 1fr; gap: 14px; align-items: center; }
-  .sheet .prev figure { margin: 0; aspect-ratio: 16 / 9; border: 1px solid var(--terra); box-shadow: 0 0 0 1px var(--terra); background: center / cover no-repeat; }
-  .sheet .prev b { display: block; font-family: var(--wide); font-weight: 400; font-size: 22px; line-height: 1.05; margin-bottom: 4px; }
-  .sheet .prev span { color: var(--bone-dim); }
+  .sheet .grip { width: 40px; height: 4px; border-radius: 2px; background: var(--line); margin: -2px auto 4px; }
+  .sheet .prev { display: grid; grid-template-columns: 132px 1fr; gap: 14px; align-items: center; }
+  .sheet .prev figure { position: relative; margin: 0; aspect-ratio: 16 / 9; border: 1px solid var(--terra); box-shadow: 0 0 0 1px var(--terra); background: center / cover no-repeat; }
+  .sheet .prev figure i { position: absolute; right: 5px; bottom: 4px; font-family: var(--cond); font-size: 11px; letter-spacing: .06em; color: #ece8dc; text-shadow: 0 1px 2px rgba(0,0,0,.6); font-style: normal; }
+  .sheet .prev b { display: block; font-family: var(--wide); font-weight: 400; font-size: 22px; line-height: 1.05; margin-bottom: 6px; }
+  .sheet .prev span { color: var(--bone-dim); font-size: 11px; line-height: 1.7; display: block; }
+  .sheet .prev span strong { color: var(--bone); font-weight: 500; }
   .sheet .btn { width: 100%; justify-content: center; min-height: 48px; }
   .sheet .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .sheet .row .btn { border-color: var(--line); color: var(--bone-dim); }
+
+  /* Barre d'outils contextuelle (mobile) & barre d'accueil simulée */
+  .tl-tools, .homebar { display: none; }
 
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
   /* ══ Mobile ═══════════════════════════════════════════════════ */
   @media (max-width: 720px) {
-    :root { --head: 52px; --pad: 16px; --tl: 150px; --pps: 16; }
-    html, body { overflow: visible; }
-    .top { gap: 0; }
+    :root { --head: 52px; --pad: 16px; --tl: 108px; --pps: 16; --sab: max(env(safe-area-inset-bottom, 0px), 24px); }
+    html, body { overflow: visible; height: auto; overscroll-behavior-y: none; }
+    body { font-size: 15px; }
+    .cond { font-size: 11px; }
+    .top { gap: 0; height: calc(var(--head) + var(--sat)); padding-top: var(--sat); }
     .logo { font-size: 19px; }
-    .menu { position: absolute; left: 0; right: 0; top: var(--head); display: flex; justify-content: space-between; padding: 0 var(--pad); background: var(--ink); border-bottom: 1px solid var(--line); }
+    .menu { position: absolute; left: 0; right: 0; top: calc(var(--head) + var(--sat)); display: flex; justify-content: space-between; padding: 0 var(--pad); background: var(--ink); border-bottom: 1px solid var(--line); }
     .menu button { padding: 12px 0; min-height: 44px; }
     .top-r .rythme span { display: none; }
     .top-r { gap: 10px; }
-    .table { position: static; display: block; padding-top: calc(var(--head) + 46px); min-height: 100vh; }
-    .stage { grid-template-columns: 1fr; gap: 14px; padding: var(--pad) var(--pad) calc(var(--tl) + var(--sab) + 24px); }
+    .table { position: static; display: block; padding-top: calc(var(--head) + var(--sat) + 46px); min-height: 100vh; min-height: 100svh; }
+    .stage { grid-template-columns: 1fr; gap: 14px; padding: var(--pad) var(--pad) calc(var(--tl) + var(--sab) + 28px); }
     .viewer { gap: 8px; }
     .screen { max-width: none; width: 100%; }
-    .under { gap: 12px; flex-wrap: wrap; }
-    .under .titre { font-size: 16px; }
+    .screen .tcin, .screen .rec { font-size: 11px; }
+    .under { gap: 6px 12px; flex-wrap: wrap; padding-top: 8px; }
+    .under .titre { font-size: 20px; width: 100%; }
     .under .tempo { margin-left: 0; width: 100%; }
     .chutier { border-left: 0; padding-left: 0; gap: 10px; }
-    .filters { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 calc(-1 * var(--pad)); padding: 0 var(--pad); }
-    .filters button { flex: none; min-height: 34px; }
-    .ch-grid { display: flex; gap: 8px; overflow-x: auto; overflow-y: hidden; margin: 0 calc(-1 * var(--pad)); padding: 2px var(--pad) 6px; scrollbar-width: none; }
-    .rush { flex: none; width: 118px; touch-action: pan-x; }
-    .rush .lab { font-size: 9px; }
+    .ch-head { font-size: 11px; }
+    .filters { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 calc(-1 * var(--pad)); padding: 0 var(--pad); -webkit-overflow-scrolling: touch; }
+    .filters::-webkit-scrollbar { display: none; }
+    .filters button { flex: none; min-height: 40px; padding: 8px 14px; }
+    .ch-grid { display: flex; gap: 8px; overflow-x: auto; overflow-y: hidden; margin: 0 calc(-1 * var(--pad)); padding: 2px var(--pad) 6px; scrollbar-width: none; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
+    .ch-grid::-webkit-scrollbar { display: none; }
+    .rush { flex: none; width: 132px; touch-action: pan-x; }
+    .rush .lab { font-size: 11px; margin-top: 5px; }
+    .rush.sel figure { transform: scale(1.03); }
     .studio-p { border: 0; padding: 0; }
-    .timeline { position: fixed; left: 0; right: 0; bottom: 0; height: calc(var(--tl) + var(--sab)); padding: 10px var(--pad) calc(10px + var(--sab)); z-index: 20; }
+    .studio-p h2 { font-size: 28px; }
+    .studio-p .mani { font-size: 20px; }
+
+    /* Timeline au pouce, hors safe area : 108 px */
+    .timeline { position: fixed; left: 0; right: 0; bottom: 0; height: calc(var(--tl) + var(--sab)); padding: 8px var(--pad) calc(6px + var(--sab)); gap: 3px; z-index: 20; border-top: 1px solid var(--bone); box-shadow: 0 -10px 24px rgba(32,26,18,.06); }
     .table[data-view="contact"] .timeline, .table[data-view="films"] .timeline { display: none; }
-    .tl-head { gap: 10px; white-space: nowrap; }
-    .tl-head #tlHint, .tl-head .edl-tag, #btnClear { display: none; }
-    .tl-head { font-size: 9.5px; }
+    .tl-head { gap: 8px; white-space: nowrap; font-size: 11px; align-items: center; min-height: 18px; }
+    .tl-head #tlHint, .tl-head .edl-tag, #btnClear, #btnDel { display: none; }
     .tl-head .hand { margin-left: auto; gap: 10px; }
-    .tl-head .hand button { min-height: 28px; }
-    .track { height: 62px; }
-    .clip .h { width: 16px; }
+    .tl-head .hand button { min-height: 28px; padding: 0 6px; }
+    .tl-scroll { overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
+    .ruler { margin-top: 12px; height: 9px; }
+    .ruler i span { font-size: 9px; top: -14px; }
+    .track { height: 50px; margin-top: 3px; }
+    .clips { inset: 4px 0; }
+    .clip .n, .clip .d { font-size: 9px; }
+    .playhead { top: -22px; }
+    .playhead span { display: none; }
+    /* Poignées de rognage : 44 px de cible, 12 px visibles, centrées sur la coupe */
+    .clip .h { width: 44px; background: none; top: -8px; bottom: -8px; }
+    .clip .h::after { content: ""; position: absolute; top: 8px; bottom: 8px; width: 12px; background: var(--terra); }
+    .clip .h.l { left: -22px; } .clip .h.l::after { left: 16px; }
+    .clip .h.r { right: -22px; } .clip .h.r::after { right: 16px; }
+    .clip .h::before { left: 21px; }
+    .clip .h.r::before { left: auto; right: 21px; }
+    .table.editing .clip { touch-action: none; }
+    .mark { padding-right: 10px; }
     .mark b { font-size: 15px; }
     .mark small { display: none; }
-    .films { display: none; grid-template-columns: 1fr; gap: 20px; padding: var(--pad) var(--pad) 40px; }
-    .fband { grid-template-columns: 24px 1fr 120px; gap: 10px; min-height: 60px; }
-    .fband .t { font-size: 17px; }
-    .fdetail { border: 0; padding: 0; }
+    .mark .body { font-size: 12px; max-width: 26ch; }
+
+    /* Barre d'outils contextuelle, posée juste au-dessus de la timeline */
+    .tl-tools { position: fixed; left: 0; right: 0; bottom: calc(var(--tl) + var(--sab)); z-index: 21; display: flex; align-items: stretch; background: var(--ink-2); border-top: 1px solid var(--line); transform: translateY(100%); opacity: 0; transition: transform .35s var(--expo), opacity .25s; pointer-events: none; }
+    .table.editing .tl-tools { transform: none; opacity: 1; pointer-events: auto; }
+    .tl-tools .who { display: flex; align-items: center; gap: 8px; padding: 0 var(--pad); color: var(--bone-dim); border-right: 1px solid var(--line); white-space: nowrap; }
+    .tl-tools .who b { color: var(--bone); font-weight: 500; }
+    .tl-tools button { flex: 1; min-height: 48px; color: var(--bone); display: flex; align-items: center; justify-content: center; gap: 6px; border-right: 1px solid var(--line); }
+    .tl-tools button:last-child { border-right: 0; }
+    .tl-tools button.on { color: var(--terra); box-shadow: inset 0 -2px 0 var(--terra); }
+    .tl-tools button.ok { flex: 0 0 64px; color: var(--terra); }
+
+    /* Barre d'accueil iOS, simulée dans la maquette */
+    .homebar { display: block; position: fixed; left: 50%; bottom: 8px; width: 134px; height: 5px; border-radius: 3px; background: var(--bone); opacity: .45; transform: translateX(-50%); z-index: 90; pointer-events: none; }
+
+    /* Films : chutier complet en bandes, film déplié en place */
+    .films { display: none; grid-template-columns: 1fr; gap: 0; padding: var(--pad) var(--pad) 40px; }
+    .films .mob-fh { display: flex; }
+    .fband { grid-template-columns: 24px 1fr; gap: 6px 10px; padding: 14px 0 12px; min-height: 60px; }
+    .fband .t { font-size: 19px; }
+    .fband .strip { grid-column: 1 / -1; gap: 3px; margin-top: 4px; }
+    .fband.open { border-bottom: 0; }
+    .fdetail { border: 0; padding: 0 0 18px; margin-bottom: 4px; border-bottom: 1px solid var(--bone); gap: 12px; grid-template-rows: auto auto auto; }
+    .fdetail .bande { display: none; }
+    .fdetail .meta { flex-wrap: wrap; gap: 6px 16px; }
+    .fdetail h2 { display: none; }
+    .fdetail .app { font-size: 15px; }
+    .fdetail .btn { width: 100%; justify-content: center; min-height: 48px; }
+    .fdetail .body { gap: 14px; }
+
+    /* Contact : bande défilable, formulaire, EDL repliée */
     .contact { padding: var(--pad) var(--pad) 40px; gap: 20px; overflow: visible; }
     .bande-m .bh { flex-wrap: wrap; gap: 6px 12px; }
     .bande-m .bh > span:nth-child(3) { display: none; }
-    .bande-m .bh .edit { margin-left: auto; }
-    .cgrid { grid-template-columns: 1fr; gap: 26px; }
-    .fields { grid-template-columns: 1fr; }
-    .edl { border: 0; padding: 0; }
-    .edl pre { max-height: 180px; }
-    .cform .actions .btn { width: 100%; justify-content: center; }
+    .bande-m .bh .edit { margin-left: auto; min-height: 32px; }
+    .bande-m .strip { margin: 0 calc(-1 * var(--pad)); padding: 0 var(--pad); height: 78px; }
+    .cgrid { grid-template-columns: 1fr; gap: 22px; }
+    .cform h2 { font-size: 32px; }
+    .cform .lead { font-size: 15px; }
+    .fields { grid-template-columns: 1fr; gap: 10px; }
+    .field input, .field select, .field textarea { font-size: 16px; }
+    .cform .actions .btn { width: 100%; justify-content: center; min-height: 52px; }
+    .cform .actions small { min-width: 0; }
+    .edl { border: 0; padding: 0; border-top: 1px solid var(--line); padding-top: 12px; }
+    .edl .eh { border-bottom: 0; padding-bottom: 0; }
+    .edl .fold { display: flex; align-items: center; justify-content: space-between; min-height: 44px; border: 1px solid var(--line); padding: 0 14px; color: var(--bone); }
+    .edl .fold::after { content: "+"; color: var(--terra); font-size: 16px; }
+    .edl.open .fold::after { content: "–"; }
+    .edl pre, .edl .coord { display: none; }
+    .edl.open pre { display: block; max-height: 220px; border: 1px solid var(--line); border-top: 0; padding: 12px 14px; }
+    .edl.open .coord { display: block; }
     .ghost { width: 110px; }
+    .sheet { padding: 12px 20px calc(16px + var(--sab)); }
   }
 </style>
 </head>
 <body>
 <div class="grain" aria-hidden="true"></div>
+<div class="homebar" aria-hidden="true"></div>
 
 <header class="top">
   <a class="logo wide" href="#" data-go="montage">Mauvais Grain<span class="dot">.</span></a>
@@ -345,7 +436,7 @@
         <h2 class="wide">Timéo Taris, réalisateur.</h2>
       </div>
       <p class="wide mani">Une histoire bien <em>racontée</em> ne s'oublie pas.</p>
-      <p>Mauvais Grain est un studio de production vidéo fondé en 2022 à Bordeaux. L'image au service de votre histoire — trois partis pris, posés comme des notes sur la timeline.</p>
+      <p>Fondé en 2022 par Timéo Taris, Mauvais Grain est un studio de production vidéo à Bordeaux. L'image au service de votre histoire — trois partis pris, posés comme des notes sur la timeline : touchez un marqueur pour l'ouvrir.</p>
       <ol>
         <li><span class="cond">01</span><span>Observer plutôt que mettre en scène.</span></li>
         <li><span class="cond">02</span><span>Accompagner plutôt que diriger.</span></li>
@@ -359,6 +450,7 @@
   <section class="films" aria-label="Films">
     <div class="flist">
       <div class="fh cond"><span><b>Chutier complet</b> · six films · 24 rushes</span><span>Ouvrir une bande</span></div>
+      <div class="mob-fh cond" hidden></div>
       <div id="flist"></div>
     </div>
     <div class="fdetail" id="fdetail"></div>
@@ -391,8 +483,9 @@
         </div>
         <div class="sent wide" id="sent">Reçu. Votre montage est sur la table — on vous rappelle.</div>
       </form>
-      <aside class="edl">
+      <aside class="edl" id="edl">
         <div class="eh cond"><span>Pièce jointe · EDL</span><span id="edlN">montage-v01.txt</span></div>
+        <button class="fold cond" type="button" id="edlFold" aria-expanded="false">Voir la pièce jointe</button>
         <pre id="edlPre"></pre>
         <p class="cond coord">Mauvais Grain · 94 quai des Chartrons<br>33000 Bordeaux<br><a href="#">Instagram</a> · <a href="#">YouTube</a></p>
       </aside>
@@ -400,11 +493,12 @@
   </section>
 
   <!-- ── Timeline ─────────────────────────────────────────────── -->
-  <footer class="timeline" aria-label="Timeline">
+  <footer class="timeline" id="timeline" aria-label="Timeline">
     <div class="tl-head cond">
       <span><span class="edl-tag"><b>EDL v.01</b> — </span><span id="tlOwner">le site monte</span></span>
       <span id="tlSum">0 plan · 0:00</span>
       <span id="tlHint">Le montage suit votre rythme</span>
+      <span class="rythme-tag" id="tlRythme" hidden>Nerveux</span>
       <span class="hand">
         <button id="btnPlay">Pause</button>
         <button id="btnDel">Retirer le plan</button>
@@ -424,18 +518,27 @@
       </div>
     </div>
   </footer>
+  <!-- Barre d'outils contextuelle (mobile) : apparaît quand un plan est sélectionné -->
+  <div class="tl-tools cond" id="tlTools" role="toolbar" aria-label="Plan sélectionné">
+    <span class="who"><b id="ttN">Plan 02</b><span id="ttD">4.6s</span></span>
+    <button data-tool="del">Retirer</button>
+    <button data-tool="trim">Rogner</button>
+    <button data-tool="move">Déplacer</button>
+    <button class="ok" data-tool="ok">OK</button>
+  </div>
 </main>
 
 <!-- Feuille mobile « Ajouter au montage » -->
 <div class="veil" id="veil"></div>
 <div class="sheet" id="sheet" role="dialog" aria-label="Ajouter au montage">
   <div class="grip"></div>
-  <div class="prev"><figure id="shImg"></figure><div><b id="shT">—</b><span class="cond" id="shM">—</span></div></div>
+  <div class="prev"><figure id="shImg"><i id="shDur">—</i></figure><div><b id="shT">—</b><span class="cond" id="shM">—</span></div></div>
   <button class="btn terra cond" id="shAdd">Ajouter au montage</button>
   <div class="row"><button class="btn cond" id="shFilm">Tout le film</button><button class="btn cond" id="shClose">Annuler</button></div>
 </div>
 
 <script>
+window.mgStates = { d: 6, m: 6 };
 (function () {
   'use strict';
   /* ── Données réelles ──────────────────────────────────────── */
@@ -463,6 +566,9 @@
   var pos = 0, playing = true, lastT = 0, auto = true, autoTimer = null, sel = -1, curClip = -1, frame = 0;
   var tempo = 0.18;        // 0 lent → 1 vif
   var ghost = null, drag = null, holdTimer = null, filter = '', gen = 0;
+  var holdTempo = false;   // état de présentation : le tempo ne décroît pas tant que le visiteur ne bouge pas
+  var editMode = '';       // mobile : '' | 'sel' | 'trim' | 'move'
+  var nerveux = false;
 
   /* ── Utilitaires ──────────────────────────────────────────── */
   function tc(s) { var f = Math.floor((s % 1) * 25), t = Math.floor(s); return pad(Math.floor(t / 3600)) + ':' + pad(Math.floor(t / 60) % 60) + ':' + pad(t % 60) + ':' + pad(f); }
@@ -507,19 +613,25 @@
     for (var s = 0; s <= T; s++) h += '<i class="' + (s % 5 === 0 ? 'big' : '') + '" style="left:' + (s * pps) + 'px">' + (s % 5 === 0 ? '<span>' + short(s) + '</span>' : '') + '</i>';
     ruler.innerHTML = h; inner.style.width = (T * pps + 120) + 'px';
   }
+  function dz(k) { return editMode === 'move' && k !== sel && k !== sel + 1 ? '<span class="dz" data-at="' + k + '" role="button" aria-label="Déposer ici"></span>' : ''; }
   function renderClips(popIndex) {
-    var pps = PPS(), h = '';
+    var pps = PPS(), h = '', m = isMobile();
     clips.forEach(function (c, i) {
       var r = RUSHES[c.r];
-      h += '<div class="clip' + (i === sel ? ' sel' : '') + (i === popIndex ? ' pop' : '') + '" data-i="' + i + '" tabindex="0" role="option" aria-label="Plan ' + (i + 1) + ', ' + FILMS[r.film].t + ', ' + c.d + ' secondes" style="width:' + Math.max(18, c.d * pps - 3) + 'px;background-image:url(' + r.src + ')"><span class="n">' + pad(i + 1) + '</span><span class="d">' + c.d.toFixed(1) + 's</span><span class="h l" data-h="l"></span><span class="h r" data-h="r"></span></div>';
+      h += dz(i) + '<div class="clip' + (i === sel ? ' sel' : '') + (i === popIndex ? ' pop' : '') + (m && editMode === 'move' && i === sel ? ' lift' : '') + '" data-i="' + i + '" tabindex="0" role="option" aria-label="Plan ' + (i + 1) + ', ' + FILMS[r.film].t + ', ' + c.d + ' secondes" style="width:' + Math.max(18, c.d * pps - 3) + 'px;background-image:url(' + r.src + ')"><span class="n">' + pad(i + 1) + '</span><span class="d">' + c.d.toFixed(1) + 's</span><span class="h l" data-h="l"></span><span class="h r" data-h="r"></span></div>';
     });
+    h += dz(clips.length);
     clipsEl.innerHTML = h;
+    table.classList.toggle('editing', m && !!editMode && sel >= 0 && sel < clips.length);
+    if (sel >= 0 && sel < clips.length) { $('ttN').textContent = 'Plan ' + pad(sel + 1); $('ttD').textContent = clips[sel].d.toFixed(1) + 's'; }
+    document.querySelectorAll('#tlTools button').forEach(function (b) { b.classList.toggle('on', b.dataset.tool === editMode); });
     $('tlEmpty').classList.toggle('off', clips.length > 0);
     var sum = plural(clips.length, 'plan') + ' · ' + short(total());
     $('tlSum').textContent = sum; $('bSum').textContent = '— ' + plural(clips.length, 'plan') + ' — ' + short(total());
     $('tlOwner').textContent = auto ? 'le site monte' : 'votre montage';
     $('tlHint').textContent = auto ? 'Le montage suit votre rythme' : 'Vous avez la main — glisser, réordonner, rogner';
     renderRuler(); markUsed(); renderBande();
+    if (table.dataset.view === 'studio') { $('tlOwner').textContent = 'porte-notes'; $('tlSum').textContent = '3 notes · 0:42'; $('tlHint').textContent = 'Les partis pris du fondateur, en timecode'; }
   }
   function addClip(r, at, d) {
     var c = { r: r, d: d || durFor(r) };
@@ -545,8 +657,8 @@
     if (playing && clips.length) { pos += dt; if (pos >= total()) pos = 0; }
     var acc = 0, idx = -1, inClip = 0;
     for (var i = 0; i < clips.length; i++) { if (pos < acc + clips[i].d) { idx = i; inClip = pos - acc; break; } acc += clips[i].d; }
-    if (!studio && idx !== curClip && idx >= 0) { showRush(clips[idx].r, tempo > 0.55); curClip = idx; }
     var studio = table.dataset.view === 'studio';
+    if (!studio && idx !== curClip && idx >= 0) { showRush(clips[idx].r, tempo > 0.55); curClip = idx; }
     if (!studio && !clips.length && curClip !== -1) { curClip = -1; frA.classList.remove('on'); frB.classList.remove('on'); $('uTitre').textContent = '—'; $('uMeta').textContent = '—'; }
     $('empty').classList.toggle('off', studio || clips.length > 0);
     playhead.style.left = (pos * PPS()) + 'px';
@@ -555,13 +667,23 @@
     var sc = $('tlScroll'), x = pos * PPS();
     if (x > sc.scrollLeft + sc.clientWidth - 80 || x < sc.scrollLeft) sc.scrollLeft = Math.max(0, x - sc.clientWidth * 0.4);
     /* décroissance du tempo */
-    tempo += (0.18 - tempo) * dt * 0.35; renderTempo();
+    if (!holdTempo) tempo += (0.18 - tempo) * dt * 0.35;
+    renderTempo();
     frame = requestAnimationFrame(tick);
   }
   function renderTempo() {
     $('tempoDot').style.left = (12 + tempo * 76) + '%';
-    var lbl = tempo < 0.35 ? 'Rythme lent · plans longs' : tempo < 0.65 ? 'Rythme posé · coupes franches' : 'Rythme vif · coupes rapides';
+    var lbl = tempo < 0.35 ? 'Rythme lent · plans longs' : tempo < 0.65 ? 'Rythme posé · coupes franches' : 'Rythme nerveux · coupes sèches';
     if ($('uTempo').textContent !== lbl) $('uTempo').textContent = lbl;
+    var nv = tempo >= 0.65;
+    if (nv !== nerveux) {
+      nerveux = nv; $('timeline').classList.toggle('nerveux', nv);
+      /* la timeline zoome sur les coupes serrées */
+      document.documentElement.style.setProperty('--pps', nv ? (isMobile() ? 22 : 30) : '');
+      $('tlRythme').hidden = !nv; $('tlRythme').textContent = 'Nerveux · coupes sèches';
+      if (auto) $('tlHint').textContent = nv ? 'Vous allez vite — le site coupe sec' : 'Le montage suit votre rythme';
+      renderClips(); renderMarks();
+    }
   }
   $('btnPlay').addEventListener('click', function () { playing = !playing; this.textContent = playing ? 'Pause' : 'Lecture'; });
   $('btnDel').addEventListener('click', function () { takeHand(); removeClip(sel); });
@@ -570,10 +692,15 @@
   /* ── Rythme : vitesse du pointeur & du défilement ─────────── */
   var lastP = null;
   window.addEventListener('pointermove', function (e) {
+    holdTempo = false;
     if (lastP) { var v = Math.hypot(e.clientX - lastP.x, e.clientY - lastP.y) / Math.max(1, e.timeStamp - lastP.t); tempo = Math.min(1, tempo + v * 0.06); }
     lastP = { x: e.clientX, y: e.clientY, t: e.timeStamp };
   }, { passive: true });
-  window.addEventListener('wheel', function (e) { tempo = Math.min(1, tempo + Math.abs(e.deltaY) * 0.002); }, { passive: true });
+  window.addEventListener('wheel', function (e) { holdTempo = false; tempo = Math.min(1, tempo + Math.abs(e.deltaY) * 0.002); }, { passive: true });
+  /* tactile : la vitesse du défilement vertical nourrit le tempo */
+  var lastY = null, lastYT = 0;
+  window.addEventListener('scroll', function () { var y = window.scrollY, t = performance.now(); if (lastY != null) { var v = Math.abs(y - lastY) / Math.max(1, t - lastYT); tempo = Math.min(1, tempo + v * 0.05); holdTempo = false; } lastY = y; lastYT = t; }, { passive: true });
+  grid.addEventListener('scroll', function () { tempo = Math.min(1, tempo + 0.012); }, { passive: true });
 
   /* ── Montage automatique à l'arrivée ──────────────────────── */
   function flyTo(fromRect, r, at, done, pauseAt) {
@@ -659,7 +786,7 @@
     var r = +el.dataset.r;
     if (e.pointerType === 'touch') {
       clearTimeout(holdTimer); pend = { x: e.clientX, y: e.clientY };
-      holdTimer = setTimeout(function () { openSheet(r); pend = null; }, 420);
+      holdTimer = setTimeout(function () { openSheet(r); pend = null; }, 450);
     } else { pend = { x: e.clientX, y: e.clientY, r: r }; }
   });
   grid.addEventListener('pointermove', function (e) {
@@ -675,14 +802,24 @@
 
   // Timeline : sélection, réordonnancement, trim
   var tPend = null, trim = null;
+  var clipHold = null;
   clipsEl.addEventListener('pointerdown', function (e) {
+    var z = e.target.closest('.dz'); if (z) { moveSelTo(+z.dataset.at); return; }
     var h = e.target.closest('.h'), c = e.target.closest('.clip'); if (!c) return;
     var i = +c.dataset.i; takeHand();
     if (h) { trim = { i: i, side: h.dataset.h, x: e.clientX, d: clips[i].d }; clipsEl.setPointerCapture(e.pointerId); e.preventDefault(); return; }
+    var touch = e.pointerType === 'touch' && isMobile();
+    if (touch) {
+      if (editMode !== 'move') { sel = i; editMode = editMode || 'sel'; renderClips(); }
+      clearTimeout(clipHold); clipHold = setTimeout(function () { sel = i; editMode = 'move'; renderClips(); tPend = null; }, 450);
+      if (editMode !== 'move') return;   // hors mode déplacer, la timeline défile au doigt
+    }
     sel = i; renderClips(); tPend = { x: e.clientX, y: e.clientY, i: i };
     clipsEl.setPointerCapture(e.pointerId);
   });
+  function moveSelTo(at) { if (sel < 0) return; var c = clips.splice(sel, 1)[0]; if (at > sel) at--; clips.splice(at, 0, c); sel = at; editMode = 'sel'; renderClips(at); }
   clipsEl.addEventListener('pointermove', function (e) {
+    if (clipHold && tPend && Math.hypot(e.clientX - tPend.x, e.clientY - tPend.y) > 8) { clearTimeout(clipHold); clipHold = null; }
     if (trim) {
       var dx = (e.clientX - trim.x) / PPS(), nd = trim.side === 'r' ? trim.d + dx : trim.d - dx;
       clips[trim.i].d = Math.max(0.6, Math.min(12, +nd.toFixed(1)));
@@ -693,7 +830,7 @@
     if (tPend && Math.hypot(e.clientX - tPend.x, e.clientY - tPend.y) > 8) { startDrag(e, clips[tPend.i].r, tPend.i); tPend = null; }
     if (drag) moveDrag(e);
   });
-  function endTl(e) { if (trim) { trim = null; renderClips(); } tPend = null; if (drag) endDrag(e); }
+  function endTl(e) { clearTimeout(clipHold); clipHold = null; if (trim) { trim = null; renderClips(); } tPend = null; if (drag) endDrag(e); }
   clipsEl.addEventListener('pointerup', endTl); clipsEl.addEventListener('pointercancel', endTl);
   clipsEl.addEventListener('keydown', function (e) {
     var c = e.target.closest('.clip'); if (!c) return; var i = +c.dataset.i; takeHand();
@@ -709,8 +846,17 @@
   window.addEventListener('pointermove', function (e) { if (drag && drag.from == null) moveDrag(e); });
   window.addEventListener('pointerup', function (e) { if (drag && drag.from == null) endDrag(e); });
   $('track').addEventListener('click', function (e) {
-    if (e.target.closest('.clip')) return;
+    if (e.target.closest('.clip') || e.target.closest('.dz') || e.target.closest('.mark')) return;
+    if (isMobile() && editMode) { editMode = ''; sel = -1; renderClips(); return; }
     var rc = inner.getBoundingClientRect(); pos = Math.max(0, Math.min(total(), (e.clientX - rc.left) / PPS())); sel = -1; renderClips();
+  });
+
+  /* ── Barre d'outils contextuelle (mobile) ─────────────────── */
+  $('tlTools').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return; var t = b.dataset.tool;
+    if (t === 'del') { removeClip(sel); editMode = clips.length ? 'sel' : ''; if (!clips.length) sel = -1; renderClips(); }
+    else if (t === 'ok') { editMode = ''; sel = -1; renderClips(); }
+    else { editMode = editMode === t ? 'sel' : t; renderClips(); }
   });
 
   /* ── Feuille mobile ───────────────────────────────────────── */
@@ -718,7 +864,10 @@
   function openSheet(r) {
     sheetR = r; var f = FILMS[RUSHES[r].film];
     $('shImg').style.backgroundImage = 'url(' + RUSHES[r].src + ')';
-    $('shT').textContent = f.t; $('shM').textContent = f.c + ' · ' + f.cat + ' · ' + f.y + ' · plan ' + pad(RUSHES[r].k + 1) + ' · ' + RUSHES[r].nat.toFixed(1) + 's';
+    $('shT').textContent = f.t; $('shDur').textContent = RUSHES[r].nat.toFixed(1) + 's';
+    var fr = RUSHES.filter(function (x) { return x.film === RUSHES[r].film; }), ft = fr.reduce(function (a, x) { return a + x.nat; }, 0);
+    $('shM').innerHTML = f.c + ' · ' + f.cat + ' · ' + f.y + '<br>Plan <strong>' + f.id.toUpperCase() + '·0' + (RUSHES[r].k + 1) + '</strong> · <strong>' + durFor(r).toFixed(1) + 's</strong> au rythme actuel';
+    $('shFilm').textContent = 'Tout le film · ' + fr.length + ' plans · ' + ft.toFixed(1) + 's';
     $('sheet').classList.add('on'); $('veil').classList.add('on');
     grid.querySelectorAll('.rush.sel').forEach(function (x) { x.classList.remove('sel'); });
     grid.querySelector('[data-r="' + r + '"]').classList.add('sel');
@@ -740,13 +889,28 @@
       '<div class="meta cond"><span>Client <b>' + f.c + '</b></span><span>Catégorie <b>' + f.cat + '</b></span><span>Année <b>' + f.y + '</b></span><span>4 rushes · ' + RUSHES.filter(function (r) { return r.film === openFilm; }).reduce(function (a, r) { return a + r.nat; }, 0).toFixed(1) + 's</span></div>' +
       '<div class="body"><h2 class="wide">' + f.t + '</h2><p class="app"><strong>L\'approche</strong>' + f.a + '</p><button class="btn cond' + (added ? ' done' : '') + '" id="addFilm">' + (added ? 'Rushes déjà sur la timeline' : 'Ajouter ces rushes au montage') + ' <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M7 1v12M1 7h12"/></svg></button></div>';
     $('addFilm').addEventListener('click', function () { takeHand(); addFilm(openFilm); renderFilms(); });
+    /* mobile : le détail se déplie sous la bande ouverte */
+    var det = $('fdetail'), band = $('flist').querySelector('.fband.open');
+    if (isMobile() && band) band.insertAdjacentElement('afterend', det); else document.querySelector('.films').appendChild(det);
+    var mh = document.querySelector('.films .mob-fh'); mh.hidden = !isMobile(); mh.innerHTML = '<span>Toucher une bande pour la déplier</span><span>' + plural(clips.length, 'plan') + ' sur la timeline</span>';
   }
-  $('flist').addEventListener('click', function (e) { var b = e.target.closest('.fband'); if (b) { openFilm = +b.dataset.f; renderFilms(); } });
+  $('flist').addEventListener('click', function (e) { var b = e.target.closest('.fband'); if (b) { openFilm = +b.dataset.f; renderFilms(); if (isMobile()) b.scrollIntoView({ block: 'start', behavior: reduce ? 'auto' : 'smooth' }); } });
 
   /* ── Studio : marqueurs sur la timeline ───────────────────── */
-  $('marks').innerHTML = ['Observer plutôt que mettre en scène.', 'Accompagner plutôt que diriger.', 'Raconter plutôt que vendre.'].map(function (t, i) {
-    return '<div class="mark" style="left:' + (2 + i * 33) + '%"><span class="cond">Note ' + pad(i + 1) + ' · ' + tc(i * 14) + '</span><b>' + t + '</b><small>Parti pris du fondateur</small></div>';
-  }).join('');
+  var NOTES = [
+    ['Observer plutôt que mettre en scène.', 'Laisser les rencontres, les ambiances et la lumière naturelle guider le récit.'],
+    ['Accompagner plutôt que diriger.', 'Au plus près des gens et des lieux, sans imposer de mise en scène : le film se construit avec vous.'],
+    ['Raconter plutôt que vendre.', 'Une histoire bien racontée ne s\'oublie pas — l\'image au service de votre histoire.']
+  ];
+  var openNote = -1;
+  function renderMarks() {
+    var pps = PPS();
+    $('marks').innerHTML = NOTES.map(function (n, i) {
+      return '<div class="mark' + (i === openNote ? ' open' : '') + '" data-n="' + i + '" role="button" tabindex="0" style="left:' + (i * 14 * pps) + 'px"><span class="cond">Note ' + pad(i + 1) + ' · ' + tc(i * 14) + '</span><b>' + n[0] + '</b><small>Parti pris du fondateur — toucher pour ouvrir</small><span class="body">' + n[1] + '</span></div>';
+    }).join('');
+  }
+  renderMarks();
+  $('marks').addEventListener('click', function (e) { var m = e.target.closest('.mark'); if (!m) return; openNote = openNote === +m.dataset.n ? -1 : +m.dataset.n; renderMarks(); });
 
   /* ── Contact : bande + EDL joint ──────────────────────────── */
   function renderBande() {
@@ -757,17 +921,19 @@
     lines.push('', 'TOTAL  ' + tc(acc) + '  ' + plural(clips.length, 'plan'));
     $('edlPre').innerHTML = lines.join('\n'); $('fEdl').value = lines.join('\n').replace(/<[^>]+>/g, '');
   }
+  $('edlFold').addEventListener('click', function () { var o = this.parentNode.classList.toggle('open'); this.setAttribute('aria-expanded', o); this.textContent = o ? 'Replier la pièce jointe' : 'Voir la pièce jointe'; });
   $('cform').addEventListener('submit', function (e) { e.preventDefault(); $('sent').classList.add('on'); $('send').textContent = 'Envoyé'; });
 
   /* ── Navigation ───────────────────────────────────────────── */
   var table = $('table');
   function go(v) {
-    table.dataset.view = v; closeSheet();
+    table.dataset.view = v; closeSheet(); editMode = ''; table.classList.remove('editing');
     document.querySelectorAll('.menu button').forEach(function (b) { b.classList.toggle('on', b.dataset.go === v); });
     if (v === 'films') renderFilms();
     if (v === 'contact') renderBande();
     if (v === 'studio') { takeHand(); playing = false; frA.src = 'img/studio.jpg'; frA.classList.add('on'); frB.classList.remove('on'); shown = frA; curClip = -2; $('uTitre').textContent = 'Timéo Taris'; $('uMeta').textContent = 'Fondateur · réalisateur · Bordeaux'; $('empty').classList.add('off'); }
     else if (curClip === -2) { curClip = -1; playing = true; }
+    renderClips(); if (v === 'studio') renderMarks();
     window.scrollTo(0, 0);
   }
   document.querySelectorAll('[data-go]').forEach(function (b) { b.addEventListener('click', function (e) { e.preventDefault(); go(b.dataset.go); }); });
@@ -779,7 +945,10 @@
     grid.querySelectorAll('.rush.sel').forEach(function (x) { x.classList.remove('sel'); });
     clips = seq.map(function (r, i) { return { r: r, d: durs[i] }; });
     sel = -1; curClip = -1; playing = true; filter = ''; applyFilter(); $('btnPlay').textContent = 'Pause';
+    editMode = ''; holdTempo = false; openNote = -1; $('edl').classList.remove('open'); grid.scrollLeft = 0; $('tlScroll').scrollLeft = 0;
+    if (nerveux) { tempo = 0.18; renderTempo(); }
   }
+  var NERV = { seq: [0, 9, 17, 22, 5, 14, 2, 11, 19], d: [1.8, 1.4, 2.2, 1.6, 1.2, 2.0, 1.5, 1.4, 1.9] };
   window.mgState = function (n) {
     var m = isMobile();
     if (!m) {
@@ -799,10 +968,21 @@
       }
       if (n === 2) { reset([0, 9, 17, 22], [3.8, 4.6, 5.4, 3.0]); takeHand(); pos = 1; openFilm = 0; go('films'); renderClips(); }
       if (n === 3) { reset([0, 9, 17, 22, 5], [9.6, 7.2, 10.4, 6.8, 8.0]); takeHand(); pos = 1; go('contact'); renderClips(); }
+      if (n === 4) { reset([0, 9, 17, 22], [3.8, 4.6, 5.4, 3.0]); takeHand(); tempo = 0.18; openNote = 1; go('studio'); renderMarks(); }
+      if (n === 5) {
+        auto = true; $('rythme').querySelector('span').textContent = 'Le montage suit votre rythme';
+        reset(NERV.seq, NERV.d); tempo = 0.92; holdTempo = true; pos = 6.3; go('montage'); renderTempo(); renderClips(); playing = false;
+      }
     } else {
       if (n === 0) { auto = true; $('rythme').querySelector('span').textContent = 'Le montage suit votre rythme'; reset([0, 9, 17], [3.8, 4.6, 5.4]); tempo = 0.22; pos = 3.8; go('montage'); renderClips(); }
-      if (n === 1) { reset([0, 9, 17], [3.8, 4.6, 5.4]); takeHand(); pos = 3.8; go('montage'); renderClips(); playing = false; openSheet(5); }
-      if (n === 2) { reset([0, 9, 17, 22, 5], [9.6, 7.2, 10.4, 6.8, 8.0]); takeHand(); pos = 1; go('contact'); renderClips(); }
+      if (n === 1) {
+        auto = true; $('rythme').querySelector('span').textContent = 'Le montage suit votre rythme';
+        reset(NERV.seq, NERV.d); tempo = 0.9; holdTempo = true; pos = 6.3; go('montage'); renderTempo(); renderClips(); playing = false; grid.scrollLeft = 640;
+      }
+      if (n === 2) { reset([0, 9, 17], [3.8, 4.6, 5.4]); takeHand(); pos = 3.8; go('montage'); renderClips(); playing = false; openSheet(5); }
+      if (n === 3) { reset([0, 9, 17, 22, 5], [3.8, 4.6, 5.4, 3.0, 3.2]); takeHand(); pos = 5.1; go('montage'); playing = false; sel = 1; editMode = 'move'; renderClips(); var lz = clipsEl.querySelector('.dz[data-at="3"]'); if (lz) lz.classList.add('hot'); }
+      if (n === 4) { reset([0, 9, 17, 22], [3.8, 4.6, 5.4, 3.0]); takeHand(); pos = 1; openFilm = 0; go('films'); renderClips(); }
+      if (n === 5) { reset([0, 9, 17, 22, 5], [9.6, 7.2, 10.4, 6.8, 8.0]); takeHand(); pos = 1; go('contact'); renderClips(); }
     }
   };
 
@@ -811,7 +991,7 @@
   frame = requestAnimationFrame(tick);
   if (reduce) { AUTO.slice(0, 4).forEach(function (r) { addClip(r); }); auto = false; sel = -1; renderClips(); }
   else setTimeout(function () { autoStep(0); }, 700);
-  window.addEventListener('resize', function () { renderClips(); });
+  window.addEventListener('resize', function () { renderClips(); renderMarks(); });
 })();
 </script>
 </body>

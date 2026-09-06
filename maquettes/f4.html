@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mauvais Grain — Plan-séquence</title>
+<link rel="stylesheet" href="_base.css">
+<style>
+  /* ────────────────────────────────────────────────────────────
+     F4 — PLAN-SÉQUENCE. Le showreel est le site : un film continu
+     de 90 s, six chapitres (= six films), aucune page. L'interface
+     n'existe que quand le pointeur bouge ; le scrubber en bas est
+     la seule navigation ; la fiche film est le seul moment papier.
+     ──────────────────────────────────────────────────────────── */
+  :root {
+    --pad: 24px;
+    --sat: env(safe-area-inset-top, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --sal: env(safe-area-inset-left, 0px);
+    --sar: env(safe-area-inset-right, 0px);
+    --ui: 480ms;
+  }
+  html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+  body {
+    --ink: #0a0908; --ink-2: #15120f; --ink-3: #1e1a15; --line: #393229; --line-soft: #221d17;
+    --bone: #ece8dc; --bone-dim: #9b9384; --bone-faint: #6e685c; --terra: #b76e4e;
+    background: var(--ink); color: var(--bone);
+    font-weight: 300; font-size: 14px; line-height: 1.45;
+    -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none;
+  }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  [hidden] { display: none !important; }
+  ::selection { background: var(--terra); color: var(--ink); }
+  .cond { font-size: 10px; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .ui { transition: opacity var(--ui) var(--soft), transform var(--ui) var(--expo); }
+  body:not(.awake) .ui { opacity: 0; pointer-events: none; }
+
+  /* ── Le film ───────────────────────────────────────────────── */
+  .film { position: fixed; inset: 0; background: var(--ink); overflow: hidden; touch-action: none; }
+  body.awake .film { cursor: none; }
+  .film img {
+    position: absolute; inset: -4% ; width: 108%; height: 108%; object-fit: cover;
+    opacity: 0; will-change: transform; transform-origin: 50% 50%;
+  }
+  .film img.on { opacity: 1; }
+  .film .dim { position: absolute; inset: 0; background: var(--ink); opacity: 0; transition: opacity 600ms var(--soft); pointer-events: none; }
+  body.fiche .film .dim { opacity: .68; }
+  body.fin .film .dim { opacity: .84; }
+  body.scrubbing .film img { filter: contrast(1.02); }
+  .shade {
+    position: fixed; left: 0; right: 0; bottom: 0; height: 46vh; pointer-events: none; z-index: 5;
+    background: linear-gradient(to top, rgba(10,9,8,.82), rgba(10,9,8,.42) 45%, rgba(10,9,8,0));
+  }
+  .shade-top {
+    position: fixed; left: 0; right: 0; top: 0; height: 22vh; pointer-events: none; z-index: 5;
+    background: linear-gradient(to bottom, rgba(10,9,8,.55), rgba(10,9,8,0));
+  }
+
+  /* ── Chrome permanent ──────────────────────────────────────── */
+  .logo {
+    position: fixed; z-index: 20; left: calc(var(--pad) + var(--sal)); top: calc(var(--pad) + var(--sat));
+    font-size: 21px; line-height: 1; text-shadow: 0 1px 12px rgba(0,0,0,.4);
+  }
+  .tc {
+    position: fixed; z-index: 20; right: calc(var(--pad) + var(--sar)); top: calc(var(--pad) + var(--sat) + 6px);
+    font-size: 10px; letter-spacing: .18em; opacity: .78; font-variant-numeric: tabular-nums;
+    text-shadow: 0 1px 10px rgba(0,0,0,.5);
+  }
+  .tc b { font-weight: 500; }
+  .tc i { font-style: normal; color: var(--terra); margin-right: 8px; }
+
+  /* ── Filtres métier (re-coupe) ─────────────────────────────── */
+  .filters {
+    position: fixed; z-index: 21; right: calc(var(--pad) + var(--sar)); top: calc(var(--pad) + var(--sat) + 34px);
+    display: flex; gap: 4px; align-items: center;
+  }
+  .filters .cond { font-size: 9px; letter-spacing: .16em; opacity: .55; margin-right: 8px; }
+  .chip {
+    font-family: var(--cond); font-weight: 500; font-size: 9px; letter-spacing: .16em; text-transform: uppercase;
+    padding: 9px 11px; min-height: 30px; border: 1px solid rgba(236,232,220,.22); border-radius: 2px;
+    color: var(--bone); opacity: .82; transition: opacity 200ms, border-color 200ms, color 200ms, background 200ms;
+    display: inline-flex; align-items: center; gap: 7px; white-space: nowrap;
+  }
+  .chip small { font-size: 8px; opacity: .55; letter-spacing: .1em; }
+  .chip:hover { opacity: 1; border-color: rgba(236,232,220,.5); }
+  .chip.on { border-color: var(--terra); color: var(--bone); background: rgba(183,110,78,.18); opacity: 1; }
+  .chip[aria-disabled="true"] { opacity: .32; cursor: default; }
+
+  /* ── Sous-titre du film courant ────────────────────────────── */
+  .sub {
+    position: fixed; z-index: 20; left: 0; right: 0; bottom: calc(var(--pad) + 132px + var(--sab));
+    text-align: center; pointer-events: none;
+  }
+  .sub h2 { margin: 0; font-size: 34px; text-shadow: 0 2px 20px rgba(0,0,0,.45); }
+  .sub .meta { margin-top: 10px; font-size: 10px; letter-spacing: .2em; opacity: .85; }
+  .sub .meta i { font-style: normal; opacity: .5; margin: 0 8px; }
+  body:not(.awake) .sub { transform: translateY(8px); }
+
+  /* ── Scrubber ──────────────────────────────────────────────── */
+  .scrub {
+    position: fixed; z-index: 22; left: calc(var(--pad) + var(--sal)); right: calc(var(--pad) + var(--sar)); bottom: calc(var(--pad) + var(--sab));
+    display: flex; gap: 16px; align-items: flex-end;
+  }
+  body:not(.awake) .scrub { transform: translateY(14px); }
+  .groups { flex: 1; display: flex; gap: 18px; min-width: 0; position: relative; }
+  .grp { flex: 1; min-width: 0; }
+  .grp .glabel {
+    font-size: 9px; letter-spacing: .2em; opacity: .55; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;
+  }
+  .grp .glabel::after { content: ''; flex: 1; height: 1px; background: rgba(236,232,220,.18); }
+  .grp .chs { display: flex; gap: 5px; }
+  .ch { flex: 1; min-width: 0; cursor: pointer; position: relative; transition: opacity 300ms; }
+  .ch.cut { opacity: .28; }
+  .ch .thumbs { display: flex; gap: 2px; height: 48px; overflow: hidden; border-radius: 1px; }
+  .ch .thumbs img { flex: 1; min-width: 0; height: 100%; object-fit: cover; opacity: .75; transition: opacity 200ms; }
+  .ch:hover .thumbs img, .ch.cur .thumbs img { opacity: 1; }
+  .ch .clabel { display: flex; justify-content: space-between; gap: 8px; margin-top: 7px; font-size: 9px; letter-spacing: .12em; opacity: .7; white-space: nowrap; }
+  .ch .clabel .n { overflow: hidden; text-overflow: ellipsis; }
+  .ch .clabel .t { opacity: .6; font-variant-numeric: tabular-nums; flex: none; }
+  .ch.cur .clabel { opacity: 1; }
+  .ch.cur .clabel .n { color: var(--terra); }
+  .ch .thumbs::after { content: ''; position: absolute; inset: 0 0 auto 0; height: 48px; box-shadow: inset 0 0 0 1px rgba(236,232,220,0); transition: box-shadow 200ms; pointer-events: none; }
+  .ch.cur .thumbs::after { box-shadow: inset 0 0 0 1px rgba(236,232,220,.35); }
+  .head {
+    position: absolute; top: 14px; width: 2px; height: 56px; background: var(--terra); pointer-events: none;
+    box-shadow: 0 0 0 1px rgba(10,9,8,.55); transform: translateX(-1px); z-index: 3;
+  }
+  .head::before { content: ''; position: absolute; left: -4px; top: -5px; border: 5px solid transparent; border-top: 6px solid var(--terra); border-bottom: 0; }
+  .finmark {
+    flex: none; width: 52px; height: 48px; border: 1px solid rgba(236,232,220,.25); display: grid; place-items: center;
+    font-size: 9px; letter-spacing: .2em; opacity: .7; transition: opacity 200ms, border-color 200ms; cursor: pointer; margin-bottom: 20px;
+  }
+  .finmark:hover { opacity: 1; border-color: var(--terra); }
+
+  /* ── Curseur ───────────────────────────────────────────────── */
+  #cur {
+    position: fixed; z-index: 40; left: 0; top: 0; pointer-events: none; transform: translate(-50%, -50%);
+    display: flex; align-items: center; gap: 10px; font-size: 9px; letter-spacing: .2em; white-space: nowrap;
+    text-shadow: 0 1px 8px rgba(0,0,0,.6); opacity: 0; transition: opacity 200ms;
+  }
+  #cur::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--terra); order: 2; }
+  #cur span:first-child { order: 1; } #cur span:last-child { order: 3; }
+  body.awake.overfilm #cur { opacity: 1; }
+  body.fiche #cur, body.fin #cur { opacity: 0 !important; }
+
+  /* ── Fiche film : le seul moment papier ────────────────────── */
+  aside.fiche {
+    position: fixed; z-index: 50; top: 0; right: 0; bottom: 0; width: min(560px, 100%);
+    background: #f6f3ec; color: #201a12; --bone: #201a12; --bone-dim: #574f43; --bone-faint: #736b5d; --terra: #a85f3c; --line: #d6cfbf;
+    transform: translateX(104%); transition: transform 640ms var(--expo); overflow: auto; overscroll-behavior: contain;
+    padding: 40px 44px calc(40px + var(--sab)); box-shadow: -30px 0 80px rgba(0,0,0,.35); cursor: auto;
+  }
+  body.fiche aside.fiche { transform: none; }
+  .fiche .row { display: flex; justify-content: space-between; align-items: center; font-size: 10px; letter-spacing: .18em; }
+  .fiche .row .x { min-width: 44px; min-height: 44px; display: grid; place-items: center; margin: -12px -12px -12px 0; border-radius: 50%; }
+  .fiche .row .x:hover { background: var(--ink-2); }
+  .fiche h2 { margin: 34px 0 0; font-size: 52px; letter-spacing: -.02em; }
+  .fiche .meta { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 6px 0; font-size: 10px; letter-spacing: .16em; color: var(--bone-dim); }
+  .fiche .meta i { font-style: normal; margin: 0 10px; color: var(--line); }
+  .fiche .app { margin: 30px 0 0; font-size: 19px; line-height: 1.42; font-weight: 300; max-width: 26em; }
+  .fiche .app::before { content: '“'; font-family: var(--wide); color: var(--terra); margin-right: 2px; }
+  .fiche .app::after { content: '”'; font-family: var(--wide); color: var(--terra); margin-left: 2px; }
+  .fiche .lab { margin-top: 34px; font-size: 9px; letter-spacing: .2em; color: var(--bone-faint); display: flex; align-items: center; gap: 10px; }
+  .fiche .lab::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+  .fiche .grid { margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .fiche .grid figure { margin: 0; cursor: pointer; }
+  .fiche .grid img { aspect-ratio: 16 / 10; width: 100%; object-fit: cover; }
+  .fiche .grid figcaption { font-size: 9px; letter-spacing: .14em; color: var(--bone-faint); margin-top: 6px; display: flex; justify-content: space-between; }
+  .fiche .go {
+    margin-top: 34px; display: inline-flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 20px;
+    background: var(--terra); color: #f6f3ec; font-family: var(--cond); font-weight: 500; font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+  }
+  .fiche .go:hover { background: #8f4e30; }
+  .fiche .foot { margin-top: 26px; font-size: 9px; letter-spacing: .14em; color: var(--bone-faint); }
+
+  /* ── FIN & générique ───────────────────────────────────────── */
+  #fin { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; pointer-events: none; opacity: 0; transition: opacity 700ms var(--soft); }
+  body.fin #fin { opacity: 1; pointer-events: auto; }
+  .fin .word { position: absolute; font-size: clamp(64px, 12vw, 150px); letter-spacing: .04em; transition: opacity 700ms, transform 900ms var(--expo); }
+  .fin.gen .word { opacity: 0; transform: scale(.9); }
+  #fin > .gen { width: min(720px, calc(100% - 48px)); opacity: 0; transform: translateY(24px); transition: opacity 900ms var(--soft) 200ms, transform 1100ms var(--expo) 200ms; text-align: center; }
+  #fin.gen > .gen { opacity: 1; transform: none; }
+  .gen .k { font-size: 9px; letter-spacing: .28em; opacity: .6; }
+  .gen h2 { margin: 12px 0 0; font-size: clamp(40px, 6vw, 68px); }
+  .gen .base { margin-top: 12px; font-size: 15px; font-weight: 300; opacity: .85; }
+  .gen .roll { margin: 36px auto 0; display: grid; grid-template-columns: 1fr 1fr; column-gap: 26px; row-gap: 12px; max-width: 620px; font-size: 13px; }
+  .gen .roll .r { text-align: right; font-size: 9px; letter-spacing: .2em; opacity: .55; padding-top: 4px; }
+  .gen .roll .v { text-align: left; }
+  .gen .roll .v a:hover { color: var(--terra); }
+  .gen .roll .v.m { font-family: var(--cond); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; line-height: 1.9; }
+  .gen .roll .v.m em { font-style: normal; color: var(--terra); margin-right: 8px; }
+  .gen .again {
+    margin-top: 34px; display: inline-flex; align-items: center; gap: 12px; min-height: 46px; padding: 0 22px;
+    border: 1px solid var(--terra); font-family: var(--cond); font-weight: 500; font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
+  }
+  .gen .again:hover { background: var(--terra); color: var(--ink); }
+  .gen .again b { font-weight: 400; }
+
+  /* ── Mobile ────────────────────────────────────────────────── */
+  .vscrub, .mband { display: none; }
+  @media (max-width: 640px), (pointer: coarse) and (max-width: 900px) {
+    :root { --pad: 18px; }
+    .filters, .scrub, .cur, .shade-top { display: none; }
+    .logo { font-size: 19px; }
+    .tc { top: calc(var(--pad) + var(--sat) + 5px); }
+    .shade { height: 52vh; }
+    /* scrubber vertical fin — toujours visible */
+    .vscrub {
+      display: block; position: fixed; z-index: 20; right: calc(8px + var(--sar)); top: calc(var(--sat) + 90px); bottom: calc(var(--sab) + 190px);
+      width: 22px; touch-action: none;
+    }
+    .vscrub .bar { position: absolute; left: 10px; top: 0; bottom: 0; width: 1px; background: rgba(236,232,220,.28); }
+    .vscrub .tick { position: absolute; left: 8px; width: 5px; height: 1px; background: rgba(236,232,220,.5); }
+    .vscrub .vh { position: absolute; left: 7px; width: 7px; height: 7px; border-radius: 50%; background: var(--terra); transform: translateY(-3px); box-shadow: 0 0 0 3px rgba(10,9,8,.5); }
+    /* sous-titre */
+    .sub { bottom: calc(var(--sab) + 150px); left: var(--pad); right: 44px; text-align: left; }
+    .sub h2 { font-size: 30px; }
+    .sub .meta { font-size: 9px; letter-spacing: .16em; }
+    /* bande de chapitres */
+    .mband { display: block; position: fixed; z-index: 22; left: 0; right: 0; bottom: 0; padding: 0 0 calc(12px + var(--sab)); }
+    body:not(.awake) .mband { transform: translateY(16px); }
+    .mchips { display: flex; gap: 6px; overflow-x: auto; padding: 0 var(--pad) 10px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    .mchips::-webkit-scrollbar { display: none; }
+    .mchips .chip { min-height: 34px; flex: none; }
+    .mchs { display: flex; gap: 6px; overflow-x: auto; padding: 0 var(--pad); scrollbar-width: none; scroll-snap-type: x proximity; }
+    .mchs::-webkit-scrollbar { display: none; }
+    .mch { flex: none; width: 168px; scroll-snap-align: start; position: relative; min-height: 44px; }
+    .mch.cut { opacity: .3; }
+    .mch .thumbs { display: flex; gap: 2px; height: 42px; overflow: hidden; }
+    .mch .thumbs img { flex: 1; min-width: 0; object-fit: cover; opacity: .8; }
+    .mch.cur .thumbs img { opacity: 1; }
+    .mch .clabel { margin-top: 6px; font-size: 8px; letter-spacing: .12em; opacity: .7; display: flex; justify-content: space-between; gap: 6px; white-space: nowrap; }
+    .mch .clabel .n { overflow: hidden; text-overflow: ellipsis; }
+    .mch.cur .clabel { opacity: 1; } .mch.cur .clabel .n { color: var(--terra); }
+    .mch .mh { position: absolute; top: -4px; width: 2px; height: 50px; background: var(--terra); display: none; }
+    .mch.cur .mh { display: block; }
+    /* fiche en feuille */
+    aside.fiche {
+      top: auto; left: 0; right: 0; width: 100%; height: 82%; border-radius: 18px 18px 0 0; transform: translateY(104%);
+      padding: 16px 20px calc(28px + var(--sab)); box-shadow: 0 -20px 60px rgba(0,0,0,.45);
+    }
+    aside.fiche::before { content: ''; display: block; width: 36px; height: 4px; border-radius: 2px; background: var(--line); margin: 0 auto 16px; }
+    .fiche h2 { font-size: 40px; margin-top: 22px; }
+    .fiche .app { font-size: 17px; margin-top: 22px; }
+    .fiche .lab { margin-top: 26px; }
+    .fiche .go { width: 100%; justify-content: center; }
+    .gen .roll { grid-template-columns: 1fr; row-gap: 4px; }
+    .gen .roll .r { text-align: center; margin-top: 12px; } .gen .roll .v { text-align: center; }
+  }
+  @media (prefers-reduced-motion: reduce) { .ui, .fiche, .fin, .gen { transition-duration: 1ms; } }
+</style>
+</head>
+<body class="tone-dark">
+
+<!-- Le film : double tampon d'images, coupes franches, dérive Ken Burns pilotée par le timecode -->
+<div class="film" id="film" aria-label="Showreel Mauvais Grain, 90 secondes. Glisser ou faire défiler pour parcourir. Cliquer pour ouvrir le film en cours.">
+  <img id="imgA" alt="">
+  <img id="imgB" alt="">
+  <div class="dim"></div>
+</div>
+<div class="shade-top ui"></div>
+<div class="shade ui"></div>
+
+<a class="logo wide" href="#tc=00:00:00">Mauvais Grain<span class="dot">.</span></a>
+<div class="tc cond" id="tc" aria-live="off"><i id="tcState">▶</i><b id="tcVal">00:00:00</b></div>
+
+<div class="filters ui" id="filters" role="group" aria-label="Re-couper le film par métier">
+  <span class="cond">Re-couper</span>
+  <button class="chip on" data-m="">Tout <small>90 s</small></button>
+  <button class="chip" data-m="Corporate" aria-disabled="true">Corporate</button>
+  <button class="chip" data-m="Événementiel">Événementiel <small>30 s</small></button>
+  <button class="chip" data-m="Immobilier" aria-disabled="true">Immobilier</button>
+  <button class="chip" data-m="Tourisme">Tourisme <small>30 s</small></button>
+  <button class="chip" data-m="Clip">Clip <small>30 s</small></button>
+</div>
+
+<div class="sub ui" id="sub">
+  <h2 class="wide" id="subT">—</h2>
+  <div class="meta cond" id="subM"></div>
+</div>
+
+<!-- Scrubber desktop : chapitres groupés par métier, vraies vignettes -->
+<nav class="scrub ui" id="scrub" aria-label="Chapitres du film">
+  <div class="groups" id="groups"><div class="head" id="head"></div></div>
+  <button class="finmark cond" id="finmark" title="Aller au générique">Fin</button>
+</nav>
+
+<!-- Mobile : scrubber vertical + bande de chapitres -->
+<div class="vscrub" id="vscrub" aria-hidden="true"><div class="bar"></div><div class="vh" id="vh"></div></div>
+<div class="mband ui" id="mband">
+  <div class="mchips" id="mchips" role="group" aria-label="Re-couper le film par métier"></div>
+  <div class="mchs" id="mchs"></div>
+</div>
+
+<div class="cur cond" id="cur"><span>◂ glisser</span><span>▸</span></div>
+
+<!-- Fiche film -->
+<aside class="fiche" id="fiche" role="dialog" aria-modal="true" aria-labelledby="fT" aria-hidden="true">
+  <div class="row cond"><span id="fNum">Film 01 / 06</span><button class="x" id="fX" aria-label="Fermer la fiche">✕</button></div>
+  <h2 class="wide" id="fT"></h2>
+  <div class="meta cond" id="fMeta"></div>
+  <p class="app" id="fApp"></p>
+  <div class="lab cond">Quatre photogrammes</div>
+  <div class="grid" id="fGrid"></div>
+  <button class="go" id="fGo">Reprendre le film <span aria-hidden="true">▸</span></button>
+  <div class="foot cond" id="fFoot"></div>
+</aside>
+
+<!-- FIN & générique de fin = carte contact -->
+<div class="fin" id="fin" aria-hidden="true">
+  <div class="word wide">FIN</div>
+  <div class="gen">
+    <div class="k cond">Un film de Timéo Taris · Bordeaux</div>
+    <h2 class="wide">Mauvais Grain<span class="dot">.</span></h2>
+    <div class="base">L'image au service de votre histoire.</div>
+    <div class="roll">
+      <div class="r cond">Studio</div><div class="v">94 quai des Chartrons, 33000 Bordeaux</div>
+      <div class="r cond">Écrire</div><div class="v"><a href="mailto:timeotaris@mauvaisgrain.com">timeotaris@mauvaisgrain.com</a></div>
+      <div class="r cond">Appeler</div><div class="v"><a href="tel:+33652065389">06 52 06 53 89</a></div>
+      <div class="r cond">Métiers</div><div class="v m"><em>01</em>Corporate &nbsp; <em>02</em>Événementiel &nbsp; <em>03</em>Immobilier<br><em>04</em>Tourisme &nbsp; <em>05</em>Clip</div>
+      <div class="r cond">Suivre</div><div class="v"><a href="#">Instagram</a> &nbsp;·&nbsp; <a href="#">YouTube</a></div>
+    </div>
+    <button class="again" id="again">Revoir <b>◂</b></button>
+  </div>
+</div>
+
+<div class="grain"></div>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var FPS = 24, SHOT = 3.75, LEN = 90, FINT = 90, GENT = 91.4, END = 96;
+  var FILMS = [
+    { id: 'the-sound-of-discovery', t: 'The Sound of Discovery', c: 'Autoproduit', m: 'Tourisme', y: 2026, a: 'Observer sans intervenir. Laisser les rencontres, les ambiances et la lumière naturelle guider le récit.' },
+    { id: 'the-shape-of-vastness', t: 'The Shape of Vastness', c: 'Autoproduit', m: 'Tourisme', y: 2025, a: 'Prendre le temps d\u2019observer. Un film contemplatif où chaque plan laisse respirer le paysage.' },
+    { id: 'silhouette', t: 'Silhouette', c: 'Autoproduit', m: 'Clip', y: 2026, a: 'Construire le film autour de plans fixes. Le mouvement naît uniquement de la danseuse.' },
+    { id: 'delaurentis-gone-colors', t: 'Gone Colors', c: 'DeLaurentis', m: 'Clip', y: 2024, a: 'Tourner durant les dernières minutes du jour, pour une lumière douce et chaleureuse.' },
+    { id: 'graduation', t: 'Graduation', c: 'COB', m: 'Événementiel', y: 2024, a: 'Une approche immersive, au plus près des étudiants, pour saisir les instants spontanés.' },
+    { id: 'la-medocaine', t: 'La Médocaine', c: 'La Médocaine', m: 'Événementiel', y: 2024, a: 'Se mêler au public : concerts, DJ, jeux de lumière et feu d\u2019artifice.' }
+  ];
+  FILMS.forEach(function (f, i) { f.i = i; f.start = i * 15; f.end = f.start + 15; f.imgs = [1, 2, 3, 4].map(function (k) { return 'img/' + f.id + '-' + k + '.jpg'; }); });
+  var GROUPS = ['Tourisme', 'Clip', 'Événementiel'];
+
+  /* ── État ─────────────────────────────────────────────────── */
+  var t = 0, playing = true, filter = '', awake = false, idleTimer = 0, scrubTimer = 0, lastFrame = 0, shot = -1;
+  var imgs = [$('imgA'), $('imgB')], front = 0;
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function isMobile() { return innerWidth <= 640 || (matchMedia('(pointer: coarse)').matches && innerWidth <= 900); }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function tc(s) { s = Math.max(0, s); var m = Math.floor(s / 60), sec = Math.floor(s % 60), f = Math.floor((s - Math.floor(s)) * FPS); return pad(m) + ':' + pad(sec) + ':' + pad(f); }
+  function parseTc(str) { var p = /^(\d\d):(\d\d):(\d\d)$/.exec(str || ''); return p ? +p[1] * 60 + +p[2] + (+p[3]) / FPS : null; }
+  function filmAt(s) { return FILMS[Math.min(5, Math.max(0, Math.floor(s / 15)))]; }
+  function active(f) { return !filter || f.m === filter; }
+  function activeFilms() { return FILMS.filter(active); }
+
+  /* préchargement */
+  FILMS.forEach(function (f) { f.imgs.forEach(function (src) { var im = new Image(); im.src = src; }); });
+
+  /* ── Rendu image (déterministe en fonction du timecode → scrubbable) ── */
+  function render() {
+    var f = filmAt(Math.min(t, LEN - 0.001)), local = Math.min(t, LEN - 0.001) - f.start;
+    var k = Math.min(3, Math.floor(local / SHOT)), id = f.i * 4 + k;
+    if (id !== shot) {
+      shot = id; front = 1 - front;
+      imgs[front].src = f.imgs[k]; imgs[front].classList.add('on'); imgs[1 - front].classList.remove('on');
+    }
+    var p = (local - k * SHOT) / SHOT, dir = (id % 2 ? 1 : -1), sc = 1 + 0.045 * p, tx = dir * (1.2 - 2.4 * p), ty = (id % 3 - 1) * 0.8 * p;
+    if (reduce) { sc = 1; tx = 0; ty = 0; }
+    imgs[front].style.transform = 'translate(' + tx + '%,' + ty + '%) scale(' + sc + ')';
+    $('tcVal').textContent = tc(t);
+    $('tcState').textContent = t >= FINT ? '■' : (document.body.classList.contains('scrubbing') ? '◂▸' : (playing ? '▶' : '❚❚'));
+    // sous-titre
+    if (f.i !== curFilm) {
+      curFilm = f.i;
+      $('subT').textContent = f.t;
+      $('subM').innerHTML = f.c + '<i>—</i>' + f.m + '<i>—</i>' + f.y;
+      document.querySelectorAll('.ch, .mch').forEach(function (el) { el.classList.toggle('cur', +el.dataset.i === f.i); });
+      var m = document.querySelector('.mch.cur'); if (m && m.scrollIntoView && isMobile()) { try { m.scrollIntoView({ inline: 'start', block: 'nearest', behavior: 'smooth' }); } catch (e) {} }
+    }
+    // tête de lecture
+    if (!isMobile()) {
+      var el = document.querySelector('.ch[data-i="' + f.i + '"]');
+      if (el) { var r = el.getBoundingClientRect(), g = $('groups').getBoundingClientRect(); $('head').style.left = (r.left - g.left + (Math.min(local, 15) / 15) * r.width) + 'px'; }
+    } else {
+      $('vh').style.top = (Math.min(1, t / LEN) * 100) + '%';
+    }
+    // FIN
+    var fin = t >= FINT;
+    document.body.classList.toggle('fin', fin);
+    $('fin').classList.toggle('gen', t >= GENT);
+    $('fin').setAttribute('aria-hidden', fin ? 'false' : 'true');
+  }
+  var curFilm = -1;
+
+  /* ── Boucle ───────────────────────────────────────────────── */
+  function tick(now) {
+    var dt = lastFrame ? Math.min(0.05, (now - lastFrame) / 1000) : 0; lastFrame = now;
+    if (playing && !document.body.classList.contains('fiche') && !document.body.classList.contains('scrubbing')) {
+      t += dt;
+      if (t < LEN) {
+        var f = filmAt(t);
+        if (!active(f)) { // re-coupe : sauter au prochain chapitre actif
+          var nx = FILMS.filter(function (x) { return active(x) && x.start > t; })[0];
+          t = nx ? nx.start : FINT;
+        }
+      }
+      if (t >= END) { t = END; playing = false; }
+    }
+    render(); requestAnimationFrame(tick);
+  }
+
+  /* ── Seek / scrub ─────────────────────────────────────────── */
+  function seek(s, opts) {
+    t = Math.max(0, Math.min(END, s));
+    if (opts && opts.scrub) {
+      document.body.classList.add('scrubbing'); wake();
+      clearTimeout(scrubTimer); scrubTimer = setTimeout(function () { document.body.classList.remove('scrubbing'); playing = true; }, 700);
+    }
+    render(); pushHash();
+  }
+  var hashTimer = 0;
+  function pushHash() { clearTimeout(hashTimer); hashTimer = setTimeout(function () { try { history.replaceState(null, '', '#tc=' + tc(t)); } catch (e) {} }, 250); }
+  setInterval(function () { if (playing && t < FINT) pushHash(); }, 2000);
+
+  /* ── Interface invisible jusqu'au mouvement ───────────────── */
+  function wake(hold) {
+    awake = true; document.body.classList.add('awake');
+    clearTimeout(idleTimer); idleTimer = setTimeout(function () { if (!document.body.classList.contains('fiche')) { awake = false; document.body.classList.remove('awake', 'overfilm'); } }, hold || 2800);
+  }
+
+  /* pointeur : réveil, curseur, glisser = jog */
+  var film = $('film'), drag = null, cur = $('cur');
+  document.addEventListener('pointermove', function (e) {
+    if (e.pointerType === 'touch') return;
+    wake(); cur.style.transform = 'translate(' + (e.clientX) + 'px,' + (e.clientY) + 'px) translate(-50%,-50%)';
+    document.body.classList.toggle('overfilm', e.target === film || e.target.parentNode === film);
+  });
+  film.addEventListener('pointerdown', function (e) {
+    if (document.body.classList.contains('fiche')) return;
+    drag = { x: e.clientX, y: e.clientY, t0: t, moved: false, touch: e.pointerType === 'touch' };
+    film.setPointerCapture(e.pointerId);
+  });
+  film.addEventListener('pointermove', function (e) {
+    if (!drag) return;
+    var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    var d = drag.touch ? dy : dx;
+    if (Math.abs(d) > 6 || drag.moved) {
+      drag.moved = true;
+      // jog : 1 s de film pour 60 px desktop, 45 px mobile
+      seek(drag.t0 + d / (drag.touch ? 45 : 60), { scrub: true });
+      if (drag.touch) wake(3000);
+    }
+  });
+  function endDrag(e) {
+    if (!drag) return;
+    var was = drag; drag = null;
+    if (!was.moved) {
+      if (t >= FINT) return;
+      if (was.touch) wake(3000);
+      openFiche(filmAt(t));
+    }
+  }
+  film.addEventListener('pointerup', endDrag);
+  film.addEventListener('pointercancel', function () { drag = null; });
+
+  /* roue / trackpad : shuttle */
+  var wheelAcc = 0;
+  document.addEventListener('wheel', function (e) {
+    if (document.body.classList.contains('fiche') || e.target.closest('.mchs, .mchips, .fiche')) return;
+    e.preventDefault();
+    var d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    seek(t + d / 120, { scrub: true });
+  }, { passive: false });
+
+  /* clavier */
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { closeFiche(); return; }
+    if (e.target.closest('input, textarea')) return;
+    if (e.key === 'ArrowRight') { e.preventDefault(); seek(t + (e.shiftKey ? 15 : 1), { scrub: true }); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); seek(t - (e.shiftKey ? 15 : 1), { scrub: true }); }
+    if (e.key === ' ') { e.preventDefault(); playing = !playing; wake(); render(); }
+    if (e.key === 'Enter' && !document.body.classList.contains('fiche') && document.activeElement === document.body) openFiche(filmAt(t));
+    if (e.key === 'Home') seek(0); if (e.key === 'End') seek(GENT);
+  });
+
+  /* ── Scrubber : construction ──────────────────────────────── */
+  function chapterHTML(f, cls) {
+    return '<a class="' + cls + '" data-i="' + f.i + '" href="#tc=' + tc(f.start) + '" role="listitem" aria-label="' + f.t + ', ' + tc(f.start) + '">' +
+      (cls === 'mch' ? '<div class="mh"></div>' : '') +
+      '<div class="thumbs">' + f.imgs.map(function (s) { return '<img src="' + s + '" alt="">'; }).join('') + '</div>' +
+      '<div class="clabel cond"><span class="n">' + pad(f.i + 1) + ' ' + f.t + '</span><span class="t">' + tc(f.start).slice(0, 5) + '</span></div></a>';
+  }
+  var groups = $('groups');
+  GROUPS.forEach(function (g) {
+    var d = document.createElement('div'); d.className = 'grp';
+    d.innerHTML = '<div class="glabel cond">' + g + '</div><div class="chs" role="list">' + FILMS.filter(function (f) { return f.m === g; }).map(function (f) { return chapterHTML(f, 'ch'); }).join('') + '</div>';
+    groups.appendChild(d);
+  });
+  $('mchs').innerHTML = FILMS.map(function (f) { return chapterHTML(f, 'mch'); }).join('');
+  $('mchips').innerHTML = Array.prototype.map.call($('filters').querySelectorAll('.chip'), function (c) { return c.outerHTML; }).join('');
+
+  // clic sur un chapitre = seek ; glisser sur la piste = scrub
+  var sdrag = null;
+  function chapterSeek(el, x) {
+    var f = FILMS[+el.dataset.i], r = el.getBoundingClientRect();
+    seek(f.start + Math.max(0, Math.min(1, (x - r.left) / r.width)) * 15, { scrub: true });
+  }
+  document.addEventListener('click', function (e) {
+    var ch = e.target.closest('.ch, .mch');
+    if (ch) { e.preventDefault(); if (!sdrag || !sdrag.moved) { if (ch.classList.contains('mch')) seek(FILMS[+ch.dataset.i].start); else chapterSeek(ch, e.clientX); playing = true; wake(isMobile() ? 3000 : 0); } }
+    var chip = e.target.closest('.chip');
+    if (chip) { e.preventDefault(); if (chip.getAttribute('aria-disabled') === 'true') return; setFilter(chip.dataset.m); wake(3000); }
+  });
+  groups.addEventListener('pointerdown', function (e) { var ch = e.target.closest('.ch'); if (!ch) return; sdrag = { moved: false }; groups.setPointerCapture(e.pointerId); playing = false; });
+  groups.addEventListener('pointermove', function (e) {
+    if (!sdrag) return; sdrag.moved = true;
+    var el = document.elementFromPoint(e.clientX, e.clientY), ch = el && el.closest ? el.closest('.ch') : null;
+    if (ch) chapterSeek(ch, e.clientX);
+  });
+  groups.addEventListener('pointerup', function () { if (sdrag && sdrag.moved) playing = true; setTimeout(function () { sdrag = null; }, 0); });
+  $('finmark').addEventListener('click', function () { seek(GENT); playing = true; });
+
+  // scrubber vertical mobile
+  var vs = $('vscrub');
+  FILMS.forEach(function (f) { var k = document.createElement('div'); k.className = 'tick'; k.style.top = (f.start / LEN * 100) + '%'; vs.appendChild(k); });
+  function vseek(e) { var r = vs.getBoundingClientRect(); seek(Math.max(0, Math.min(1, (e.clientY - r.top) / r.height)) * LEN, { scrub: true }); wake(3000); }
+  vs.addEventListener('pointerdown', function (e) { vs.setPointerCapture(e.pointerId); vseek(e); vs._on = true; });
+  vs.addEventListener('pointermove', function (e) { if (vs._on) vseek(e); });
+  vs.addEventListener('pointerup', function () { vs._on = false; });
+
+  /* ── Re-coupe par métier ──────────────────────────────────── */
+  function setFilter(m) {
+    filter = m || '';
+    document.querySelectorAll('.chip').forEach(function (c) { c.classList.toggle('on', (c.dataset.m || '') === filter); });
+    document.querySelectorAll('.ch, .mch').forEach(function (el) { el.classList.toggle('cut', !active(FILMS[+el.dataset.i])); });
+    var act = activeFilms();
+    if (t < FINT && !active(filmAt(t))) { var nx = act.filter(function (x) { return x.start > t; })[0] || act[0]; seek(nx.start); }
+    else if (t >= FINT && filter) seek(act[0].start);
+    playing = true; render();
+  }
+
+  /* ── Fiche ────────────────────────────────────────────────── */
+  function openFiche(f) {
+    $('fNum').textContent = 'Film ' + pad(f.i + 1) + ' / 06 · ' + tc(f.start) + ' → ' + tc(f.end);
+    $('fT').textContent = f.t;
+    $('fMeta').innerHTML = '<span>Client ' + f.c + '</span><i>/</i><span>' + f.m + '</span><i>/</i><span>' + f.y + '</span>';
+    $('fApp').textContent = f.a;
+    $('fGrid').innerHTML = f.imgs.map(function (s, k) { return '<figure data-t="' + (f.start + k * SHOT) + '"><img src="' + s + '" alt="' + f.t + ', photogramme ' + (k + 1) + '"><figcaption class="cond"><span>Plan ' + pad(k + 1) + '</span><span>' + tc(f.start + k * SHOT) + '</span></figcaption></figure>'; }).join('');
+    $('fFoot').textContent = 'Réalisation Timéo Taris · Mauvais Grain, Bordeaux · Lien direct : #tc=' + tc(f.start);
+    document.body.classList.add('fiche', 'awake'); $('fiche').setAttribute('aria-hidden', 'false'); $('fiche').scrollTop = 0;
+    clearTimeout(idleTimer); render();
+    setTimeout(function () { $('fX').focus({ preventScroll: true }); }, 400);
+  }
+  function closeFiche() {
+    if (!document.body.classList.contains('fiche')) return;
+    document.body.classList.remove('fiche'); $('fiche').setAttribute('aria-hidden', 'true'); playing = true; wake(); render();
+  }
+  $('fX').addEventListener('click', closeFiche);
+  $('fGo').addEventListener('click', closeFiche);
+  $('fGrid').addEventListener('click', function (e) { var fg = e.target.closest('figure'); if (fg) { seek(+fg.dataset.t); closeFiche(); } });
+  $('again').addEventListener('click', function () { seek(filter ? activeFilms()[0].start : 0); playing = true; });
+
+  /* ── Hash au chargement ───────────────────────────────────── */
+  function readHash() { var m = /tc=(\d\d:\d\d:\d\d)/.exec(location.hash); var s = m && parseTc(m[1]); if (s !== null && s !== undefined) { t = s; } }
+  readHash(); window.addEventListener('hashchange', function () { readHash(); render(); });
+  if (!location.hash) t = 15 + 4.2; // arrivée sur The Shape of Vastness (plan de démo)
+
+  /* ── États de présentation ────────────────────────────────── */
+  window.mgStates = { d: 4, m: 3 };
+  window.mgState = function (n) {
+    document.body.classList.remove('fiche', 'scrubbing', 'overfilm', 'fin'); $('fiche').setAttribute('aria-hidden', 'true');
+    clearTimeout(idleTimer); clearTimeout(scrubTimer); playing = true; setFilter('');
+    if (!isMobile()) {
+      if (n === 0) { awake = false; document.body.classList.remove('awake'); seek(20); }
+      if (n === 1) { seek(49); wake(20000); document.body.classList.add('overfilm'); cur.style.transform = 'translate(' + (innerWidth * 0.5) + 'px,' + (innerHeight * 0.47) + 'px) translate(-50%,-50%)'; }
+      if (n === 2) { seek(6); openFiche(FILMS[0]); }
+      if (n === 3) { seek(GENT + 0.2); wake(20000); }
+    } else {
+      if (n === 0) { awake = false; document.body.classList.remove('awake'); seek(20); }
+      if (n === 1) { seek(49); wake(20000); }
+      if (n === 2) { seek(6); openFiche(FILMS[0]); }
+    }
+    render();
+  };
+
+  /* ── Action ───────────────────────────────────────────────── */
+  render(); requestAnimationFrame(tick);
+  window.addEventListener('resize', render);
+})();
+</script>
+</body>
+</html>

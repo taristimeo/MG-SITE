@@ -5,7 +5,7 @@ const { chromium } = pw;
 const DIR = '/tmp/claude-0/-home-user-MG-SITE/9d5c93dd-0bf5-5524-906d-697c0ddde50a/scratchpad/mockups';
 const OUT = '/tmp/claude-0/-home-user-MG-SITE/9d5c93dd-0bf5-5524-906d-697c0ddde50a/scratchpad/shots3';
 const only = process.argv.slice(2);
-const dirs = only.length ? only : ['f1', 'f2', 'f3'];
+const dirs = only.length ? only : ['f1', 'f4', 'f5'];
 const browser = await chromium.launch();
 const report = [];
 for (const d of dirs) {
@@ -21,7 +21,10 @@ for (const d of dirs) {
     await page.evaluate(() => document.fonts.ready);
     await page.waitForTimeout(900);
     const hasState = await page.evaluate(() => typeof window.mgState === 'function');
-    for (const s of vp.states) {
+    // La page peut déclarer son nombre d'états : window.mgStates = { d: 6, m: 6 }
+    const declared = await page.evaluate(() => (window.mgStates || null));
+    const states = declared && declared[vp.tag] ? [...Array(declared[vp.tag]).keys()] : vp.states;
+    for (const s of states) {
       if (hasState) await page.evaluate(n => window.mgState(n), s);
       await page.waitForTimeout(1600);
       await page.screenshot({ path: `${OUT}/${d}-${vp.tag}${s}.jpg`, type: 'jpeg', quality: 86 });
