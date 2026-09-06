@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mauvais Grain — Le point</title>
+<link rel="stylesheet" href="_base.css">
+<style>
+  /* ────────────────────────────────────────────────────────────
+     F2 — LE POINT.
+     Un seul plan, trois distances. Rien ne se déplace : seul le
+     point (la mise au point) voyage. Ce qui est net se lit, ce
+     qui est hors champ se dissout en bokeh crème.
+       0,5 m — les métiers et le contact
+       3 m   — les six films (chacun à sa profondeur)
+       ∞     — le studio, le fondateur, Bordeaux
+     ──────────────────────────────────────────────────────────── */
+  :root {
+    --ring-w: 88px;
+    --amber: #d9a273;
+  }
+  html { overflow: hidden; height: 100%; overscroll-behavior: none; }
+  body {
+    overflow: hidden;
+    height: 100%;
+    font-weight: 300;
+    background:
+      radial-gradient(120% 90% at 78% 40%, rgba(217,162,115,0.22), rgba(217,162,115,0) 60%),
+      radial-gradient(70% 60% at 12% 85%, rgba(168,95,60,0.10), rgba(168,95,60,0) 70%),
+      var(--ink);
+    color: var(--bone);
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  ::selection { background: var(--terra); color: var(--ink); }
+
+  /* ── La scène ────────────────────────────────────────────── */
+  #scene {
+    position: fixed; inset: 0;
+    right: var(--ring-w);
+    overflow: hidden;
+  }
+  .layer {
+    position: absolute; inset: 0;
+    transform-origin: 50% 50%;
+    will-change: filter, transform, opacity;
+  }
+  .layer[data-hit="off"] { pointer-events: none; }
+
+  /* Table (les trois distances) ↔ pile d'un film */
+  #table, #stack {
+    position: absolute; inset: 0;
+    transition: opacity 1.1s var(--expo), visibility 0s linear 0s;
+  }
+  #stack { opacity: 0; visibility: hidden; transition-delay: 0s, 1.1s; }
+  body.film #table { opacity: 0; visibility: hidden; transition-delay: 0s, 1.1s; }
+  body.film #stack { opacity: 1; visibility: visible; transition-delay: 0s, 0s; }
+
+  /* ── ∞ — le fond ─────────────────────────────────────────── */
+  #fond .photo {
+    position: absolute; left: 47%; top: 9vh; width: 50%; height: 78vh;
+    overflow: hidden;
+    background: var(--ink-3);
+  }
+  #fond .photo img { width: 100%; height: 100%; object-fit: cover; object-position: 60% 40%; }
+  #fond .photo figcaption {
+    position: absolute; left: 0; bottom: 0; padding: 14px 18px;
+    font-size: 10px; color: var(--ink);
+    background: linear-gradient(to top, rgba(32,26,18,0.55), rgba(32,26,18,0));
+    width: 100%;
+  }
+  #fond .texte {
+    position: absolute; left: 6vw; top: 20vh; width: 40vw;
+  }
+  #fond .sur { font-size: 10px; color: var(--bone-dim); margin: 0 0 30px; }
+  #fond h1 {
+    margin: 0; font-size: clamp(40px, 5.2vw, 76px);
+  }
+  #fond h1 em { font-style: normal; box-shadow: inset 0 -0.06em 0 0 var(--ink), inset 0 -0.14em 0 0 var(--terra); }
+  #fond .partis {
+    margin: 42px 0 0; padding: 0; list-style: none;
+    font-size: 17px; line-height: 1.55; color: var(--bone-dim); max-width: 34ch;
+  }
+  #fond .partis li::before { content: "— "; color: var(--terra); }
+  #fond .base {
+    position: absolute; left: 6vw; bottom: 8vh;
+    font-size: 15px; color: var(--bone-dim);
+  }
+
+  /* ── 3 m — les films ──────────────────────────────────────── */
+  .film {
+    position: absolute; bottom: auto; height: auto;
+    cursor: pointer;
+  }
+  .film .cadre {
+    position: relative; width: 100%; aspect-ratio: 16 / 9;
+    overflow: hidden; background: var(--ink-3);
+    box-shadow: 0 30px 60px -30px rgba(32,26,18,0.35);
+  }
+  .film img { width: 100%; height: 100%; object-fit: cover; }
+  .film .cap {
+    position: absolute; left: 0; top: calc(100% + 14px); width: 130%;
+    transition: opacity .7s var(--expo), transform .7s var(--expo);
+  }
+  .film .cap h2 { margin: 0 0 6px; font-size: clamp(22px, 2.2vw, 34px); white-space: nowrap; }
+  .film .cap p { margin: 0; font-size: 10px; color: var(--bone-dim); }
+  .film .cap p b { font-weight: 500; color: var(--terra); }
+  .film .idx {
+    position: absolute; right: 0; top: -22px; font-size: 10px; color: var(--bone-faint);
+  }
+  /* constellation desktop */
+  .film[data-id="sound"]      { left: 5vw;  top: 9vh;  width: 24vw; }
+  .film[data-id="silhouette"] { left: 33vw; top: 5vh;  width: 19vw; }
+  .film[data-id="vastness"]   { left: 60vw; top: 12vh; width: 27vw; }
+  .film[data-id="gone"]       { left: 29vw; top: 34vh; width: 35vw; }
+  .film[data-id="graduation"] { left: 4vw;  top: 57vh; width: 22vw; }
+  .film[data-id="medocaine"]  { left: 68vw; top: 58vh; width: 21vw; }
+  .film[data-id="sound"] .cadre { aspect-ratio: 2.4 / 1; }
+
+  /* ── 0,5 m — métiers + contact ───────────────────────────── */
+  #front .metiers {
+    position: absolute; left: 5vw; top: 9vh; margin: 0; padding: 0; list-style: none;
+  }
+  #front .metiers li {
+    display: flex; align-items: baseline; gap: 28px;
+    margin: 0 0 6px;
+  }
+  #front .metiers .num { font-size: 10px; color: var(--terra); width: 22px; flex: none; }
+  #front .metiers .mot { font-size: clamp(56px, 8.6vh, 96px); line-height: 1; white-space: nowrap; }
+  #front .metiers .phr { font-size: 15px; line-height: 1.4; color: var(--bone-dim); max-width: 24vw; padding-left: 10px; }
+  #front .carte {
+    position: absolute; left: 66%; top: 55vh; width: 27vw; max-width: 380px;
+    padding: 26px 28px 24px;
+    border: 1px solid var(--line);
+    background: rgba(246,243,236,0.86);
+    font-size: 15px; line-height: 1.5;
+  }
+  #front .carte .logo { font-size: 26px; margin: 0 0 18px; }
+  #front .carte p { margin: 0; }
+  #front .carte .k { font-size: 9px; color: var(--bone-faint); margin: 14px 0 2px; }
+  #front .carte a:hover { color: var(--terra); }
+  #front .carte .rs { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line-soft); font-size: 10px; display: flex; gap: 18px; }
+
+  /* ── Dans un film — la pile des photogrammes ─────────────── */
+  .plan {
+    position: absolute; left: 36vw; top: 12vh; width: 48vw; bottom: auto; height: auto;
+    cursor: pointer;
+  }
+  .plan .cadre { width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: var(--ink-3);
+    box-shadow: 0 40px 80px -40px rgba(32,26,18,0.4); }
+  .plan img { width: 100%; height: 100%; object-fit: cover; }
+  .plan .n { position: absolute; left: 0; top: -22px; font-size: 10px; color: var(--bone-faint); }
+  .plan[data-i="1"] { margin: -7vh 0 0 -7vw; }
+  .plan[data-i="2"] { margin: -2.3vh 0 0 -2.3vw; }
+  .plan[data-i="3"] { margin: 2.3vh 0 0 2.3vw; }
+  .plan[data-i="4"] { margin: 7vh 0 0 7vw; }
+  #stack .fiche {
+    position: absolute; left: 6vw; bottom: 9vh; width: 27vw;
+  }
+  #stack .fiche .sur { font-size: 10px; color: var(--bone-dim); margin: 0 0 12px; }
+  #stack .fiche h2 { margin: 0 0 22px; font-size: clamp(36px, 3.6vw, 54px); }
+  #stack .fiche .ap { margin: 0 0 30px; font-size: 17px; line-height: 1.5; color: var(--bone); max-width: 30ch; }
+  #stack .fiche .ap::before { content: "Approche — "; font-family: var(--cond); font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: var(--terra); display: block; margin-bottom: 8px; }
+  #stack .echelle { display: flex; gap: 14px; font-size: 12px; margin: 0 0 26px; }
+  #stack .echelle button { min-width: 34px; min-height: 34px; color: var(--bone-faint); }
+  #stack .echelle button.on { color: var(--terra); }
+  #stack .echelle span { color: var(--line); align-self: center; }
+  #stack .retour { font-size: 10px; display: inline-flex; align-items: center; gap: 10px; min-height: 44px; }
+  #stack .retour::before { content: "←"; color: var(--terra); }
+  #stack .retour:hover { color: var(--terra); }
+
+  /* ── Chrome : ce qui n'est jamais flou ───────────────────── */
+  #logo {
+    position: fixed; left: 6vw; top: 34px; z-index: 20; font-size: 20px;
+    line-height: 1;
+  }
+  #logo .dot { color: var(--terra); }
+  #hint {
+    position: fixed; left: 6vw; bottom: 34px; z-index: 20;
+    display: flex; align-items: center; gap: 14px;
+    font-size: 10px; color: var(--bone-dim);
+    transition: opacity 1s var(--expo);
+  }
+  #hint .tick { width: 1px; height: 34px; background: var(--terra); animation: tirer 2.2s var(--expo) infinite; transform-origin: top; }
+  @keyframes tirer { 0% { transform: scaleY(0); opacity: 0 } 30% { opacity: 1 } 100% { transform: scaleY(1); opacity: 0 } }
+  body:not([data-zone="far"]) #hint, body.film #hint { opacity: 0; pointer-events: none; }
+  #distance {
+    position: fixed; right: calc(var(--ring-w) + 26px); bottom: 34px; z-index: 20;
+    font-size: 10px; color: var(--bone-dim); text-align: right;
+  }
+  #distance b { display: block; font-family: var(--wide); font-weight: 400; font-size: 34px; letter-spacing: 0; text-transform: none; color: var(--bone); margin-bottom: 4px; }
+
+  /* La bague de mise au point */
+  #ring {
+    position: fixed; right: 0; top: 0; bottom: 0; width: var(--ring-w); z-index: 30;
+    border-left: 1px solid var(--line-soft);
+    background: linear-gradient(to left, rgba(246,243,236,0.9), rgba(246,243,236,0.6));
+    cursor: ns-resize;
+    touch-action: none;
+  }
+  #ring .piste {
+    position: absolute; left: 50%; top: 18vh; bottom: 18vh; width: 1px;
+    background: var(--line);
+  }
+  #ring .marque {
+    position: absolute; left: 0; width: 100%; height: 44px; margin-top: -22px;
+    display: flex; align-items: center; justify-content: center; gap: 0;
+    font-size: 10px; color: var(--bone-faint); white-space: nowrap; z-index: 3;
+    transition: color .5s;
+  }
+  #ring .marque::before { content: ""; position: absolute; left: calc(50% - 10px); width: 20px; height: 1px; background: var(--line); }
+  #ring .marque span { position: relative; background: var(--ink); padding: 3px 6px; }
+  #ring .marque.on { color: var(--bone); }
+  #ring .marque.fin { display: none; }
+  body.film #ring .marque.tab { display: none; }
+  body.film #ring .marque.fin { display: flex; }
+  #ring .aiguille {
+    position: absolute; left: calc(50% - 23px); width: 46px; height: 2px; margin-top: -1px;
+    background: var(--terra); z-index: 2;
+  }
+  #ring .aiguille::before { content: ""; position: absolute; left: -7px; top: -4px; width: 0; height: 0; border: 5px solid transparent; border-left: 7px solid var(--terra); border-right: 0; }
+  #ring .aiguille::after { content: ""; position: absolute; right: -7px; top: -4px; width: 0; height: 0; border: 5px solid transparent; border-right: 7px solid var(--terra); border-left: 0; }
+  #ring .titre {
+    position: absolute; top: 34px; left: 0; width: 100%; text-align: center;
+    font-size: 9px; color: var(--bone-faint);
+  }
+  #ring .zone {
+    position: absolute; bottom: 34px; left: 0; width: 100%; text-align: center;
+    font-size: 9px; color: var(--terra);
+    opacity: 0; transition: opacity .6s;
+  }
+  body.film #ring .zone { opacity: 1; }
+  #ring .marque:focus-visible { outline: 0; }
+  #ring .marque:focus-visible span { box-shadow: 0 0 0 1px var(--terra); }
+
+  .grain { z-index: 200; }
+
+  /* ── Téléphone ───────────────────────────────────────────── */
+  @media (max-width: 640px) {
+    :root { --ring-w: 56px; }
+    body { background:
+      radial-gradient(120% 60% at 60% 30%, rgba(217,162,115,0.22), rgba(217,162,115,0) 60%),
+      var(--ink); }
+    #scene { padding: 0; }
+    #logo { left: 20px; top: calc(env(safe-area-inset-top) + 22px); font-size: 17px; }
+    #hint { left: 20px; bottom: calc(env(safe-area-inset-bottom) + 24px); }
+    #distance { right: calc(var(--ring-w) + 16px); bottom: auto; top: calc(env(safe-area-inset-top) + 18px); }
+    #distance b { font-size: 24px; margin: 0; }
+    #distance span { display: none; }
+    #ring .titre { display: none; }
+
+    #fond .photo { left: 20px; top: calc(env(safe-area-inset-top) + 72px); width: calc(100% - 40px); height: 34vh; }
+    #fond .texte { left: 20px; top: calc(env(safe-area-inset-top) + 72px + 34vh + 28px); width: calc(100% - 40px); }
+    #fond .sur { margin-bottom: 14px; }
+    #fond h1 { font-size: 34px; }
+    #fond .partis { margin-top: 20px; font-size: 14px; line-height: 1.5; }
+    #fond .base { display: none; }
+
+    .film[data-id="sound"]      { left: 6%;  top: 8%;  width: 52%; }
+    .film[data-id="silhouette"] { left: 56%; top: 4%;  width: 40%; }
+    .film[data-id="vastness"]   { left: 48%; top: 22%; width: 48%; }
+    .film[data-id="gone"]       { left: 8%;  top: 37%; width: 82%; }
+    .film[data-id="graduation"] { left: 4%;  top: 66%; width: 46%; }
+    .film[data-id="medocaine"]  { left: 54%; top: 72%; width: 42%; }
+    .film .cap h2 { font-size: 24px; white-space: normal; }
+    .film .cap { width: 100%; top: calc(100% + 10px); }
+    .film .idx { display: none; }
+
+    #front .metiers { left: 20px; top: calc(env(safe-area-inset-top) + 66px); }
+    #front .metiers li { display: block; margin-bottom: 8px; }
+    #front .metiers .num { display: inline-block; width: 18px; }
+    #front .metiers .mot { font-size: 50px; }
+    #front .metiers .phr { display: block; padding: 3px 0 0 0; max-width: 84%; font-size: 12.5px; line-height: 1.35; }
+    #front .carte { left: 20px; top: auto; bottom: calc(env(safe-area-inset-bottom) + 18px); width: calc(100% - 40px); max-width: none;
+      padding: 16px 18px 14px; font-size: 13px; }
+    #front .carte .logo { font-size: 20px; margin-bottom: 8px; }
+    #front .carte .k { margin-top: 8px; }
+    #front .carte .rs { margin-top: 10px; padding-top: 8px; }
+
+    .plan { left: 8%; top: calc(env(safe-area-inset-top) + 92px); width: 84%; }
+    .plan[data-i="1"] { margin: -36px 0 0 -6%; }
+    .plan[data-i="2"] { margin: -12px 0 0 -2%; }
+    .plan[data-i="3"] { margin: 12px 0 0 2%; }
+    .plan[data-i="4"] { margin: 36px 0 0 6%; }
+    #stack .fiche { left: 20px; bottom: calc(env(safe-area-inset-bottom) + 20px); width: calc(100% - 40px); }
+    #stack .fiche h2 { font-size: 32px; margin-bottom: 12px; }
+    #stack .fiche .ap { font-size: 14px; margin-bottom: 12px; }
+    #stack .echelle { margin-bottom: 4px; }
+
+    #ring { top: 0; bottom: 0; background: linear-gradient(to left, rgba(246,243,236,0.95), rgba(246,243,236,0.7)); }
+    #ring .piste { top: calc(env(safe-area-inset-top) + 96px); bottom: calc(env(safe-area-inset-bottom) + 96px); }
+    #ring .titre { top: calc(env(safe-area-inset-top) + 40px); }
+    #ring .zone { bottom: calc(env(safe-area-inset-bottom) + 40px); }
+    #ring .marque { font-size: 9px; }
+    #ring .marque::before { left: calc(50% - 8px); width: 16px; }
+    #ring .aiguille { left: calc(50% - 20px); width: 40px; height: 3px; margin-top: -1.5px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #hint .tick { animation: none; }
+  }
+</style>
+</head>
+<body data-zone="far">
+
+<div id="scene">
+  <div id="table">
+
+    <!-- ∞ — LE FOND -->
+    <div class="layer" id="fond" data-d="1" data-hit="off">
+      <figure class="photo" style="margin:0">
+        <img src="img/studio.jpg" alt="Timéo Taris en tournage, à contre-jour">
+        <figcaption class="cond">Timéo Taris — en tournage</figcaption>
+      </figure>
+      <div class="texte">
+        <p class="sur cond">Studio de production vidéo — Bordeaux — fondé en 2022 par Timéo Taris</p>
+        <h1 class="wide">Une histoire bien <em>racontée</em> ne s'oublie pas.</h1>
+        <ul class="partis">
+          <li>Observer plutôt que mettre en scène.</li>
+          <li>Accompagner plutôt que diriger.</li>
+          <li>Raconter plutôt que vendre.</li>
+        </ul>
+      </div>
+      <p class="base">L'image au service de votre histoire.</p>
+    </div>
+
+    <!-- 3 m — LES FILMS -->
+    <div class="layer film" data-id="sound" data-d="0.59" tabindex="0" role="button" aria-label="The Sound of Discovery">
+      <span class="idx cond">01</span>
+      <div class="cadre"><img src="img/the-sound-of-discovery-1.jpg" alt=""></div>
+      <div class="cap"><h2 class="wide">The Sound of Discovery</h2><p class="cond">Autoproduit — Tourisme — <b>2026</b></p></div>
+    </div>
+    <div class="layer film" data-id="silhouette" data-d="0.56" tabindex="0" role="button" aria-label="Silhouette">
+      <span class="idx cond">02</span>
+      <div class="cadre"><img src="img/silhouette-1.jpg" alt=""></div>
+      <div class="cap"><h2 class="wide">Silhouette</h2><p class="cond">Autoproduit — Clip — <b>2026</b></p></div>
+    </div>
+    <div class="layer film" data-id="vastness" data-d="0.53" tabindex="0" role="button" aria-label="The Shape of Vastness">
+      <span class="idx cond">03</span>
+      <div class="cadre"><img src="img/the-shape-of-vastness-1.jpg" alt=""></div>
+      <div class="cap"><h2 class="wide">The Shape of Vastness</h2><p class="cond">Autoproduit — Tourisme — <b>2025</b></p></div>
+    </div>
+    <div class="layer film" data-id="gone" data-d="0.5" tabindex="0" role="button" aria-label="Gone Colors">
+      <span class="idx cond">04</span>
+      <div class="cadre"><img src="img/delaurentis-gone-colors-1.jpg" alt=""></div>
+      <div class="cap"><h2 class="wide">Gone Colors</h2><p class="cond">DeLaurentis — Clip — <b>2024</b></p></div>
+    </div>
+    <div class="layer film" data-id="graduation" data-d="0.47" tabindex="0" role="button" aria-label="Graduation">
+      <span class="idx cond">05</span>
+      <div class="cadre"><img src="img/graduation-1.jpg" alt=""></div>
+      <div class="cap"><h2 class="wide">Graduation</h2><p class="cond">COB — Événementiel — <b>2024</b></p></div>
+    </div>
+    <div class="layer film" data-id="medocaine" data-d="0.44" tabindex="0" role="button" aria-label="La Médocaine">
+      <span class="idx cond">06</span>
+      <div class="cadre"><img src="img/la-medocaine-1.jpg" alt=""></div>
+      <div class="cap"><h2 class="wide">La Médocaine</h2><p class="cond">La Médocaine — Événementiel — <b>2024</b></p></div>
+    </div>
+
+    <!-- 0,5 m — LES MÉTIERS ET LE CONTACT -->
+    <div class="layer" id="front" data-d="0">
+      <ul class="metiers">
+        <li><span class="num cond">01</span><span class="mot wide">Corporate</span><span class="phr">Votre stratégie mérite mieux qu'une vidéo. Elle mérite un film.</span></li>
+        <li><span class="num cond">02</span><span class="mot wide">Événementiel</span><span class="phr">Un événement ne dure qu'un soir. Son film, beaucoup plus longtemps.</span></li>
+        <li><span class="num cond">03</span><span class="mot wide">Immobilier</span><span class="phr">Un bien se visite. Un lieu, ça se ressent.</span></li>
+        <li><span class="num cond">04</span><span class="mot wide">Tourisme</span><span class="phr">Mettre en lumière vos paysages, vos expériences et l'identité d'un territoire.</span></li>
+        <li><span class="num cond">05</span><span class="mot wide">Clip</span><span class="phr">Donner une image à votre musique.</span></li>
+      </ul>
+      <div class="carte">
+        <p class="logo wide">Mauvais Grain<span class="dot">.</span></p>
+        <p class="k cond">Adresse</p>
+        <p>94 quai des Chartrons<br>33000 Bordeaux</p>
+        <p class="k cond">Écrire</p>
+        <p><a href="mailto:timeotaris@mauvaisgrain.com">timeotaris@mauvaisgrain.com</a></p>
+        <p class="k cond">Appeler</p>
+        <p><a href="tel:+33652065389">06 52 06 53 89</a></p>
+        <p class="rs cond"><a href="#">Instagram</a><a href="#">YouTube</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- DANS UN FILM — la pile des photogrammes (remplie par script) -->
+  <div id="stack">
+    <div class="fiche">
+      <p class="sur cond" id="st-meta"></p>
+      <h2 class="wide" id="st-titre"></h2>
+      <p class="ap" id="st-ap"></p>
+      <div class="echelle cond" id="st-echelle"></div>
+      <button class="retour cond" id="st-retour" type="button">Retour à la table</button>
+    </div>
+  </div>
+</div>
+
+<a id="logo" class="wide" href="#">Mauvais Grain<span class="dot">.</span></a>
+<div id="hint" class="cond"><span class="tick"></span><span>Tirez le point</span></div>
+<div id="distance" class="cond"><b id="dist-v">∞</b><span id="dist-l">Point à l'infini</span></div>
+
+<div id="ring" aria-label="Bague de mise au point" role="slider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" tabindex="0">
+  <div class="titre cond">Mise au point</div>
+  <div class="piste">
+    <div class="marque tab cond" data-t="1"    tabindex="0" title="Le studio"><span>∞</span></div>
+    <div class="marque tab cond" data-t="0.75" tabindex="-1"><span>10</span></div>
+    <div class="marque tab cond" data-t="0.5"  tabindex="0" title="Les films"><span>3 m</span></div>
+    <div class="marque tab cond" data-t="0.25" tabindex="-1"><span>1</span></div>
+    <div class="marque tab cond" data-t="0"    tabindex="0" title="Métiers et contact"><span>0,5</span></div>
+    <div class="marque fin cond" data-t="0.5675"><span>1</span></div>
+    <div class="marque fin cond" data-t="0.5225"><span>2</span></div>
+    <div class="marque fin cond" data-t="0.4775"><span>3</span></div>
+    <div class="marque fin cond" data-t="0.4325"><span>4</span></div>
+    <div class="aiguille"></div>
+  </div>
+  <div class="zone cond">Zone fine</div>
+</div>
+
+<div class="grain"></div>
+
+<script>
+(function () {
+  'use strict';
+  var body = document.body;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var mobile = function () { return window.matchMedia('(max-width: 640px)').matches; };
+
+  /* ── Données réelles ──────────────────────────────────────── */
+  var FILMS = {
+    sound:      { t: 'The Sound of Discovery', m: 'Autoproduit — Tourisme — 2026', img: 'the-sound-of-discovery', ap: 'Observer sans intervenir. Laisser les rencontres, les ambiances et la lumière naturelle guider le récit.' },
+    silhouette: { t: 'Silhouette', m: 'Autoproduit — Clip — 2026', img: 'silhouette', ap: 'Construire le film autour de plans fixes. Le mouvement naît uniquement de la danseuse.' },
+    vastness:   { t: 'The Shape of Vastness', m: 'Autoproduit — Tourisme — 2025', img: 'the-shape-of-vastness', ap: 'Prendre le temps d\'observer. Un film contemplatif où chaque plan laisse respirer le paysage.' },
+    gone:       { t: 'Gone Colors', m: 'DeLaurentis — Clip — 2024', img: 'delaurentis-gone-colors', ap: 'Tourner durant les dernières minutes du jour, pour une lumière douce et chaleureuse.' },
+    graduation: { t: 'Graduation', m: 'COB — Événementiel — 2024', img: 'graduation', ap: 'Une approche immersive, au plus près des étudiants, pour saisir les instants spontanés.' },
+    medocaine:  { t: 'La Médocaine', m: 'La Médocaine — Événementiel — 2024', img: 'la-medocaine', ap: 'Se mêler au public : concerts, DJ, jeux de lumière et feu d\'artifice.' }
+  };
+  var PLAN_D = [0.5675, 0.5225, 0.4775, 0.4325];   // plan 1 le plus loin, plan 4 le plus près
+
+  /* ── Couches ──────────────────────────────────────────────── */
+  var table = document.getElementById('table');
+  var stack = document.getElementById('stack');
+  var tableLayers = Array.prototype.map.call(table.querySelectorAll('.layer'), function (el) {
+    return { el: el, d: +el.getAttribute('data-d'), film: el.classList.contains('film'), cap: el.querySelector('.cap'), z: el.classList.contains('film') };
+  });
+  var filmStops = tableLayers.filter(function (l) { return l.film; }).map(function (l) { return l.d; });
+  var tableStops = [0].concat(filmStops, [1]);
+  var stackLayers = [];
+  var openId = null;
+
+  /* ── Bague ────────────────────────────────────────────────── */
+  var ring = document.getElementById('ring');
+  var piste = ring.querySelector('.piste');
+  var aiguille = ring.querySelector('.aiguille');
+  var marques = Array.prototype.slice.call(ring.querySelectorAll('.marque'));
+  marques.forEach(function (m) {
+    var t = +m.getAttribute('data-t');
+    var r = rangeOf(m.classList.contains('fin'));
+    m.style.top = ((r[1] - t) / (r[1] - r[0]) * 100) + '%';
+  });
+  function rangeOf(film) { return film ? [0.41, 0.59] : [0, 1]; }
+
+  /* ── État ─────────────────────────────────────────────────── */
+  var cur = 0, target = 1, raf = 0, idle = 0, dragging = false;
+  var mx = 0, my = 0, pmx = 0, pmy = 0;
+
+  function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+  function inFilm() { return openId !== null; }
+  function range() { return rangeOf(inFilm()); }
+  function stops() { return inFilm() ? PLAN_D : tableStops; }
+  function nearest(v) {
+    var s = stops(), best = s[0];
+    s.forEach(function (x) { if (Math.abs(x - v) < Math.abs(best - v)) best = x; });
+    return best;
+  }
+  function setTarget(v, snap) {
+    var r = range();
+    target = clamp(v, r[0], r[1]);
+    if (snap) target = nearest(target);
+    tick();
+  }
+  function tick() { if (!raf) raf = requestAnimationFrame(loop); }
+  function loop() {
+    raf = 0;
+    var diff = target - cur;
+    if (Math.abs(diff) < 0.0004 && Math.abs(mx - pmx) < 0.002 && Math.abs(my - pmy) < 0.002) { cur = target; pmx = mx; pmy = my; render(); return; }
+    cur += diff * (reduce ? 1 : 0.11);
+    pmx += (mx - pmx) * 0.08; pmy += (my - pmy) * 0.08;
+    render();
+    tick();
+  }
+
+  /* ── Rendu : flou, échelle, opacité par profondeur ───────── */
+  function shade(l, K, cap, px) {
+    var dl = l.d - cur, a = Math.abs(dl);
+    var blur = clamp((a - 0.012) * K, 0, cap);
+    var op = dl < 0 ? 1 - clamp(a * 2.6, 0, 0.72) : 1 - clamp(a * 1.15, 0, 0.66);
+    var sc = 1 + (cur - l.d) * 0.05;
+    var tx = (l.d - cur) * px * pmx, ty = (l.d - cur) * px * pmy;
+    l.el.style.filter = blur > 0.2 ? 'blur(' + blur.toFixed(2) + 'px)' : 'none';
+    l.el.style.opacity = op.toFixed(3);
+    if (l.z) l.el.style.zIndex = String(Math.max(1, 40 - Math.round(a * 100)));
+    l.el.style.transform = 'translate3d(' + tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px,0) scale(' + sc.toFixed(4) + ')';
+    return a;
+  }
+  function render() {
+    var film = inFilm();
+    if (!film) {
+      tableLayers.forEach(function (l) {
+        var a = shade(l, 70, 20, 26);
+        if (l.film) {
+          var c = clamp(1 - a * 28, 0, 1);
+          l.cap.style.opacity = c.toFixed(3);
+          l.cap.style.transform = 'translateY(' + ((1 - c) * 8).toFixed(1) + 'px)';
+          l.el.setAttribute('data-hit', a < 0.4 ? 'on' : 'off');
+        } else if (l.el.id === 'front') {
+          l.el.setAttribute('data-hit', a < 0.2 ? 'on' : 'off');
+        }
+      });
+    } else {
+      stackLayers.forEach(function (l, i) {
+        var a = shade(l, 170, 22, 30);
+        l.el.setAttribute('data-hit', 'on');
+      });
+      var n = PLAN_D.indexOf(nearest(cur));
+      Array.prototype.forEach.call(document.querySelectorAll('#st-echelle button'), function (b, i) { b.classList.toggle('on', i === n); });
+    }
+    // bague
+    var r = range();
+    var pct = (r[1] - cur) / (r[1] - r[0]) * 100;
+    aiguille.style.top = pct + '%';
+    ring.setAttribute('aria-valuenow', Math.round(100 - pct));
+    marques.forEach(function (m) {
+      m.classList.toggle('on', Math.abs(+m.getAttribute('data-t') - cur) < 0.02);
+    });
+    // zone & lecture
+    body.setAttribute('data-zone', cur > 0.88 ? 'far' : cur < 0.14 ? 'near' : 'mid');
+    readout();
+  }
+  var dv = document.getElementById('dist-v'), dlab = document.getElementById('dist-l');
+  function metres(t) {
+    if (t >= 0.985) return '∞';
+    var v;
+    if (t < 0.25) v = 0.5 + t / 0.25 * 0.5;
+    else if (t < 0.5) v = 1 + (t - 0.25) / 0.25 * 2;
+    else if (t < 0.75) v = 3 + (t - 0.5) / 0.25 * 7;
+    else v = 10 + (t - 0.75) / 0.235 * 60;
+    return (v < 10 ? v.toFixed(1) : Math.round(v)).toString().replace('.', ',') + ' m';
+  }
+  function readout() {
+    if (inFilm()) {
+      var n = PLAN_D.indexOf(nearest(cur)) + 1;
+      dv.textContent = 'Plan ' + n + '/4';
+      dlab.textContent = FILMS[openId].t;
+      return;
+    }
+    dv.textContent = metres(cur);
+    dlab.textContent = cur > 0.88 ? 'Point à l\'infini — le studio' : cur < 0.14 ? 'Point à 0,5 m — les métiers' : 'Point à 3 m — les films';
+  }
+
+  /* ── Ouvrir / fermer un film ──────────────────────────────── */
+  function buildStack(id) {
+    var f = FILMS[id];
+    stackLayers.forEach(function (l) { l.el.parentNode.removeChild(l.el); });
+    stackLayers = [];
+    for (var i = 0; i < 4; i++) {
+      var el = document.createElement('div');
+      el.className = 'layer plan';
+      el.setAttribute('data-i', i + 1);
+      el.setAttribute('data-d', PLAN_D[i]);
+      el.innerHTML = '<span class="n cond">Plan ' + (i + 1) + '</span><div class="cadre"><img src="img/' + f.img + '-' + (i + 1) + '.jpg" alt=""></div>';
+      stack.insertBefore(el, stack.firstChild);
+      stackLayers.push({ el: el, d: PLAN_D[i], z: true });
+    }
+    document.getElementById('st-titre').textContent = f.t;
+    document.getElementById('st-meta').textContent = f.m;
+    document.getElementById('st-ap').textContent = f.ap;
+    var ech = document.getElementById('st-echelle'); ech.innerHTML = '';
+    for (var j = 0; j < 4; j++) {
+      if (j) { var s = document.createElement('span'); s.textContent = '·'; ech.appendChild(s); }
+      var b = document.createElement('button'); b.type = 'button'; b.textContent = j + 1; b.setAttribute('data-i', j);
+      ech.appendChild(b);
+    }
+  }
+  function openFilm(id, plan, instant) {
+    buildStack(id);
+    openId = id;
+    body.classList.add('film');
+    ring.classList.add('fin');
+    var t = PLAN_D[(plan || 1) - 1];
+    if (instant) { cur = t; }
+    else { cur = 0.5; }
+    setTarget(t, false);
+  }
+  function closeFilm(instant) {
+    if (!inFilm()) return;
+    var backTo = tableLayers.filter(function (l) { return l.el.getAttribute('data-id') === openId; })[0].d;
+    openId = null;
+    body.classList.remove('film');
+    cur = instant ? backTo : cur;
+    setTarget(backTo, false);
+  }
+  document.getElementById('st-retour').addEventListener('click', function () { closeFilm(false); });
+  document.getElementById('st-echelle').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    setTarget(PLAN_D[+b.getAttribute('data-i')], false);
+  });
+
+  /* ── Molette / défilement : tirer le point ────────────────── */
+  window.addEventListener('wheel', function (e) {
+    if (e.target.closest && e.target.closest('#ring')) return;
+    e.preventDefault();
+    var k = inFilm() ? 0.00045 : 0.0006;
+    var d = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+    if (e.deltaMode === 1) d *= 16;
+    setTarget(target - d * k, false);
+    clearTimeout(idle);
+    idle = setTimeout(function () { setTarget(target, true); }, 160);
+  }, { passive: false });
+
+  /* Glisser sur la bague (souris ou pouce) */
+  function ringValue(y) {
+    var b = piste.getBoundingClientRect();
+    var p = clamp((y - b.top) / b.height, 0, 1);
+    var r = range();
+    return r[1] - p * (r[1] - r[0]);
+  }
+  ring.addEventListener('pointerdown', function (e) {
+    dragging = true; ring.setPointerCapture(e.pointerId);
+    setTarget(ringValue(e.clientY), false);
+    e.preventDefault();
+  });
+  ring.addEventListener('pointermove', function (e) { if (dragging) setTarget(ringValue(e.clientY), false); });
+  function endDrag() { if (!dragging) return; dragging = false; setTarget(target, true); }
+  ring.addEventListener('pointerup', endDrag);
+  ring.addEventListener('pointercancel', endDrag);
+  marques.forEach(function (m) {
+    m.addEventListener('focus', function () { setTarget(+m.getAttribute('data-t'), false); });
+  });
+
+  /* Glisser au pouce n'importe où (téléphone) : tirer le point verticalement */
+  var swipeY = null, swipeT = 0;
+  document.getElementById('scene').addEventListener('pointerdown', function (e) {
+    if (e.pointerType !== 'touch') return;
+    swipeY = e.clientY; swipeT = target;
+  });
+  window.addEventListener('pointermove', function (e) {
+    if (swipeY === null || e.pointerType !== 'touch') return;
+    var dy = e.clientY - swipeY;
+    if (Math.abs(dy) > 6) setTarget(swipeT + dy / window.innerHeight * (inFilm() ? 0.28 : 0.9), false);
+  });
+  window.addEventListener('pointerup', function (e) { if (swipeY !== null) { swipeY = null; setTarget(target, true); } });
+
+  /* Clic sur un film : le mettre au point, ou l'ouvrir s'il est déjà net */
+  var lastTap = { id: null, t: 0 };
+  tableLayers.filter(function (l) { return l.film; }).forEach(function (l) {
+    var id = l.el.getAttribute('data-id');
+    function act(e) {
+      if (Math.abs(l.d - target) < 0.012 && Math.abs(cur - target) < 0.02) openFilm(id, 1, false);
+      else setTarget(l.d, false);
+    }
+    l.el.addEventListener('click', function (e) {
+      if (e.detail > 1 && mobile()) return;
+      act(e);
+    });
+    l.el.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); act(e); } });
+  });
+  /* Double-tap sur un élément = faire le point dessus (téléphone) */
+  document.getElementById('scene').addEventListener('pointerup', function (e) {
+    if (e.pointerType !== 'touch') return;
+    var L = e.target.closest('.layer'); if (!L) return;
+    var now = Date.now();
+    if (lastTap.el === L && now - lastTap.t < 320) {
+      var id = L.getAttribute('data-id');
+      if (id && Math.abs(+L.getAttribute('data-d') - target) < 0.012) openFilm(id, 1, false);
+      else setTarget(+L.getAttribute('data-d'), false);
+      lastTap = { el: null, t: 0 };
+    } else lastTap = { el: L, t: now };
+  });
+  /* Clic sur un photogramme flou : y tirer le point */
+  stack.addEventListener('click', function (e) {
+    var p = e.target.closest('.plan'); if (!p) return;
+    setTarget(+p.getAttribute('data-d'), false);
+  });
+
+  /* Clavier : Tab passe d'une distance à l'autre (marques focusables), flèches affinent */
+  window.addEventListener('keydown', function (e) {
+    var step = inFilm() ? 0.045 : 0.03;
+    if (e.key === 'ArrowDown' || e.key === 'PageDown') { e.preventDefault(); setTarget(nearest(target - step), true); }
+    if (e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); setTarget(nearest(target + step), true); }
+    if (e.key === 'Home') { e.preventDefault(); closeFilm(false); setTarget(1, false); }
+    if (e.key === 'End') { e.preventDefault(); closeFilm(false); setTarget(0, false); }
+    if (e.key === 'Escape') closeFilm(false);
+  });
+  document.getElementById('logo').addEventListener('click', function (e) { e.preventDefault(); closeFilm(false); setTarget(1, false); });
+
+  /* Parallaxe au pointeur */
+  window.addEventListener('pointermove', function (e) {
+    if (e.pointerType === 'touch') return;
+    mx = (e.clientX / window.innerWidth - 0.5) * 2;
+    my = (e.clientY / window.innerHeight - 0.5) * 2;
+    tick();
+  });
+
+  /* ── États de présentation ────────────────────────────────── */
+  window.mgState = function (n) {
+    mx = my = pmx = pmy = 0;
+    var m = mobile();
+    if (!m) {
+      if (n === 2) { openFilm('gone', 2, true); cur = target; render(); return; }
+      closeFilm(true);
+      cur = target = n === 0 ? 1 : n === 1 ? 0.5 : 0;
+    } else {
+      closeFilm(true);
+      cur = target = n === 0 ? 1 : n === 1 ? 0.5 : 0;
+    }
+    render();
+  };
+
+  /* ── Arrivée : le point part de tout près et file à l'infini ─ */
+  if (reduce) { cur = 1; target = 1; render(); }
+  else { cur = 0.05; target = 1; render(); setTimeout(tick, 350); }
+})();
+</script>
+</body>
+</html>

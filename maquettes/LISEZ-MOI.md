@@ -64,3 +64,30 @@ accessoires : ni timecode, ni viseur, ni perforations, ni clap.
 | `e5.html` | Le plan-séquence | …un seul plan sans coupe, du jour à la nuit, tenu au steadicam |
 
 Dossier : `MauvaisGrain-5-realisateur.pdf`.
+
+---
+
+# Troisième série — veille et concepts
+
+Quatre agents ont écumé ≈ 150 sites (maisons de production internationales,
+réalisateurs et chefs opérateurs, studios parisiens et vidéastes bordelais,
+études de cas techniques 2025-2026). Les synthèses sont dans `veille/`, les
+captures de référence dans `veille/refs/`. Trois concepts en sont sortis,
+chacun construit sur un geste de réalisateur que personne n'a mis en ligne.
+
+| Fichier | Concept | Le geste |
+| --- | --- | --- |
+| `f1.html` | Montage | Le site est une table de montage : le film se monte au rythme du visiteur, qui reprend la main et envoie son montage avec sa demande |
+| `f2.html` | Le point | La bague de mise au point remplace le menu : ce qui est net se lit, le reste attend dans le flou |
+| `f3.html` | Découpage | Le site est le découpage technique du réalisateur : lire, c'est naviguer ; maintenir, c'est jouer la séquence |
+
+Chaque maquette expose `window.mgState(0..3)` (bureau) et `mgState(0..2)`
+(téléphone). Les notes d'implémentation sont dans `f1-notes.md`, `f2-notes.md`,
+`f3-notes.md`.
+
+**Le dossier** : `MauvaisGrain-veille-concepts.pdf` (27 pages, A4 paysage) —
+la veille (méthode, quatre planches de références, conventions, gestes rares,
+ce que personne ne fait), puis cinq pages par concept (ouverture, l'idée,
+architecture et gestes, écrans bureau, téléphone et mise en œuvre), puis la
+grille de comparaison et la recommandation. Il se régénère avec
+`veille/dossier4.mjs` (contenu dans `veille/dossier4-content.mjs`).
