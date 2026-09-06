@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mauvais Grain — Le générique</title>
+<link rel="stylesheet" href="_base.css">
+<style>
+  /* ────────────────────────────────────────────────────────────
+     E4 — LE GÉNÉRIQUE.
+     Le site est une séquence de titres. Les crédits sont la
+     navigation. Chaque mot arrive en se resserrant, tient, s'efface.
+     ──────────────────────────────────────────────────────────── */
+  html { scroll-behavior: auto; overflow-x: clip; }
+  html, body { height: auto; min-height: 100%; }
+  body { background: #0a0908; color: #f6f3ec; }
+
+  :root {
+    --creme: #f6f3ec;
+    --noir: #0a0908;
+    --mx: 7vw;              /* marge horizontale des cartes */
+    --my: 13vh;             /* marge verticale des cartes */
+    --hold: 2400ms;
+    --enter: 700ms;
+    --exit: 250ms;
+  }
+
+  /* ── L'écran du générique ─────────────────────────────────── */
+  .gen {
+    position: relative;
+    height: 100vh; height: 100svh;
+    overflow: hidden;
+    background: var(--noir);
+  }
+  .bg { position: absolute; inset: 0; }
+  .bg img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%; object-fit: cover;
+    opacity: 0;
+    transform: scale(1);
+    transform-origin: 50% 50%;
+    will-change: transform;
+  }
+  .bg img.on { opacity: 1; }         /* COUPE : pas de fondu entre deux images */
+
+  /* Lumière : les images sont légèrement rabattues, comme sous un titre */
+  .gen::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(120vw 90vh at 50% 50%, rgba(10,9,8,0) 40%, rgba(10,9,8,.42) 100%),
+      linear-gradient(to bottom, rgba(10,9,8,.34) 0%, rgba(10,9,8,.06) 38%, rgba(10,9,8,.06) 62%, rgba(10,9,8,.46) 100%);
+  }
+
+  /* ── Les cartes ───────────────────────────────────────────── */
+  .card {
+    position: absolute; z-index: 3;
+    max-width: 86vw;
+    pointer-events: none;
+    color: var(--creme);
+    text-shadow: 0 1px 24px rgba(10,9,8,.28);
+  }
+  .card.on { pointer-events: auto; }
+
+  /* positions : jamais la même deux fois de suite */
+  .card.p-tl { top: var(--my); left: var(--mx); text-align: left; }
+  .card.p-tr { top: var(--my); right: var(--mx); text-align: right; }
+  .card.p-bl { bottom: var(--my); left: var(--mx); text-align: left; }
+  .card.p-br { bottom: var(--my); right: var(--mx); text-align: right; }
+  .card.p-ml { top: 50%; left: var(--mx); transform: translateY(-50%); text-align: left; }
+  .card.p-mr { top: 50%; right: var(--mx); transform: translateY(-50%); text-align: right; }
+  .card.p-c { top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; white-space: nowrap; }
+  .card.p-tt { top: 32vh; left: 33vw; text-align: left; }        /* au tiers, un peu haut */
+
+  .role {
+    font-family: var(--sans); font-weight: 400;
+    font-size: 13px; line-height: 1;
+    letter-spacing: .3em;
+    color: var(--creme); opacity: 0;
+    margin-bottom: .9em;
+  }
+  .name {
+    font-family: var(--wide); font-weight: 400;
+    font-size: 4.6vw; line-height: 1.04;
+    letter-spacing: .4em;
+    opacity: 0;
+  }
+  .name.big { font-size: 6vw; line-height: .96; text-transform: uppercase; }
+  .name.list { font-size: 3.4vw; line-height: 1.16; }
+  .name.mail { font-size: 3.2vw; }
+
+  /* ENTRÉE : le tracking se resserre, le mot se révèle. */
+  .card.on .role {
+    opacity: .78; letter-spacing: .1em;
+    transition: letter-spacing var(--enter) var(--expo), opacity 520ms var(--soft);
+  }
+  .card.on .name {
+    opacity: 1; letter-spacing: 0;
+    transition: letter-spacing var(--enter) var(--expo), opacity 640ms var(--soft) 40ms;
+  }
+  /* SORTIE : fondu court, le tracking ne bouge pas. */
+  .card.out .role, .card.out .name {
+    opacity: 0;
+    transition: opacity var(--exit) var(--soft);
+  }
+
+  /* Les crédits sont des liens. Survol : la boucle s'arrête, un trait terracotta. */
+  .name a {
+    color: inherit; text-decoration: none;
+    position: relative; display: inline-block;
+    letter-spacing: inherit;
+  }
+  .name a::after {
+    content: ""; position: absolute; left: 0; right: .02em; bottom: -.04em;
+    height: .06em; min-height: 2px; background: #b76e4e;
+    transform: scaleX(0); transform-origin: left center;
+    transition: transform 380ms var(--expo);
+  }
+  .p-tr .name a::after, .p-br .name a::after, .p-mr .name a::after { transform-origin: right center; }
+  .name a:hover::after, .name a.is-hover::after { transform: scaleX(1); }
+  .name .sep { color: #c07a58; margin: 0 .22em; }
+
+  /* ── La navigation : une ligne, en bas, au centre. Rien d'autre. ── */
+  .nav {
+    position: fixed; left: 0; right: 0; z-index: 120;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 26px);
+    display: flex; justify-content: center; gap: .9em;
+    font-family: var(--sans); font-weight: 400;
+    font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--creme);
+    text-shadow: 0 1px 14px rgba(10,9,8,.35);
+  }
+  .nav a { color: inherit; text-decoration: none; opacity: .92; position: relative; }
+  .nav a::after {
+    content: ""; position: absolute; left: .02em; right: .22em; bottom: -.4em; height: 1px;
+    background: var(--terra); transform: scaleX(0); transform-origin: left;
+    transition: transform 320ms var(--expo);
+  }
+  .nav a:hover::after { transform: scaleX(1); }
+  .nav .dot { color: #c07a58; }
+
+  /* ── Sous la séquence : les six films, écrans successifs ──── */
+  .film, .studio, .end {
+    position: relative; display: block;
+    height: 100vh; height: 100svh;
+    overflow: hidden; color: var(--creme); text-decoration: none;
+    background: var(--noir);
+  }
+  .film img, .studio img {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+    transform: scale(1); transform-origin: 50% 50%;
+  }
+  .film.in img, .studio.in img { animation: kb 9s linear forwards; }
+  @keyframes kb { from { transform: scale(1); } to { transform: scale(1.06); } }
+
+  /* la lumière vient du coin où se pose le titre */
+  .film::after, .studio::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(120vw 90vh at 50% 50%, rgba(10,9,8,0) 40%, rgba(10,9,8,.38) 100%),
+      linear-gradient(var(--from, to bottom), rgba(10,9,8,.50) 0%, rgba(10,9,8,.10) 45%, rgba(10,9,8,0) 70%);
+  }
+  .film.p-tl, .film.p-tr, .film.p-tt, .studio.p-tl { --from: to bottom; }
+  .film.p-bl, .film.p-br { --from: to top; }
+  .film.p-ml, .studio.p-ml { --from: to right; }
+  .film.p-mr { --from: to left; }
+
+  .film .card, .studio .card { pointer-events: none; }
+  .film .name { font-size: 7vw; line-height: .98; }
+  .film .role, .studio .role { font-size: 12px; }
+  .film .meta {
+    font-family: var(--sans); font-weight: 400; font-size: 13px; line-height: 1.4;
+    letter-spacing: .08em; color: var(--creme); opacity: 0; margin-top: 1.1em;
+    transition: opacity 640ms var(--soft) 320ms;
+  }
+  .film .meta .dot, .studio .meta .dot, .end .meta .dot, .end .logo .dot { color: #c07a58; }
+  .film.in .card .role { opacity: .78; letter-spacing: .1em; transition: letter-spacing var(--enter) var(--expo), opacity 520ms var(--soft); }
+  .film.in .card .name { opacity: 1; letter-spacing: 0; transition: letter-spacing var(--enter) var(--expo), opacity 640ms var(--soft) 40ms; }
+  .film.in .meta { opacity: .78; }
+  /* trait terracotta au survol de l'écran entier : le titre est le lien */
+  .film .name span { position: relative; display: inline-block; }
+  .film .name span::after {
+    content: ""; position: absolute; left: 0; right: .02em; bottom: -.03em;
+    height: .06em; min-height: 2px; background: #b76e4e;
+    transform: scaleX(0); transform-origin: left; transition: transform 380ms var(--expo);
+  }
+  .film.p-tr .name span::after, .film.p-br .name span::after, .film.p-mr .name span::after { transform-origin: right; }
+  .film:hover .name span::after { transform: scaleX(1); }
+
+  /* studio : les trois partis pris, posés comme des crédits */
+  .studio .name { font-size: 3.4vw; line-height: 1.2; }
+  .studio.in .card .role { opacity: .78; letter-spacing: .1em; transition: letter-spacing var(--enter) var(--expo), opacity 520ms var(--soft); }
+  .studio.in .card .name { opacity: 1; letter-spacing: 0; transition: letter-spacing var(--enter) var(--expo), opacity 640ms var(--soft) 40ms; }
+  .studio .meta { font-family: var(--sans); font-size: 13px; letter-spacing: .08em; line-height: 1.5; opacity: 0; margin-top: 1.4em; transition: opacity 640ms var(--soft) 320ms; }
+  .studio.in .meta { opacity: .78; }
+  .studio em { font-style: normal; color: var(--terra); }
+
+  /* carton de fin : noir, centré, comme le dernier carton d'un film */
+  .end { display: grid; place-items: center; text-align: center; }
+  .end .card { position: static; transform: none; text-align: center; max-width: 92vw; }
+  .end .name { font-size: 4.2vw; }
+  .end .meta { font-family: var(--sans); font-size: 13px; letter-spacing: .08em; line-height: 1.7; opacity: 0; margin-top: 2em; transition: opacity 640ms var(--soft) 320ms; }
+  .end .meta a { color: inherit; text-decoration: none; }
+  .end .meta .dot { color: var(--terra); }
+  .end.in .card .role { opacity: .78; letter-spacing: .1em; transition: letter-spacing var(--enter) var(--expo), opacity 520ms var(--soft); }
+  .end.in .card .name { opacity: 1; letter-spacing: 0; transition: letter-spacing var(--enter) var(--expo), opacity 640ms var(--soft) 40ms; }
+  .end.in .meta { opacity: .78; }
+  .end .logo { font-family: var(--wide); font-size: 20px; margin-top: 12vh; opacity: 0; transition: opacity 900ms var(--soft) 700ms; }
+  .end.in .logo { opacity: .9; }
+
+  /* ── Téléphone ────────────────────────────────────────────── */
+  @media (max-width: 640px) {
+    :root { --mx: 6vw; --my: 12vh; }
+    .card { max-width: 88vw; }
+    .name, .name.big, .film .name, .end .name { font-size: 10vw; line-height: 1.0; }
+    .name.list { font-size: 7.6vw; line-height: 1.18; }
+    .name.mail, .end .name { font-size: 8vw; line-height: 1.08; word-break: normal; overflow-wrap: normal; }
+    .studio .name { font-size: 6.4vw; }
+    .role { font-size: 12px; }
+    /* alternance haut / bas */
+    .card.m-top { top: var(--my); bottom: auto; left: var(--mx); right: auto; text-align: left; transform: none; white-space: normal; }
+    .card.m-bot { bottom: calc(env(safe-area-inset-bottom, 0px) + 90px); top: auto; right: var(--mx); left: auto; text-align: right; transform: none; white-space: normal; }
+    .m-bot .name a::after { transform-origin: right center; }
+    .m-top .name a::after { transform-origin: left center; }
+    .film.m-top, .studio.m-top { --from: to bottom; }
+    .film.m-bot { --from: to top; }
+    .film .meta, .studio .meta { font-size: 12px; }
+    .nav { font-size: 10px; letter-spacing: .2em; bottom: calc(env(safe-area-inset-bottom, 0px) + 22px); }
+  }
+
+  /* ── Mode figé (états de présentation, mouvement réduit) ──── */
+  html.still *, html.still *::before, html.still *::after {
+    transition: none !important; animation: none !important;
+  }
+  html.still .film.in img, html.still .studio.in img { transform: scale(1.03); }
+  html.nohover .film:hover .name span::after { transform: scaleX(0); }
+  @media (prefers-reduced-motion: reduce) {
+    .film.in img, .studio.in img { animation: none; transform: scale(1.03); }
+  }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<!-- ═══════════ LE GÉNÉRIQUE ═══════════ -->
+<section class="gen" id="top" aria-label="Générique">
+  <div class="bg" aria-hidden="true">
+    <img src="img/the-shape-of-vastness-3.jpg" alt="">
+    <img src="img/the-sound-of-discovery-3.jpg" alt="">
+    <img src="img/silhouette-1.jpg" alt="">
+    <img src="img/delaurentis-gone-colors-3.jpg" alt="">
+    <img src="img/la-medocaine-3.jpg" alt="">
+    <img src="img/the-shape-of-vastness-2.jpg" alt="">
+    <img src="img/graduation-3.jpg" alt="">
+    <img src="img/the-sound-of-discovery-1.jpg" alt="">
+    <img src="img/studio.jpg" alt="">
+  </div>
+
+  <div class="card p-tl m-top">
+    <div class="role">un film de</div>
+    <div class="name big"><a href="#studio">Mauvais Grain</a></div>
+  </div>
+
+  <div class="card p-br m-bot">
+    <div class="role">réalisation</div>
+    <div class="name"><a href="#studio">Timéo Taris</a></div>
+  </div>
+
+  <div class="card p-ml m-top">
+    <div class="role">avec</div>
+    <div class="name list">
+      <a href="#film-the-sound-of-discovery">The Sound of Discovery</a><br>
+      <a href="#film-silhouette">Silhouette</a><br>
+      <a href="#film-the-shape-of-vastness">The Shape of Vastness</a>
+    </div>
+  </div>
+
+  <div class="card p-tr m-bot">
+    <div class="role">et</div>
+    <div class="name list">
+      <a href="#film-gone-colors">Gone Colors</a><br>
+      <a href="#film-graduation">Graduation</a><br>
+      <a href="#film-la-medocaine">La Médocaine</a>
+    </div>
+  </div>
+
+  <div class="card p-bl m-top">
+    <div class="role">images, montage, étalonnage</div>
+    <div class="name"><a href="#studio">Mauvais Grain</a></div>
+  </div>
+
+  <div class="card p-tt m-bot">
+    <div class="role">pour</div>
+    <div class="name list"><a href="#film-gone-colors">DeLaurentis</a><span class="sep">·</span><a href="#film-graduation">COB</a><span class="sep">·</span><a href="#film-la-medocaine">La Médocaine</a></div>
+  </div>
+
+  <div class="card p-mr m-top">
+    <div class="role">tourné à</div>
+    <div class="name"><a href="#studio">Bordeaux, et ailleurs</a></div>
+  </div>
+
+  <div class="card p-c m-bot">
+    <div class="role">depuis</div>
+    <div class="name"><a href="#studio">2022</a></div>
+  </div>
+
+  <div class="card p-bl m-top">
+    <div class="role">contact</div>
+    <div class="name mail"><a href="#contact">timeotaris<wbr>@mauvaisgrain.com</a></div>
+  </div>
+</section>
+
+<nav class="nav" aria-label="Navigation">
+  <a href="#films">Films</a><span class="dot">·</span>
+  <a href="#studio">Studio</a><span class="dot">·</span>
+  <a href="#contact">Contact</a>
+</nav>
+
+<!-- ═══════════ LES SIX FILMS ═══════════ -->
+<span id="films"></span>
+<a class="film p-tl m-top" id="film-the-sound-of-discovery" href="#film-the-sound-of-discovery">
+  <img src="img/the-sound-of-discovery-3.jpg" alt="The Sound of Discovery">
+  <div class="card p-tl m-top">
+    <div class="role">tourisme, 2026</div>
+    <div class="name"><span>The Sound of Discovery</span></div>
+    <div class="meta">Autoproduit <span class="dot">·</span> Observer sans intervenir.</div>
+  </div>
+</a>
+
+<a class="film p-br m-bot" id="film-silhouette" href="#film-silhouette">
+  <img src="img/silhouette-1.jpg" alt="Silhouette">
+  <div class="card p-br m-bot">
+    <div class="role">clip, 2026</div>
+    <div class="name"><span>Silhouette</span></div>
+    <div class="meta">Autoproduit <span class="dot">·</span> Le mouvement naît uniquement de la danseuse.</div>
+  </div>
+</a>
+
+<a class="film p-bl m-top" id="film-the-shape-of-vastness" href="#film-the-shape-of-vastness">
+  <img src="img/the-shape-of-vastness-3.jpg" alt="The Shape of Vastness">
+  <div class="card p-bl m-top">
+    <div class="role">tourisme, 2025</div>
+    <div class="name"><span>The Shape of Vastness</span></div>
+    <div class="meta">Autoproduit <span class="dot">·</span> Chaque plan laisse respirer le paysage.</div>
+  </div>
+</a>
+
+<a class="film p-tr m-bot" id="film-gone-colors" href="#film-gone-colors">
+  <img src="img/delaurentis-gone-colors-1.jpg" alt="Gone Colors">
+  <div class="card p-tr m-bot">
+    <div class="role">clip, 2024</div>
+    <div class="name"><span>Gone Colors</span></div>
+    <div class="meta">DeLaurentis <span class="dot">·</span> Les dernières minutes du jour.</div>
+  </div>
+</a>
+
+<a class="film p-ml m-top" id="film-graduation" href="#film-graduation">
+  <img src="img/graduation-3.jpg" alt="Graduation">
+  <div class="card p-ml m-top">
+    <div class="role">événementiel, 2024</div>
+    <div class="name"><span>Graduation</span></div>
+    <div class="meta">COB <span class="dot">·</span> Au plus près des étudiants.</div>
+  </div>
+</a>
+
+<a class="film p-tr m-bot" id="film-la-medocaine" href="#film-la-medocaine">
+  <img src="img/la-medocaine-3.jpg" alt="La Médocaine">
+  <div class="card p-tr m-bot">
+    <div class="role">événementiel, 2024</div>
+    <div class="name"><span>La Médocaine</span></div>
+    <div class="meta">La Médocaine <span class="dot">·</span> Se mêler au public.</div>
+  </div>
+</a>
+
+<!-- ═══════════ STUDIO ═══════════ -->
+<section class="studio p-ml m-top" id="studio">
+  <img src="img/studio.jpg" alt="Timéo Taris en tournage, à contre-jour">
+  <div class="card p-ml m-top">
+    <div class="role">partis pris</div>
+    <div class="name">Observer plutôt que mettre en scène.<br>Accompagner plutôt que diriger.<br>Raconter plutôt que vendre.</div>
+    <div class="meta">Studio de production vidéo, Bordeaux <span class="dot">·</span> fondé en 2022 par Timéo Taris<br>Corporate <span class="dot">·</span> Événementiel <span class="dot">·</span> Immobilier <span class="dot">·</span> Tourisme <span class="dot">·</span> Clip</div>
+  </div>
+</section>
+
+<!-- ═══════════ CARTON DE FIN ═══════════ -->
+<section class="end" id="contact">
+  <div class="card">
+    <div class="role">contact</div>
+    <div class="name mail"><a href="mailto:timeotaris@mauvaisgrain.com">timeotaris<wbr>@mauvaisgrain.com</a></div>
+    <div class="meta">
+      <a href="tel:+33652065389">06 52 06 53 89</a><br>
+      94 quai des Chartrons, 33000 Bordeaux<br>
+      Instagram <span class="dot">·</span> YouTube
+    </div>
+    <div class="logo">Mauvais Grain<span class="dot">.</span></div>
+  </div>
+</section>
+
+<script>
+(function () {
+  var HOLD = 2400, ENTER = 700, EXIT = 250, IMG = 6000;
+  var gen = document.querySelector('.gen');
+  var cards = Array.prototype.slice.call(gen.querySelectorAll('.card'));
+  var imgs = Array.prototype.slice.call(gen.querySelectorAll('.bg img'));
+  var N = cards.length, M = imgs.length;
+
+  var t = 0, last = null, paused = false, still = false, raf = null;
+  var curCard = -1, curImg = -1, outSet = false;
+
+  function render() {
+    var ci = Math.floor(t / HOLD) % N;
+    var phase = t % HOLD;
+    var ii = Math.floor(t / IMG) % M;
+    var z = (t % IMG) / IMG;
+
+    if (ii !== curImg) {
+      if (curImg >= 0) imgs[curImg].classList.remove('on');
+      imgs[ii].classList.add('on');
+      curImg = ii;
+    }
+    imgs[ii].style.transform = 'scale(' + (1 + 0.06 * z).toFixed(4) + ')';
+
+    if (ci !== curCard) {
+      if (curCard >= 0) cards[curCard].classList.remove('on', 'out');
+      // deux passes : l'état de repos doit être posé avant l'entrée
+      void cards[ci].offsetWidth;
+      cards[ci].classList.add('on');
+      curCard = ci; outSet = false;
+    }
+    if (!still && phase >= HOLD - EXIT && !outSet) {
+      cards[ci].classList.add('out'); outSet = true;
+    }
+  }
+
+  function frame(now) {
+    if (last === null) last = now;
+    var dt = Math.min(now - last, 100); last = now;
+    if (!paused) t += dt;
+    render();
+    raf = requestAnimationFrame(frame);
+  }
+
+  // Survol d'un crédit : la boucle s'arrête.
+  gen.addEventListener('pointerover', function (e) { if (e.target.closest && e.target.closest('.name a')) paused = true; });
+  gen.addEventListener('pointerout',  function (e) { if (e.target.closest && e.target.closest('.name a')) paused = false; });
+
+  // Les écrans sous la séquence : entrée par tracking quand ils arrivent.
+  var screens = Array.prototype.slice.call(document.querySelectorAll('.film, .studio, .end'));
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) en.target.classList.add('in');
+        else en.target.classList.remove('in');
+      });
+    }, { threshold: 0.45 });
+    screens.forEach(function (s) { io.observe(s); });
+  } else {
+    screens.forEach(function (s) { s.classList.add('in'); });
+  }
+
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reduce) raf = requestAnimationFrame(frame);
+  else { document.documentElement.classList.add('still'); t = 1300; render(); }
+
+  // États de présentation — synchrones. La boucle est figée sur une carte précise.
+  window.mgState = function (n) {
+    if (raf) cancelAnimationFrame(raf); raf = null;
+    still = true; paused = true;
+    document.documentElement.classList.add('still');
+    document.documentElement.classList.toggle('nohover', n === 2);
+    var mobile = window.matchMedia('(max-width: 640px)').matches;
+    cards.forEach(function (c) { c.classList.remove('on', 'out'); });
+    gen.querySelectorAll('.is-hover').forEach(function (a) { a.classList.remove('is-hover'); });
+    curCard = -1;
+
+    var card = 0, img = 0, y = 0;
+    if (n && typeof n === 'object') { card = n.card || 0; img = n.img || 0; n = -1; }
+    else if (mobile) {
+      card = [0, 1][n] || 0; img = [0, 1][n] || 0;
+    } else if (n === 2) {
+      // un écran de film sous la séquence : « The Shape of Vastness », titre en bas à gauche
+      var f = document.getElementById('film-the-shape-of-vastness');
+      y = f.offsetTop;
+    } else {
+      card = [0, 2][n] || 0; img = [0, 1][n] || 0;
+    }
+
+    if (y) {
+      window.scrollTo(0, y);
+      screens.forEach(function (s) { s.classList.add('in'); });
+      t = 1300; render();
+    } else {
+      window.scrollTo(0, 0);
+      t = card * HOLD + 1300;
+      // image choisie pour la carte
+      if (curImg >= 0) imgs[curImg].classList.remove('on');
+      curImg = -1;
+      render();
+      imgs[curImg].classList.remove('on'); imgs[img].classList.add('on'); curImg = img;
+      imgs[img].style.transform = 'scale(1.03)';
+      if (!mobile && n === 1) {
+        var a = cards[2].querySelectorAll('.name a')[1];
+        if (a) a.classList.add('is-hover');
+      }
+    }
+  };
+})();
+</script>
+</body>
+</html>

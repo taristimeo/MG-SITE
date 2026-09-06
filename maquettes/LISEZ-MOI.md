@@ -46,3 +46,21 @@ pas transposé.
 | `d5.html` | Atelier | Tirages posés de biais, annotations à la main | Kinfolk · Cereal |
 
 Dossier : `MauvaisGrain-5-directions.pdf`.
+
+---
+
+# Troisième série — le site d'un réalisateur
+
+La première série imitait le matériel de caméra ; la seconde faisait de
+l'agence. Celle-ci fait du cinéma par sa GRAMMAIRE, jamais par ses
+accessoires : ni timecode, ni viseur, ni perforations, ni clap.
+
+| Fichier | Direction | Le site est… |
+| --- | --- | --- |
+| `e1.html` | Le film | …un court-métrage : noir, carton-titre, coupes franches, letterbox, générique de fin |
+| `e2.html` | Le traitement | …la note d'intention qu'un réalisateur envoie à un producteur, qu'on feuillette |
+| `e3.html` | Le storyboard | …une planche de storyboard dont chaque case joue son mouvement de caméra |
+| `e4.html` | Le générique | …une séquence de titres façon Saul Bass ; les crédits sont la navigation |
+| `e5.html` | Le plan-séquence | …un seul plan sans coupe, du jour à la nuit, tenu au steadicam |
+
+Dossier : `MauvaisGrain-5-realisateur.pdf`.
