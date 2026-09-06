@@ -79,7 +79,7 @@ export function ServicesStack() {
                   />
 
                   <Link
-                    href="/banc/realisations"
+                    href="/films"
                     aria-label={`Voir les films — ${s.title}`}
                     className="svc-link relative block py-8 sm:py-12"
                   >

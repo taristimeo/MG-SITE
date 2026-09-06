@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 // Liens de secours — on renvoie vers les trois destinations utiles du site.
 const exits = [
   { label: "Accueil", href: "/" },
-  { label: "Réalisations", href: "/realisations" },
+  { label: "Films", href: "/films" },
   { label: "On en parle", href: "/contact" },
 ];
 

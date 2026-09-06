@@ -5,9 +5,9 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { navLinks, site } from "@/lib/site";
 
-// Le brouillon « banc de montage » vit sous /banc : ses liens de navigation
-// y sont préfixés, la racine restant la page de choix des trois brouillons.
-const BASE = "/banc";
+// Les liens de navigation partent de la racine : la table de montage est le site.
+// (BASE reste là pour pouvoir remonter le site sous un préfixe si besoin.)
+const BASE = "";
 
 export function Header() {
   const [open, setOpen] = useState(false);

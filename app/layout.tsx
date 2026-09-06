@@ -2,8 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Gloock, JetBrains_Mono, Saira } from "next/font/google";
 import "./globals.css";
 import { Grain } from "@/components/Grain";
-import { ToneWatcher } from "@/components/bench/ToneWatcher";
-import { DraftSwitcher } from "@/components/drafts/DraftSwitcher";
 import { services, site } from "@/lib/site";
 
 // Logotype & titres — Gloock (serif display fort contraste, cf. la charte).
@@ -56,12 +54,12 @@ export const metadata: Metadata = {
   },
 };
 
-// Barre d'état du navigateur (iOS/Android) accordée au fond du site : plus de
-// bandeau blanc au-dessus de la page. Valeur statique = fond du thème SOMBRE
-// (--color-ink) ; à passer sur le fond clair dans la branche jumelle.
+// Barre d'état du navigateur accordée au papier crème de la charte ; le
+// viewport couvre les encoches pour que la timeline respecte la barre d'accueil.
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
   themeColor: "#f6f3ec",
 };
 
@@ -138,15 +136,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessLd) }}
         />
         <Grain />
-        {/* Le header suit le ton de la section qu'il survole (crème / salle
-            de projection), la barre d'état du navigateur avec lui. */}
-        <ToneWatcher />
-        {/* En-tête, pied de page et réglette appartiennent au brouillon 01 :
-            ils sont posés par son propre layout, pas ici — les deux autres
-            brouillons occupent l'écran entier. */}
         {children}
-        {/* L'outil de comparaison, commun aux trois brouillons */}
-        <DraftSwitcher />
       </body>
     </html>
   );
