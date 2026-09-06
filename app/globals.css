@@ -1,32 +1,27 @@
 @import "tailwindcss";
 
 @theme {
-  /* Version claire (« blanc ») — blanc chaud de la charte comme fond,
-     jamais #fff pur : légèrement crémeux pour rester premium. */
-  --color-ink: #f6f3ec;
-  --color-ink-2: #efeadf;
-  --color-ink-3: #e6e0d2;
-  --color-line: #d6cfbf;
-  --color-line-soft: #e7e1d4;
+  /* Le noir chaud de la charte comme fond : la salle de projection. Jamais
+     de noir pur, un brun très sombre qui laisse vivre les images. */
+  --color-ink: #0a0908;
+  --color-ink-2: #15120f;
+  --color-ink-3: #1e1a15;
+  --color-line: #393229;
+  --color-line-soft: #221d17;
 
-  /* Encres chaudes de la charte (texte sur fond clair) */
-  --color-fog: #4a4339;
-  --color-cream: #14100b;
-  --color-bone: #201a12;
-  /* Méta / labels : contraste vérifié sur --color-ink (formule WCAG 2.1).
-     bone-dim 7,28:1 · bone-faint 4,75:1 — tous deux ≥ AA (4,5:1) pour du
-     texte normal, en conservant la teinte chaude de la charte. */
-  --color-bone-dim: #574f43;
-  --color-bone-faint: #736b5d;
+  /* Encres claires de la charte (texte sur fond sombre) */
+  --color-fog: #c9c2b4;
+  --color-cream: #f6f3ec;
+  --color-bone: #ece8dc;
+  /* Méta / labels : bone-dim 8,9:1 · bone-faint 5,6:1 sur --color-ink. */
+  --color-bone-dim: #9b9384;
+  --color-bone-faint: #857d6f;
 
-  /* Accent terracotta — le point signature, parcimonieux (valeur charte DA) */
-  --color-terra: #a85f3c;
-  --color-terra-dim: #8f5439;
-  /* Texte posé SUR un aplat terracotta (pastilles, boutons pleins). La
-     terracotta ne s'inversant pas entre les thèmes, cette valeur est choisie
-     par thème pour rester au-dessus de 4,5:1 — blanc ici (4,8:1 sur la
-     terracotta claire, là où l'encre sombre ne donnerait que 3,9:1). */
-  --color-on-terra: #ffffff;
+  /* Accent terracotta, un ton plus clair sur fond sombre (valeur charte) */
+  --color-terra: #b76e4e;
+  --color-terra-dim: #a35f42;
+  /* Texte posé sur un aplat terracotta : l'encre sombre (5,1:1). */
+  --color-on-terra: #14100b;
 
   /* Typo : Gloock (logotype/titres), mono (labels/méta), Saira (texte) */
   --font-wide: var(--font-gloock), "Times New Roman", serif;
@@ -44,8 +39,8 @@
 @layer base {
   :root {
     /* défini explicitement pour garantir l'émission (dev + prod) */
-    --color-cream: #14100b;
-    --color-terra: #a85f3c;
+    --color-cream: #f6f3ec;
+    --color-terra: #b76e4e;
   }
 
   html {
@@ -884,3 +879,155 @@ html {
   }
 }
 
+
+/* ═══ L'accueil : le showreel plein écran ═══════════════════════════════
+   Un film à la fois, l'index numéroté avec sa ligne de progression. Les
+   extraits jouent muets ; l'affiche reste dessous si la vidéo ne peut pas
+   jouer (économie de données, mouvement réduit, navigateur sans H.264). */
+.showreel {
+  position: relative;
+  height: 100svh;
+  min-height: 560px;
+  overflow: hidden;
+  background: var(--color-ink);
+  user-select: none;
+  -webkit-user-select: none;
+}
+.showreel-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.9s var(--ease-out-soft);
+}
+.showreel-slide.is-on {
+  opacity: 1;
+}
+.showreel-poster,
+.showreel-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.showreel-video {
+  opacity: 0;
+  transition: opacity 0.6s var(--ease-out-soft);
+}
+.showreel-video.is-playing {
+  opacity: 1;
+}
+/* Léger zoom lent sur le film courant : l'image respire */
+.showreel-slide.is-on .showreel-poster,
+.showreel-slide.is-on .showreel-video {
+  animation: showreel-breathe 14s var(--ease-out-soft) both;
+}
+@keyframes showreel-breathe {
+  from { transform: scale(1.04); }
+  to { transform: scale(1); }
+}
+.showreel-scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to top, rgba(10, 9, 8, 0.78) 0%, rgba(10, 9, 8, 0.28) 34%, rgba(10, 9, 8, 0) 60%),
+    linear-gradient(to bottom, rgba(10, 9, 8, 0.45) 0%, rgba(10, 9, 8, 0) 22%);
+}
+.showreel-zone {
+  position: absolute;
+  top: 18%;
+  bottom: 26%;
+  width: 22%;
+  background: none;
+  border: 0;
+  cursor: w-resize;
+  z-index: 2;
+}
+.showreel-zone.is-prev { left: 0; }
+.showreel-zone.is-next { right: 0; cursor: e-resize; }
+.showreel-caption {
+  position: absolute;
+  left: clamp(20px, 4vw, 56px);
+  right: clamp(20px, 4vw, 56px);
+  bottom: clamp(88px, 14vh, 150px);
+  z-index: 3;
+  color: var(--color-cream);
+  pointer-events: none;
+}
+.showreel-caption a { pointer-events: auto; }
+.showreel-meta {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  color: var(--color-bone);
+  opacity: 0.85;
+}
+.showreel-title {
+  margin: 12px 0 0;
+  font-size: clamp(2.6rem, 7.2vw, 6.8rem);
+  line-height: 0.96;
+  letter-spacing: -0.015em;
+  max-width: 14ch;
+  text-shadow: 0 2px 24px rgba(10, 9, 8, 0.35);
+}
+.showreel-title a { color: inherit; text-decoration: none; }
+.showreel-cta {
+  display: inline-block;
+  margin-top: 22px;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  color: var(--color-cream);
+}
+.showreel-index {
+  position: absolute;
+  left: clamp(20px, 4vw, 56px);
+  right: clamp(20px, 4vw, 56px);
+  bottom: clamp(24px, 4vh, 44px);
+  z-index: 3;
+  display: flex;
+  gap: clamp(18px, 3vw, 40px);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+}
+.showreel-num {
+  position: relative;
+  background: none;
+  border: 0;
+  padding: 12px 0 10px;
+  color: var(--color-bone);
+  opacity: 0.45;
+  cursor: pointer;
+  transition: opacity 0.3s;
+  min-width: 34px;
+  text-align: left;
+}
+.showreel-num:hover,
+.showreel-num.is-active { opacity: 1; }
+.showreel-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 4px;
+  height: 1px;
+  background: rgba(236, 232, 220, 0.25);
+  overflow: hidden;
+}
+.showreel-bar > span {
+  position: absolute;
+  inset: 0;
+  background: var(--color-terra);
+  transform-origin: left;
+  transform: scaleX(0);
+}
+@media (max-width: 640px) {
+  .showreel { min-height: 100svh; }
+  .showreel-caption { bottom: 108px; }
+  .showreel-title { font-size: clamp(2.4rem, 12vw, 4rem); max-width: 10ch; }
+  .showreel-index { gap: 14px; font-size: 11px; }
+  .showreel-num { min-width: 30px; }
+  .showreel-zone { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .showreel-slide.is-on .showreel-poster,
+  .showreel-slide.is-on .showreel-video { animation: none; }
+}

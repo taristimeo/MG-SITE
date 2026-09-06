@@ -14,7 +14,7 @@ const groups: FooterGroup[] = [
   },
   {
     label: "Travail",
-    items: [{ text: "Tous les films", href: "/films" }, { text: "La table de montage", href: "/" }],
+    items: [{ text: "Tous les films", href: "/realisations" }],
   },
   {
     label: "Contact",

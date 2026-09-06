@@ -18,7 +18,7 @@ export function Header() {
   const [pastHero, setPastHero] = useState(false);
 
   const pathname = usePathname();
-  const isHome = pathname === BASE;
+  const isHome = pathname === (BASE || "/");
 
   const menuRef = useRef<HTMLDivElement>(null);
   const burgerRef = useRef<HTMLButtonElement>(null);
@@ -124,7 +124,8 @@ export function Header() {
 
   // Accueil : le logotype géant du hero tient lieu de wordmark. Celui du header
   // reste en retrait tant qu'on n'a pas dépassé l'écran-titre (pas de doublon).
-  const logoHidden = isHome && !pastHero;
+  // L'accueil est désormais le showreel plein écran : le logotype reste visible.
+  const logoHidden = false;
 
   return (
     <header data-header className="fixed inset-x-0 top-0 z-50">

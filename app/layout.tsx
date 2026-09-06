@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Gloock, JetBrains_Mono, Saira } from "next/font/google";
 import "./globals.css";
 import { Grain } from "@/components/Grain";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
 import { services, site } from "@/lib/site";
 
 // Logotype & titres — Gloock (serif display fort contraste, cf. la charte).
@@ -54,13 +56,13 @@ export const metadata: Metadata = {
   },
 };
 
-// Barre d'état du navigateur accordée au papier crème de la charte ; le
-// viewport couvre les encoches pour que la timeline respecte la barre d'accueil.
+// Barre d'état du navigateur (iOS/Android) accordée au fond du site : plus de
+// bandeau blanc au-dessus de la page. Valeur statique = fond du thème SOMBRE
+// (--color-ink) ; à passer sur le fond clair dans la branche jumelle.
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  viewportFit: "cover",
-  themeColor: "#f6f3ec",
+  themeColor: "#0a0908",
 };
 
 // Données structurées — studio local (référencement local + éligibilité aux
@@ -136,7 +138,11 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessLd) }}
         />
         <Grain />
-        {children}
+        <Header />
+        <main>{children}</main>
+        {/* L'année est calculée ici (composant serveur) et passée au pied de
+            page : le HTML rendu et la première passe client concordent. */}
+        <Footer year={new Date().getFullYear()} />
       </body>
     </html>
   );

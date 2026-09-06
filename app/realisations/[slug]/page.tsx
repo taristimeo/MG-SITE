@@ -228,7 +228,7 @@ export default async function ProjectPage({
 
           <Reveal delay={90} className="hidden shrink-0 sm:block">
           <Link
-            href="/films"
+            href="/realisations"
             className="font-cond text-[11px] tracking-[0.2em] text-[var(--color-bone-faint)] transition-colors duration-300 hover:text-[var(--color-terra)]"
           >
             Tous les films

@@ -318,8 +318,7 @@ export function projectSuggestions(current: Project, count = 2): Project[] {
 }
 
 export const navLinks = [
-  { label: "Montage", href: "/" },
-  { label: "Films", href: "/films" },
+  { label: "Films", href: "/realisations" },
   { label: "Studio", href: "/studio" },
 ];
 
