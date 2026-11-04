@@ -18,9 +18,8 @@ export default function manifest(): MetadataRoute.Manifest {
     id: "/",
     scope: "/",
     display: "standalone",
-    // Fond du thème SOMBRE (--color-ink) — à inverser sur la branche claire.
-    background_color: "#0a0908",
-    theme_color: "#0a0908",
+    background_color: "#fcfbf8",
+    theme_color: "#fcfbf8",
     icons: [
       {
         src: "/icon.png",

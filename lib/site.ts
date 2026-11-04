@@ -320,6 +320,7 @@ export function projectSuggestions(current: Project, count = 2): Project[] {
 export const navLinks = [
   { label: "Films", href: "/realisations" },
   { label: "Studio", href: "/studio" },
+  { label: "Contact", href: "/contact" },
 ];
 
 // --- Médias des réalisations ---------------------------------------------

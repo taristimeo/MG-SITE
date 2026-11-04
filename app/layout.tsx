@@ -1,8 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Gloock, JetBrains_Mono, Saira } from "next/font/google";
 import "./globals.css";
-import { Grain } from "@/components/Grain";
-import { Header } from "@/components/Header";
+import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { services, site } from "@/lib/site";
 
@@ -56,13 +55,11 @@ export const metadata: Metadata = {
   },
 };
 
-// Barre d'état du navigateur (iOS/Android) accordée au fond du site : plus de
-// bandeau blanc au-dessus de la page. Valeur statique = fond du thème SOMBRE
-// (--color-ink) ; à passer sur le fond clair dans la branche jumelle.
+// Barre d'état du navigateur (iOS/Android) accordée au papier du site.
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0a0908",
+  themeColor: "#fcfbf8",
 };
 
 // Données structurées — studio local (référencement local + éligibilité aux
@@ -137,8 +134,7 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessLd) }}
         />
-        <Grain />
-        <Header />
+        <Nav />
         <main>{children}</main>
         {/* L'année est calculée ici (composant serveur) et passée au pied de
             page : le HTML rendu et la première passe client concordent. */}

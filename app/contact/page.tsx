@@ -1,114 +1,77 @@
 import type { Metadata } from "next";
-import { Reveal } from "@/components/Reveal";
-import { RevealTitle } from "@/components/RevealTitle";
-import { MaskTitle } from "@/components/MaskTitle";
-import { ContactBand } from "@/components/ContactBand";
+import { DevisForm } from "@/components/DevisForm";
+import { Rise } from "@/components/Rise";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Contact — Demander un devis",
-  description: `Demandez un devis à ${site.name}, studio de production vidéo à ${site.city}. Parlez-nous de votre projet vidéo : corporate, événement, mariage, publicité ou clip.`,
+  title: "Contact",
+  description: `Parlez-nous de votre projet vidéo : ${site.name}, studio de production vidéo à ${site.city}. Réponse sous 24 h.`,
   alternates: { canonical: "/contact" },
 };
 
-// Contact éditorial : le devis est LA pièce centrale — une bande géante qui se
-// remplit de terracotta au survol — puis les accès directs en colonnes
-// (écrire / appeler), l'adresse et les réseaux en générique de fin.
 export default function ContactPage() {
   return (
-    <section className="px-5 pb-28 pt-32 sm:px-8 sm:pt-40 lg:px-10">
-      <div className="mx-auto w-full max-w-[1200px]">
-        {/* Écran-titre */}
-        <div className="text-center">
-          <Reveal>
-            <p className="font-cond text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
-              Un projet en tête ?
+    <article className="pt-[calc(var(--nav-h)+24px)] md:pt-[calc(var(--nav-h)+48px)]">
+      <header className="gutter">
+        <p className="t-legend mb-5">Un projet ?</p>
+        <h1 className="t-giant m-0">On en parle.</h1>
+      </header>
+
+      <section className="gutter mt-16 md:mt-28 md:grid md:grid-cols-12 md:gap-x-8">
+        {/* Les accès directs. */}
+        <div className="md:col-span-4">
+          <Rise>
+            <dl className="space-y-8">
+              <div>
+                <dt className="t-legend mb-2 opacity-60">Écrire</dt>
+                <dd className="m-0">
+                  <a href={`mailto:${site.email}`} className="u-draw font-wide text-[clamp(1.35rem,2.3vw,2.4rem)] leading-tight [overflow-wrap:anywhere]">
+                    {site.email}
+                  </a>
+                </dd>
+              </div>
+              <div>
+                <dt className="t-legend mb-2 opacity-60">Appeler</dt>
+                <dd className="m-0">
+                  <a href={`tel:${site.phoneHref}`} className="u-draw t-title">
+                    {site.phone}
+                  </a>
+                </dd>
+              </div>
+              <div>
+                <dt className="t-legend mb-2 opacity-60">Venir</dt>
+                <dd className="t-body m-0">
+                  {site.street}
+                  <br />
+                  {site.postalCode} {site.city}
+                </dd>
+              </div>
+              <div>
+                <dt className="t-legend mb-2 opacity-60">Suivre</dt>
+                <dd className="t-legend m-0 flex gap-5">
+                  {site.socials.map((s) => (
+                    <a key={s.href} href={s.href} target="_blank" rel="noreferrer" className="u-draw">
+                      {s.label}
+                    </a>
+                  ))}
+                </dd>
+              </div>
+            </dl>
+            <p className="t-legend mt-12 flex items-center gap-3">
+              <span aria-hidden className="inline-block h-[6px] w-[6px] rounded-full bg-[var(--color-terra)]" />
+              Disponible — réponse sous 24 h
             </p>
-          </Reveal>
-          <RevealTitle
-            text="On en parle"
-            className="mt-3 text-[clamp(2.4rem,8vw,7rem)] text-[var(--color-cream)]"
-          />
-          <Reveal delay={260}>
-            {/* Le point reste collé à la PREMIÈRE ligne quand le texte passe
-                sur deux lignes (mobile) : items-start + décalage optique. */}
-            <p className="mt-8 inline-flex items-start gap-3 text-left font-cond text-[11px] leading-[1.7] tracking-[0.2em] text-[var(--color-bone-dim)] sm:text-center">
-              <span className="avail-dot mt-[0.48em] shrink-0" aria-hidden />
-              <span>
-                Disponible pour de nouveaux projets · Réponse sous 24 h
-              </span>
-            </p>
-          </Reveal>
+          </Rise>
         </div>
 
-        {/* La bande devis — l'unique geste fort de la page : elle se remplit
-            de terracotta et sa flèche file vers l'avant */}
-        <Reveal delay={340}>
-          {/* Le rappel « gratuit et sans engagement » est passé DANS la bande
-              (état de repos plus habité), il n'est plus répété en dessous. */}
-          <div className="mt-16 sm:mt-24">
-            <ContactBand />
-          </div>
-        </Reveal>
-
-        {/* Accès directs — deux grandes lignes qui montent par masque */}
-        <div className="mt-20 grid grid-cols-1 gap-14 border-t border-[var(--color-line-soft)] pt-16 text-center sm:mt-24 sm:grid-cols-2 sm:gap-10">
-          <div>
-            <Reveal>
-              <p className="font-cond text-[11px] tracking-[0.25em] text-[var(--color-bone-faint)]">
-                Écrivez-nous
-              </p>
-            </Reveal>
-            <MaskTitle delay={140} className="mt-4">
-              <a
-                href={`mailto:${site.email}`}
-                className="font-wide inline-block text-[clamp(1.05rem,2.6vw,1.9rem)] leading-tight text-[var(--color-bone)] transition-colors [overflow-wrap:anywhere] hover:text-[var(--color-terra)]"
-              >
-                {site.email}
-              </a>
-            </MaskTitle>
-          </div>
-          <div>
-            <Reveal delay={120}>
-              <p className="font-cond text-[11px] tracking-[0.25em] text-[var(--color-bone-faint)]">
-                Appelez-nous
-              </p>
-            </Reveal>
-            <MaskTitle delay={260} className="mt-4">
-              <a
-                href={`tel:${site.phoneHref}`}
-                className="font-wide inline-block text-[clamp(1.15rem,2.6vw,1.9rem)] leading-tight text-[var(--color-bone)] transition-colors hover:text-[var(--color-terra)]"
-              >
-                {site.phone}
-              </a>
-            </MaskTitle>
-          </div>
+        {/* La demande. */}
+        <div className="mt-16 md:col-span-7 md:col-start-6 md:mt-0">
+          <Rise>
+            <p className="t-legend mb-8">Décrire le projet</p>
+            <DevisForm />
+          </Rise>
         </div>
-
-        {/* Générique de fin : le lieu puis les réseaux, en cascade */}
-        <div className="mt-16 flex flex-col items-center gap-4 text-center sm:mt-20">
-          <Reveal delay={200}>
-            <address className="font-cond text-[11px] not-italic leading-relaxed tracking-[0.2em] text-[var(--color-bone-dim)]">
-              {site.street} · {site.postalCode} {site.city}
-            </address>
-          </Reveal>
-          <Reveal delay={320}>
-            <div className="flex gap-6 font-cond text-[11px] tracking-[0.2em] text-[var(--color-bone-faint)]">
-              {site.socials.map((s) => (
-                <a
-                  key={s.label}
-                  href={s.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="transition-colors duration-300 hover:text-[var(--color-terra)]"
-                >
-                  {s.label}
-                </a>
-              ))}
-            </div>
-          </Reveal>
-        </div>
-      </div>
-    </section>
+      </section>
+    </article>
   );
 }

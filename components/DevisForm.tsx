@@ -24,10 +24,8 @@ type Status = "idle" | "sending" | "success" | "error";
 // traité comme un échec réseau (donc réessayé, puis état "error").
 type PostResult = "ok" | "failed" | "aborted";
 
-const fieldClass =
-  "w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-ink-2)] px-4 py-3 font-sans text-[15px] text-[var(--color-bone)] placeholder:text-[var(--color-bone-faint)] outline-none transition-[color,border-color,box-shadow] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] focus:border-[var(--color-terra)] focus:shadow-[0_0_0_3px_rgba(183,110,78,0.14)]";
-const labelClass =
-  "font-cond mb-2 flex items-center gap-1 text-[11px] tracking-[0.18em] text-[var(--color-bone-dim)]";
+const fieldClass = "field";
+const labelClass = "t-legend mb-1 flex items-center gap-1";
 
 // POST avec réessais : 2 tentatives supplémentaires sur erreur réseau, délai
 // de garde dépassé ou 5xx ; aucune sur 4xx. Renvoie "ok" si l'API répond
@@ -198,24 +196,13 @@ export function DevisForm() {
   if (status === "success") {
     return (
       <div
-        className="mx-auto max-w-[560px] px-2 py-8 text-center"
+        className="max-w-[560px] py-4"
         role="status"
         aria-live="polite"
       >
-        <span className="font-wide text-5xl leading-none text-[var(--color-terra)]">
-          ✓
-        </span>
-        <h3 className="font-wide mt-5 text-[clamp(1.6rem,4vw,2.4rem)] text-[var(--color-cream)]">
-          Demande envoyée. Merci&nbsp;!
-        </h3>
-        <p className="font-sans mx-auto mt-3 max-w-[38ch] text-sm leading-relaxed text-[var(--color-bone-dim)]">
-          On revient vers vous très vite pour en parler.
-        </p>
-        <button
-          type="button"
-          onClick={reset}
-          className="font-cond mt-8 rounded-full border border-[var(--color-line)] px-7 py-3 text-sm text-[var(--color-bone)] transition-colors duration-300 hover:border-[var(--color-terra)] hover:text-[var(--color-terra)]"
-        >
+        <p className="t-legend text-[var(--color-terra)]">Demande envoyée</p>
+        <h3 className="t-title mt-4">Merci. On revient vers vous très vite.</h3>
+        <button type="button" onClick={reset} className="u-draw t-legend mt-10 text-[var(--color-text)]">
           Faire une autre demande
         </button>
       </div>
@@ -228,9 +215,9 @@ export function DevisForm() {
     <form
       onSubmit={handleSubmit}
       noValidate
-      className="mx-auto max-w-[560px] text-left"
+      className="max-w-[640px] text-left"
     >
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-8">
         {/* Nom / société — pré-remplit le client dans le cockpit */}
         <div>
           <label htmlFor="devis-client" className={labelClass}>
@@ -253,7 +240,7 @@ export function DevisForm() {
           {touched && errors.client && (
             <p
               id="devis-client-error"
-              className="font-cond mt-2 text-[11px] tracking-[0.1em] text-[var(--color-terra)]"
+              className="t-legend mt-2 text-[var(--color-terra)]"
             >
               Champ requis
             </p>
@@ -275,20 +262,20 @@ export function DevisForm() {
               aria-describedby={
                 touched && errors.type ? "devis-type-error" : undefined
               }
-              className={`${fieldClass} appearance-none pr-10 ${type ? "" : "text-[var(--color-bone-faint)]"}`}
+              className={`${fieldClass} appearance-none pr-10 ${type ? "" : "text-[var(--color-text-faint)]"}`}
             >
               <option value="" disabled>
                 Choisir…
               </option>
               {TYPES.map((t) => (
-                <option key={t} value={t} className="text-[var(--color-ink)]">
+                <option key={t} value={t}>
                   {t}
                 </option>
               ))}
             </select>
             <span
               aria-hidden
-              className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-terra)]"
+              className="pointer-events-none absolute right-1 top-1/2 -translate-y-1/2 text-[var(--color-text-dim)]"
             >
               ▾
             </span>
@@ -296,7 +283,7 @@ export function DevisForm() {
           {touched && errors.type && (
             <p
               id="devis-type-error"
-              className="font-cond mt-2 text-[11px] tracking-[0.1em] text-[var(--color-terra)]"
+              className="t-legend mt-2 text-[var(--color-terra)]"
             >
               Champ requis
             </p>
@@ -325,7 +312,7 @@ export function DevisForm() {
           {touched && errors.projet && (
             <p
               id="devis-projet-error"
-              className="font-cond mt-2 text-[11px] tracking-[0.1em] text-[var(--color-terra)]"
+              className="t-legend mt-2 text-[var(--color-terra)]"
             >
               Champ requis
             </p>
@@ -333,7 +320,7 @@ export function DevisForm() {
         </div>
 
         {/* Échéance + budget */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
           <div>
             <label htmlFor="devis-echeance" className={labelClass}>
               Échéance souhaitée
@@ -384,7 +371,7 @@ export function DevisForm() {
           {touched && errors.contact && (
             <p
               id="devis-contact-error"
-              className="font-cond mt-2 text-[11px] tracking-[0.1em] text-[var(--color-terra)]"
+              className="t-legend mt-2 text-[var(--color-terra)]"
             >
               Champ requis
             </p>
@@ -411,11 +398,11 @@ export function DevisForm() {
         </div>
 
         {/* Envoi */}
-        <div className="mt-2 flex flex-col items-center gap-4">
+        <div className="mt-4 flex flex-col items-start gap-5">
           <button
             type="submit"
             disabled={sending}
-            className="btn-cta font-cond w-full rounded-full bg-[var(--color-terra)] px-9 py-4 text-sm text-[var(--color-ink)] disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto"
+            className="t-legend inline-flex items-center gap-4 bg-[var(--color-text)] px-6 py-4 text-[var(--color-paper)] transition-colors duration-500 hover:bg-[var(--color-terra)] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {sending
               ? "Envoi…"
@@ -424,23 +411,23 @@ export function DevisForm() {
                 : "Demander un devis"}
           </button>
           {status === "error" && (
-            <div className="text-center" role="alert" aria-live="assertive">
-              <p className="font-cond text-[12px] tracking-[0.08em] text-[var(--color-terra)]">
+            <div role="alert" aria-live="assertive">
+              <p className="t-legend text-[var(--color-terra)]">
                 L&apos;envoi a échoué. Réessayez dans un instant.
               </p>
               {/* Repli : on ne perd pas le contact si l'API reste muette. */}
-              <p className="font-sans mt-2 text-[13px] leading-relaxed text-[var(--color-bone-dim)]">
+              <p className="t-body mt-2 text-[15px]">
                 Ou écrivez-nous directement&nbsp;:{" "}
                 <a
                   href={`mailto:${site.email}`}
-                  className="text-[var(--color-bone)] underline underline-offset-4 transition-colors duration-300 hover:text-[var(--color-terra)] [overflow-wrap:anywhere]"
+                  className="u-draw text-[var(--color-text)] [overflow-wrap:anywhere]"
                 >
                   {site.email}
                 </a>{" "}
                 ·{" "}
                 <a
                   href={`tel:${site.phoneHref}`}
-                  className="whitespace-nowrap text-[var(--color-bone)] underline underline-offset-4 transition-colors duration-300 hover:text-[var(--color-terra)]"
+                  className="u-draw whitespace-nowrap text-[var(--color-text)]"
                 >
                   {site.phone}
                 </a>

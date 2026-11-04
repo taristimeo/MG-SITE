@@ -1,1033 +1,363 @@
 @import "tailwindcss";
 
 @theme {
-  /* Le noir chaud de la charte comme fond : la salle de projection. Jamais
-     de noir pur, un brun très sombre qui laisse vivre les images. */
-  --color-ink: #0a0908;
-  --color-ink-2: #15120f;
-  --color-ink-3: #1e1a15;
-  --color-line: #393229;
-  --color-line-soft: #221d17;
+  /* ---- Papier ------------------------------------------------------------
+     Le site est une feuille : un blanc légèrement chaud, jamais #fff. Les
+     noms « ink / bone » sont historiques (ink = fond, bone = texte) et sont
+     conservés pour les composants existants ; « paper / text » sont les
+     alias lisibles utilisés par le nouveau code. */
+  --color-ink: #fcfbf8;
+  --color-ink-2: #f6f3ec;
+  --color-ink-3: #efeadf;
+  --color-paper: #fcfbf8;
+  --color-paper-2: #f6f3ec;
+  --color-line: #d9d2c3;
+  --color-line-soft: #ebe6da;
 
-  /* Encres claires de la charte (texte sur fond sombre) */
-  --color-fog: #c9c2b4;
-  --color-cream: #f6f3ec;
-  --color-bone: #ece8dc;
-  /* Méta / labels : bone-dim 8,9:1 · bone-faint 5,6:1 sur --color-ink. */
-  --color-bone-dim: #9b9384;
-  --color-bone-faint: #857d6f;
+  --color-fog: #8d8578;
+  --color-cream: #201a12;
+  --color-bone: #201a12;
+  --color-text: #201a12;
+  --color-bone-dim: #5b5347;
+  --color-bone-faint: #8d8578;
+  --color-text-dim: #5b5347;
+  --color-text-faint: #8d8578;
 
-  /* Accent terracotta, un ton plus clair sur fond sombre (valeur charte) */
-  --color-terra: #b76e4e;
-  --color-terra-dim: #a35f42;
-  /* Texte posé sur un aplat terracotta : l'encre sombre (5,1:1). */
-  --color-on-terra: #14100b;
+  --color-terra: #a85f3c;
+  --color-terra-dim: #8f5439;
+  --color-on-terra: #fcfbf8;
 
-  /* Typo : Gloock (logotype/titres), mono (labels/méta), Saira (texte) */
   --font-wide: var(--font-gloock), "Times New Roman", serif;
   --font-cond: var(--font-mono), ui-monospace, "SFMono-Regular", monospace;
   --font-sans: var(--font-saira), system-ui, -apple-system, sans-serif;
 
-  /* Courbe signature — décélération franche, arrivée posée */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-  /* Décélération un peu plus courte, pour les traits/soulignements */
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
-  /* Sortie très douce, quasi linéaire en fin — fondus longs et calmes */
   --ease-out-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
 @layer base {
   :root {
-    /* défini explicitement pour garantir l'émission (dev + prod) */
-    --color-cream: #f6f3ec;
-    --color-terra: #b76e4e;
+    /* Marge constante : la même sur toute la feuille. */
+    --gutter: 20px;
+    --nav-h: 64px;
+  }
+  @media (min-width: 640px) {
+    :root {
+      --gutter: 32px;
+    }
+  }
+  @media (min-width: 1280px) {
+    :root {
+      --gutter: 48px;
+    }
   }
 
   html {
-    scroll-behavior: smooth;
+    background: var(--color-paper);
+    color: var(--color-text);
+    -webkit-text-size-adjust: 100%;
+    text-rendering: geometricPrecision;
   }
-
   body {
-    background-color: var(--color-ink);
-    color: var(--color-bone);
     font-family: var(--font-sans);
+    background: var(--color-paper);
+    color: var(--color-text);
     -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
-    /* `clip` et non `hidden` : `overflow-x: hidden` force le calcul de
-       `overflow-y` à `auto` (spec CSS) et transforme le body en conteneur de
-       défilement — ce qui casse les `position: sticky` sur iOS. `clip` coupe
-       les débordements horizontaux sans créer de conteneur de scroll. */
+    -moz-osx-font-smoothing: grayscale;
     overflow-x: clip;
+    min-height: 100dvh;
   }
-
   ::selection {
     background: var(--color-terra);
-    color: var(--color-ink);
+    color: var(--color-on-terra);
   }
-
-  /* Focus clavier visible, à la charte (remplace l'anneau UA bleu) */
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  img,
+  video,
+  canvas {
+    display: block;
+    max-width: 100%;
+  }
+  button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+  }
   :focus-visible {
     outline: 1px solid var(--color-terra);
-    outline-offset: 3px;
-    border-radius: 2px;
+    outline-offset: 4px;
   }
 }
 
-/* Logotype & titres — Gloock, serif fort contraste, casse naturelle */
+/* ---- Typographie ---------------------------------------------------------- */
 .font-wide {
   font-family: var(--font-wide);
   font-weight: 400;
-  text-transform: none;
-  letter-spacing: -0.01em;
-  line-height: 0.98;
+  letter-spacing: -0.015em;
+  font-feature-settings: "kern" 1, "liga" 1;
 }
-
-/* Labels & méta — monospace capitales espacées */
 .font-cond {
   font-family: var(--font-cond);
-  font-weight: 500;
+  font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.14em;
+  font-variant-numeric: tabular-nums;
+}
+.font-sans {
+  font-family: var(--font-sans);
 }
 
-/* Le point terracotta signature du logotype */
-.dot {
-  color: var(--color-terra);
+/* Les deux échelles de la feuille : la légende (10-12 px) et l'affiche. */
+.t-legend {
+  font-family: var(--font-cond);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--color-text-dim);
+}
+.t-giant {
+  font-family: var(--font-wide);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  line-height: 0.9;
+  font-size: clamp(3.4rem, 13.5vw, 14rem);
+}
+.t-display {
+  font-family: var(--font-wide);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 0.95;
+  font-size: clamp(2.4rem, 7.2vw, 7.5rem);
+}
+.t-title {
+  font-family: var(--font-wide);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.02;
+  font-size: clamp(1.6rem, 3.4vw, 3.2rem);
+}
+.t-body {
+  font-family: var(--font-sans);
+  font-size: clamp(1rem, 1.05vw, 1.125rem);
+  line-height: 1.6;
+  color: var(--color-text-dim);
 }
 
-/* Bouton d'action principal — l'unique aplat terracotta, comme une
-   ponctuation. Relief et halo doux au survol, texte sombre pour la lisibilité. */
-.btn-cta {
-  transition:
-    transform 0.45s var(--ease-out-expo),
-    box-shadow 0.45s var(--ease-out-expo),
-    filter 0.45s var(--ease-out-expo);
-  box-shadow: 0 4px 16px -8px rgba(183, 110, 78, 0.45);
-}
-.btn-cta:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.05);
-  box-shadow: 0 14px 34px -10px rgba(183, 110, 78, 0.55);
-}
-.btn-cta:active {
-  transform: translateY(0);
+.gutter {
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
 }
 
-/* ---- Modale (pop-up devis) ---- */
-@keyframes modal-backdrop {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-@keyframes modal-panel {
-  from {
-    opacity: 0;
-    transform: translateY(14px) scale(0.985);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-.modal-backdrop {
-  animation: modal-backdrop 0.3s var(--ease-out-expo) both;
-}
-.modal-panel {
-  animation: modal-panel 0.45s var(--ease-out-expo) both;
-}
-
-/* ---- Filtres (liste des réalisations) : soulignement terracotta tracé ---- */
-.filter-chip {
-  position: relative;
-  padding-bottom: 6px;
-}
-.filter-chip::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: 0;
+/* Le filet : un trait de 1 px, jamais une ombre. */
+.rule {
   height: 1px;
-  width: 100%;
-  background: var(--color-terra);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.45s var(--ease-out-expo);
-}
-.filter-chip.is-active::after {
-  transform: scaleX(1);
-}
-
-/* Fondu de la grille quand le filtre change */
-@keyframes grid-fade {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-.grid-fade {
-  animation: grid-fade 0.5s var(--ease-out-expo) both;
-}
-
-/* Point de disponibilité — pulse doux, comme un témoin d'enregistrement */
-.avail-dot {
-  position: relative;
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 9999px;
-  background: var(--color-terra);
-}
-.avail-dot::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 9999px;
-  background: var(--color-terra);
-  animation: avail-ping 2.2s var(--ease-out-expo) infinite;
-}
-.avail-dot::after {
-  /* Une pulsation n'est pas une entrée de contenu : courbe dédiée, pas expo */
-  animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
-}
-@keyframes avail-ping {
-  0% {
-    transform: scale(1);
-    opacity: 0.5;
-  }
-  70%,
-  100% {
-    transform: scale(2.6);
-    opacity: 0;
-  }
-}
-
-/* Barre de défilement fine, dans les tons du site */
-html {
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-ink-3) var(--color-ink);
-}
-::-webkit-scrollbar {
-  width: 10px;
-}
-::-webkit-scrollbar-track {
-  background: var(--color-ink);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--color-ink-3);
-  border-radius: 999px;
-  border: 2px solid var(--color-ink);
-}
-::-webkit-scrollbar-thumb:hover {
   background: var(--color-line);
 }
 
-/* ---- Grain argentique : très subtil, clin d'œil au nom ---- */
-.grain {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 60;
-  opacity: 0.035;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
-/* ---- Reveal au scroll — fondu-montée beurré : montée un peu plus courte que
-   le fondu, très léger flou qui se dissipe pour un « focus » qui se pose ---- */
-.reveal {
-  opacity: 0;
-  transform: translateY(22px);
-  transition:
-    opacity 1.05s var(--ease-out-soft),
-    transform 1.1s var(--ease-out-expo);
-  transition-delay: var(--reveal-delay, 0ms);
-  will-change: opacity, transform;
-}
-.reveal.is-visible {
-  opacity: 1;
-  transform: none;
-}
-
-/* ---- Vitrine Apple : chaque film entre en fondu + montée + très léger zoom,
-   quand il arrive en vue (FilmReveal → is-in). Que du transform + opacity
-   (aucun filtre ni clip-path près des vidéos) → robuste iOS. ---- */
-.apple-rise {
-  opacity: 0;
-  transform: translateY(52px) scale(0.98);
-  transition:
-    opacity 1s var(--ease-out-soft),
-    transform 1.2s var(--ease-out-expo);
-  will-change: opacity, transform;
-}
-.apple-rise.is-in {
-  opacity: 1;
-  transform: none;
-}
-@media (prefers-reduced-motion: reduce) {
-  .apple-rise {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-}
-
-/* ---- Récit d'une réalisation : révélation premium en trois temps ---- */
-.story-block .story-ghost,
-.story-block .story-index,
-.story-block .story-title,
-.story-block .story-body {
-  opacity: 0;
-  transform: translateY(20px);
-  transition:
-    opacity 1.1s var(--ease-out-soft),
-    transform 1.1s var(--ease-out-expo);
-  will-change: opacity, transform;
-}
-.story-block .story-ghost {
-  transform: translateY(0) scale(0.92);
-  transition:
-    opacity 1.6s var(--ease-out-soft),
-    transform 1.6s var(--ease-out-expo);
-}
-.story-block .story-title {
-  filter: blur(5px);
-  transition:
-    opacity 1.1s var(--ease-out-soft),
-    transform 1.1s var(--ease-out-expo),
-    filter 0.9s var(--ease-out-soft);
-}
-.story-block .story-rule {
-  opacity: 0;
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 1s var(--ease-out-quart);
-  transition-delay: 0.2s;
-  will-change: transform;
-}
-.story-block .story-index {
-  transition-delay: 0.06s;
-}
-.story-block .story-title {
-  transition-delay: 0.16s;
-}
-.story-block .story-body {
-  transition-delay: 0.34s;
-}
-.story-block.is-in .story-ghost {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-.story-block.is-in .story-index,
-.story-block.is-in .story-title,
-.story-block.is-in .story-body {
-  opacity: 1;
-  transform: none;
-}
-.story-block.is-in .story-title {
-  filter: blur(0);
-}
-.story-block.is-in .story-rule {
-  opacity: 1;
-  transform: scaleX(1);
-}
-
-/* Lien souligné animé */
-.link-underline {
+/* ---- Lien : soulignement qui se trace --------------------------------------- */
+.u-draw {
   position: relative;
+  display: inline-block;
 }
-.link-underline::after {
+.u-draw::after {
   content: "";
   position: absolute;
   left: 0;
-  bottom: -2px;
-  width: 100%;
+  right: 0;
+  bottom: -0.15em;
   height: 1px;
   background: currentColor;
   transform: scaleX(0);
-  transform-origin: right;
-  transition: transform 0.5s var(--ease-out-expo);
+  transform-origin: left;
+  transition: transform 0.6s var(--ease-out-expo);
 }
-.link-underline:hover::after {
+.u-draw:hover::after,
+.u-draw:focus-visible::after,
+.u-draw.is-on::after {
   transform: scaleX(1);
-  transform-origin: left;
 }
 
-/* ---- Mot-clé souligné terracotta : le trait se trace de gauche à droite,
-   ~1s après l'apparition du texte du hero ---- */
-.kw {
-  position: relative;
-  color: var(--color-bone);
+/* ---- Navigation : trois mots en haut de la feuille, sur un voile de papier. */
+.nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 60;
+  height: var(--nav-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--gutter);
+  color: var(--color-text);
+  background: linear-gradient(to bottom, var(--color-paper) 0%, var(--color-paper) 62%, transparent 100%);
+  pointer-events: none;
 }
-.kw::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -0.18em;
-  height: 1px;
-  width: 100%;
-  background: var(--color-terra);
-  transform: scaleX(0);
-  transform-origin: left;
-  animation: kw-draw 0.7s var(--ease-out-expo) var(--kw-delay, 1.8s) forwards;
+.nav > * {
+  pointer-events: auto;
 }
-@keyframes kw-draw {
-  to {
-    transform: scaleX(1);
-  }
+.nav-logo {
+  transition: opacity 0.5s var(--ease-out-expo);
 }
-
-/* ---- Défilement vertical en boucle (liste des réalisations) ---- */
-@keyframes marquee-y {
-  from {
-    transform: translateY(0);
-  }
-  to {
-    transform: translateY(-50%);
-  }
-}
-.marquee-y {
-  animation: marquee-y 36s linear infinite;
-}
-
-/* ---- Défilement horizontal en boucle (galerie d'un projet) ---- */
-@keyframes marquee-x {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-.marquee-x {
-  animation: marquee-x 45s linear infinite;
-}
-
-/* ---- Intro : fondu du titre (léger flou qui se pose) puis point « REC » ---- */
-@keyframes title-fade {
-  from {
-    opacity: 0;
-    filter: blur(7px);
-    transform: translateY(0.14em);
-  }
-  to {
-    opacity: 1;
-    filter: blur(0);
-    transform: translateY(0);
-  }
-}
-.reveal-word-text {
-  display: inline-block;
+html[data-hero="1"] .nav-logo {
   opacity: 0;
-  animation: title-fade 1.1s var(--ease-out-expo) 0.12s forwards;
-  will-change: opacity, filter, transform;
+  pointer-events: none;
+}
+.nav a[aria-current="page"] {
+  opacity: 0.55;
 }
 
-/* Le point apparaît à sa place (pas de mouvement), clignote 3 fois comme un
-   REC, puis reste STATIQUE. */
-@keyframes dot-rec {
-  0% {
-    opacity: 0;
-  }
-  8% {
-    opacity: 1;
-  }
-  18% {
-    opacity: 1;
-  }
-  20% {
-    opacity: 0;
-  }
-  33% {
-    opacity: 0;
-  }
-  35% {
-    opacity: 1;
-  }
-  48% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0;
-  }
-  63% {
-    opacity: 0;
-  }
-  65% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 1;
-  }
+/* ---- Entrée de page : la feuille « monte en révélateur ». ----------------- */
+.page-enter {
+  animation: page-enter 0.9s var(--ease-out-expo) both;
 }
-.hero-dot {
-  opacity: 0;
-  animation: dot-rec 1.2s ease-in-out 0.8s both;
-}
-
-/* Le header se révèle en fondu doux au chargement */
-@keyframes header-fade {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-.header-in {
-  animation: header-fade 0.9s var(--ease-out-expo) 0.15s both;
-}
-
-/* ---- Révélation premium par masque (lignes de titre qui montent) ---- */
-.mask-line {
-  display: block;
-  overflow: hidden;
-  /* Réserve sous la ligne de base pour ne pas rogner les jambages (g, j, p…)
-     de Gloock, marqués aux grandes tailles. */
-  padding-bottom: 0.16em;
-}
-.mask-line > span {
-  display: block;
-  transform: translateY(115%);
-  filter: blur(5px);
-  transition:
-    transform 1.2s var(--ease-out-expo),
-    filter 0.85s var(--ease-out-soft);
-  transition-delay: var(--mask-delay, 0ms);
-  will-change: transform, filter;
-}
-.in-view .mask-line > span {
-  transform: translateY(0);
-  filter: blur(0);
-}
-
-/* ---- Révélation premium d'une image : ouverture + léger dézoom ---- */
-.img-open {
-  clip-path: inset(16% 10% 16% 10%);
-  transform: scale(1.16);
-  opacity: 0;
-  transition:
-    clip-path 1.5s var(--ease-out-expo),
-    transform 1.6s var(--ease-out-expo),
-    opacity 1.1s var(--ease-out-soft);
-  transition-delay: var(--mask-delay, 0ms);
-  will-change: transform, clip-path, opacity;
-}
-.in-view .img-open {
-  clip-path: inset(0% 0% 0% 0%);
-  transform: scale(1);
-  opacity: 1;
-}
-
-/* ---- Lecteur vidéo : ouverture cinématographique (écran qui s'ouvre depuis
-   une fente centrale) + zoom qui se pose + bouton « play » qui éclot ---- */
-.video-cinema {
-  clip-path: inset(47% 0% 47% 0% round 1rem);
-  opacity: 0;
-  transition:
-    clip-path 1.4s var(--ease-out-expo),
-    opacity 0.6s ease-out;
-  will-change: clip-path;
-}
-.video-cinema.is-in {
-  clip-path: inset(0% 0% 0% 0% round 1rem);
-  opacity: 1;
-}
-.video-cinema-inner {
-  transform: scale(1.22);
-  transition: transform 1.8s var(--ease-out-expo);
-  will-change: transform;
-}
-.video-cinema.is-in .video-cinema-inner {
-  transform: scale(1);
-}
-.video-cinema-play {
-  opacity: 0;
-  transform: translate(-50%, -50%) scale(0.7);
-  transition:
-    opacity 0.7s ease-out,
-    transform 0.9s var(--ease-out-expo);
-  transition-delay: 0.7s;
-}
-.video-cinema.is-in .video-cinema-play {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
-}
-@keyframes play-pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(183, 110, 78, 0.45);
-  }
-  70% {
-    box-shadow: 0 0 0 22px rgba(183, 110, 78, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(183, 110, 78, 0);
-  }
-}
-.play-pulse {
-  animation: play-pulse 2.4s var(--ease-out-expo) infinite;
-}
-
-/* ---- Transition d'entrée de page (template.tsx) ----
-   FONDU SEUL, volontairement. Une animation de `transform`, même terminée
-   sur `none`, fait du conteneur le référentiel de tous ses descendants en
-   `position: fixed` pendant toute sa durée — en-tête fixe, calques plein
-   écran du viseur, amorce : tout se décalait le temps de l'animation. Ne pas
-   réintroduire de montée ici ; si un jour on en veut une, elle doit vivre
-   sur un enfant qui ne contient aucun calque fixe. */
 @keyframes page-enter {
   from {
     opacity: 0;
+    filter: contrast(0.6) brightness(1.25);
   }
   to {
     opacity: 1;
-  }
-}
-.page-enter {
-  animation: page-enter 0.4s var(--ease-out-expo) both;
-}
-
-/* ---- Curseur « VOIR » qui suit le pointeur au survol des cards ---- */
-/* Actif uniquement sur pointeur fin (activé côté JS) ; le disque suit le
-   pointeur, se teinte terracotta au contact d'une card. */
-.card-cursor {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 70;
-  display: flex;
-  height: 4rem;
-  width: 4rem;
-  align-items: center;
-  justify-content: center;
-  border-radius: 9999px;
-  border: 1px solid rgba(232, 228, 216, 0.55);
-  color: var(--color-cream);
-  background: rgba(10, 9, 8, 0.28);
-  backdrop-filter: blur(2px);
-  pointer-events: none;
-  opacity: 0;
-  transform: translate3d(-100px, -100px, 0) translate(-50%, -50%) scale(0.6);
-  transition:
-    opacity 0.3s var(--ease-out-expo),
-    background-color 0.3s var(--ease-out-expo),
-    border-color 0.3s var(--ease-out-expo),
-    color 0.3s var(--ease-out-expo);
-  will-change: transform, opacity;
-}
-.card-cursor.is-visible {
-  opacity: 1;
-}
-.card-cursor.is-active {
-  border-color: var(--color-terra);
-  background: var(--color-terra);
-  color: var(--color-ink);
-}
-/* Sur desktop (pointeur fin), le badge play central cède la place au curseur
-   « VOIR ». En tactile, le badge reste (le curseur y est désactivé). */
-@media (hover: hover) and (pointer: fine) {
-  .card-play-badge {
-    display: none;
-  }
-}
-
-/* ---- Frise du process (page Studio) : trait qui se trace au scroll ---- */
-.process-fill {
-  transform: scaleX(0);
-  transform-origin: left;
-  will-change: transform;
-}
-.process-fill-v {
-  transform: scaleY(0);
-  transform-origin: top;
-  will-change: transform;
-}
-.process-dot {
-  background: var(--color-bone-faint);
-  transition:
-    background-color 0.45s var(--ease-out-expo),
-    box-shadow 0.45s var(--ease-out-expo),
-    transform 0.45s var(--ease-out-expo);
-}
-.process-dot[data-state="done"] {
-  background: var(--color-bone);
-}
-.process-dot[data-state="active"] {
-  background: var(--color-terra);
-  transform: scale(1.35);
-  animation: process-pulse 1.6s var(--ease-out-expo) infinite;
-}
-/* Le point actif « ping » comme une tête de lecture qui avance dans le temps. */
-@keyframes process-pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(183, 110, 78, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 9px rgba(183, 110, 78, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(183, 110, 78, 0);
-  }
-}
-/* Texte d'une étape : estompé puis révélé (montée + éclaircissement) au
-   passage de la tête de lecture, en synchro avec le point. */
-.process-text {
-  opacity: 0.28;
-  transform: translateY(10px);
-  transition:
-    opacity 0.6s var(--ease-out-expo),
-    transform 0.6s var(--ease-out-expo);
-  will-change: opacity, transform;
-}
-.process-text[data-in="true"] {
-  opacity: 1;
-  transform: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-  .page-enter {
-    animation: none;
-  }
-  .card-cursor {
-    display: none;
-  }
-  .process-fill {
-    transform: scaleX(1);
-  }
-  .process-fill-v {
-    transform: scaleY(1);
-  }
-  .process-dot {
-    transition: none;
-  }
-  .process-dot[data-state="active"] {
-    animation: none;
-    box-shadow: 0 0 0 4px rgba(183, 110, 78, 0.16);
-  }
-  .process-text {
-    transition: none;
-    opacity: 1;
-    transform: none;
-  }
-  .grid-fade {
-    animation: none;
-  }
-  /* Défilé de logos arrêté : la rangée devient défilable manuellement */
-  .marquee-wrap {
-    overflow-x: auto;
-  }
-  .avail-dot::after {
-    animation: none;
-    display: none;
-  }
-  .filter-chip::after {
-    transition: none;
-  }
-  .mask-line > span,
-  .img-open {
-    transform: none;
-    opacity: 1;
     filter: none;
-    clip-path: none;
-    transition: none;
-  }
-  .video-cinema {
-    clip-path: none;
-    opacity: 1;
-    transition: none;
-  }
-  .video-cinema-inner,
-  .video-cinema-play {
-    transform: translate(0, 0) scale(1);
-    opacity: 1;
-    transition: none;
-  }
-  .video-cinema-play {
-    transform: translate(-50%, -50%) scale(1);
-  }
-  .play-pulse {
-    animation: none;
-  }
-  .reveal {
-    opacity: 1;
-    transform: none;
-    filter: none;
-    transition: none;
-  }
-  .story-block .story-ghost,
-  .story-block .story-index,
-  .story-block .story-title,
-  .story-block .story-body,
-  .story-block .story-rule {
-    opacity: 1;
-    transform: none;
-    filter: none;
-    transition: none;
-  }
-  .marquee-y,
-  .marquee-x,
-  .header-in {
-    animation: none;
-  }
-  .reveal-word-text,
-  .hero-dot {
-    animation: none;
-    opacity: 1;
-  }
-  .kw::after {
-    animation: none;
-    transform: scaleX(1);
-  }
-  .parallax {
-    transform: none !important;
   }
 }
 
-/* ═══ Signatures premium — cinéma ═══════════════════════════════════════ */
-
-/* Point « REC » qui pulse (viewfinder). Le timecode défile en JS. */
-@keyframes rec-blink {
-  0%, 45% { opacity: 1; }
-  55%, 100% { opacity: 0.15; }
-}
-.rec-blink {
-  animation: rec-blink 1.4s steps(1, end) infinite;
-}
-
-/* « Titres qui se composent » : chaque mot monte derrière un masque, léger
-   flou qui se dissipe, en cascade (le retard est posé en inline par mot). */
-.word-reveal-mask {
-  display: inline-block;
-  overflow: hidden;
-  vertical-align: top;
-  margin-right: 0.26em;
-  padding-bottom: 0.16em; /* garde les jambages */
-}
-.word-reveal-mask > span {
-  display: inline-block;
-  transform: translateY(110%);
-  transition: transform 0.95s var(--ease-out-expo);
-  will-change: transform;
-}
-.word-reveal.is-in .word-reveal-mask > span {
-  transform: none;
-}
-
-/* Déclencheur d'apparition (ajoute .is-in en vue). Le mouvement « déploiement »
-   est porté par .film-pull (l'image descend dans sa fenêtre) et .film-cap-reveal
-   (la légende suit). Que du transform + overflow — robuste iOS. */
-.film-reveal {
+/* ---- Apparition au défilement (sobre : un seul mouvement) ----------------- */
+.rise {
   opacity: 0;
-  transition: opacity 0.7s var(--ease-out-soft);
-}
-.film-reveal.is-in {
-  opacity: 1;
-}
-
-/* La pellicule se déroule : l'image descend depuis le haut, révélée par la
-   fenêtre du photogramme (overflow: hidden côté .film-frame). */
-.film-pull {
-  position: absolute;
-  inset: 0;
-  transform: translateY(-100%);
-  transition: transform 1.2s var(--ease-out-expo);
-  will-change: transform;
-}
-.film-reveal.is-in .film-pull {
-  transform: translateY(0);
-}
-.film-cap-reveal {
-  opacity: 0;
-  transform: translateY(10px);
+  transform: translateY(18px);
   transition:
-    opacity 0.8s var(--ease-out-soft),
+    opacity 0.9s var(--ease-out-expo),
     transform 0.9s var(--ease-out-expo);
-  transition-delay: 0.35s;
 }
-.film-reveal.is-in .film-cap-reveal {
+.rise.is-in {
   opacity: 1;
   transform: none;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .rec-blink {
-    animation: none;
+/* ---- Image qui se développe (repli CSS quand WebGL n'est pas là) ---------- */
+.develop {
+  opacity: 0;
+  filter: contrast(0.3) brightness(1.4) saturate(0.4);
+  transition:
+    opacity 1.3s var(--ease-out-soft),
+    filter 1.6s var(--ease-out-soft);
+}
+.develop.is-in {
+  opacity: 1;
+  filter: none;
+}
+
+/* ---- Scène des films (accueil) --------------------------------------------- */
+.stage {
+  position: relative;
+}
+.stage-sticky {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  overflow: hidden;
+}
+.stage-title {
+  animation: stage-title 0.9s var(--ease-out-expo) both;
+}
+@keyframes stage-title {
+  from {
+    opacity: 0;
+    transform: translateY(0.25em);
+    filter: blur(6px);
   }
-  .word-reveal-mask {
-    overflow: visible;
-  }
-  .word-reveal-mask > span {
-    transform: none;
-    transition: none;
-  }
-  .film-reveal,
-  .film-reveal .film-pull,
-  .film-reveal .film-cap-reveal {
+  to {
     opacity: 1;
     transform: none;
-    transition: none;
+    filter: none;
+  }
+}
+.stage-legend {
+  animation: stage-legend 0.7s var(--ease-out-expo) 0.1s both;
+}
+@keyframes stage-legend {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 
-
-/* ═══ L'accueil : le showreel plein écran ═══════════════════════════════
-   Un film à la fois, l'index numéroté avec sa ligne de progression. Les
-   extraits jouent muets ; l'affiche reste dessous si la vidéo ne peut pas
-   jouer (économie de données, mouvement réduit, navigateur sans H.264). */
-.showreel {
-  position: relative;
-  height: 100svh;
-  min-height: 560px;
-  overflow: hidden;
-  background: var(--color-ink);
-  user-select: none;
-  -webkit-user-select: none;
-}
-.showreel-slide {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  transition: opacity 0.9s var(--ease-out-soft);
-}
-.showreel-slide.is-on {
-  opacity: 1;
-}
-.showreel-poster,
-.showreel-video {
+/* ---- Canvas WebGL ----------------------------------------------------------- */
+.gl {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-}
-.showreel-video {
   opacity: 0;
   transition: opacity 0.6s var(--ease-out-soft);
 }
-.showreel-video.is-playing {
+.gl.is-on {
   opacity: 1;
 }
-/* Léger zoom lent sur le film courant : l'image respire */
-.showreel-slide.is-on .showreel-poster,
-.showreel-slide.is-on .showreel-video {
-  animation: showreel-breathe 14s var(--ease-out-soft) both;
-}
-@keyframes showreel-breathe {
-  from { transform: scale(1.04); }
-  to { transform: scale(1); }
-}
-.showreel-scrim {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    linear-gradient(to top, rgba(10, 9, 8, 0.78) 0%, rgba(10, 9, 8, 0.28) 34%, rgba(10, 9, 8, 0) 60%),
-    linear-gradient(to bottom, rgba(10, 9, 8, 0.45) 0%, rgba(10, 9, 8, 0) 22%);
-}
-.showreel-zone {
-  position: absolute;
-  top: 18%;
-  bottom: 26%;
-  width: 22%;
-  background: none;
+
+/* ---- Formulaire : des champs tracés, pas des boîtes --------------------------- */
+.field {
+  width: 100%;
+  background: transparent;
   border: 0;
-  cursor: w-resize;
-  z-index: 2;
+  border-bottom: 1px solid var(--color-line);
+  border-radius: 0;
+  padding: 14px 0;
+  font-family: var(--font-sans);
+  font-size: 17px;
+  line-height: 1.4;
+  color: var(--color-text);
+  outline: none;
+  transition: border-color 0.4s var(--ease-out-expo);
 }
-.showreel-zone.is-prev { left: 0; }
-.showreel-zone.is-next { right: 0; cursor: e-resize; }
-.showreel-caption {
-  position: absolute;
-  left: clamp(20px, 4vw, 56px);
-  right: clamp(20px, 4vw, 56px);
-  bottom: clamp(88px, 14vh, 150px);
-  z-index: 3;
-  color: var(--color-cream);
-  pointer-events: none;
+.field::placeholder {
+  color: var(--color-text-faint);
 }
-.showreel-caption a { pointer-events: auto; }
-.showreel-meta {
-  font-size: 11px;
-  letter-spacing: 0.22em;
-  color: var(--color-bone);
-  opacity: 0.85;
+.field:focus {
+  border-bottom-color: var(--color-text);
 }
-.showreel-title {
-  margin: 12px 0 0;
-  font-size: clamp(2.6rem, 7.2vw, 6.8rem);
-  line-height: 0.96;
-  letter-spacing: -0.015em;
-  max-width: 14ch;
-  text-shadow: 0 2px 24px rgba(10, 9, 8, 0.35);
+.field[aria-invalid="true"] {
+  border-bottom-color: var(--color-terra);
 }
-.showreel-title a { color: inherit; text-decoration: none; }
-.showreel-cta {
-  display: inline-block;
-  margin-top: 22px;
-  font-size: 11px;
-  letter-spacing: 0.22em;
-  color: var(--color-cream);
+select.field option {
+  color: var(--color-text);
+  background: var(--color-paper);
 }
-.showreel-index {
-  position: absolute;
-  left: clamp(20px, 4vw, 56px);
-  right: clamp(20px, 4vw, 56px);
-  bottom: clamp(24px, 4vh, 44px);
-  z-index: 3;
-  display: flex;
-  gap: clamp(18px, 3vw, 40px);
-  font-size: 12px;
-  letter-spacing: 0.2em;
+
+/* ---- Marquee de la liste des métiers ------------------------------------------ */
+.row-link {
+  transition: color 0.4s var(--ease-out-expo);
 }
-.showreel-num {
-  position: relative;
-  background: none;
-  border: 0;
-  padding: 12px 0 10px;
-  color: var(--color-bone);
-  opacity: 0.45;
-  cursor: pointer;
-  transition: opacity 0.3s;
-  min-width: 34px;
-  text-align: left;
+.row-link:hover {
+  color: var(--color-terra);
 }
-.showreel-num:hover,
-.showreel-num.is-active { opacity: 1; }
-.showreel-bar {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 4px;
-  height: 1px;
-  background: rgba(236, 232, 220, 0.25);
-  overflow: hidden;
-}
-.showreel-bar > span {
-  position: absolute;
-  inset: 0;
-  background: var(--color-terra);
-  transform-origin: left;
-  transform: scaleX(0);
-}
-@media (max-width: 640px) {
-  .showreel { min-height: 100svh; }
-  .showreel-caption { bottom: 108px; }
-  .showreel-title { font-size: clamp(2.4rem, 12vw, 4rem); max-width: 10ch; }
-  .showreel-index { gap: 14px; font-size: 11px; }
-  .showreel-num { min-width: 30px; }
-  .showreel-zone { display: none; }
-}
+
+/* ---- Mouvement réduit ----------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
-  .showreel-slide.is-on .showreel-poster,
-  .showreel-slide.is-on .showreel-video { animation: none; }
+  .page-enter,
+  .stage-title,
+  .stage-legend {
+    animation: none;
+  }
+  .rise,
+  .develop {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+  .u-draw::after {
+    transition: none;
+  }
 }

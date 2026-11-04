@@ -1,18 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Still } from "@/components/Poster";
-import { DevisModal } from "@/components/DevisModal";
-import { OtherWorks } from "@/components/OtherWorks";
-import { ProjectStory } from "@/components/ProjectStory";
-import { ProjectVideo } from "@/components/ProjectVideo";
-import { Reveal } from "@/components/Reveal";
-import { MaskTitle } from "@/components/MaskTitle";
-import { HeroZoom } from "@/components/HeroZoom";
+import { Player } from "@/components/Player";
+import { Rise } from "@/components/Rise";
 import {
   projectCredits,
+  projectPreview,
   projects,
-  projectSuggestions,
+  projectStills,
   projectThumb,
   site,
   youtubeId,
@@ -65,21 +60,18 @@ export default async function ProjectPage({
 
   const project = projects[index];
   const credits = projectCredits(project);
-  const suggestions = projectSuggestions(project, 2);
-  // Navigation cyclique film précédent / suivant (geste « à l'affiche »).
   const n = projects.length;
-  const prev = projects[(index - 1 + n) % n];
   const next = projects[(index + 1) % n];
-
   const videoId = youtubeId(project.video);
+  const stills = projectStills(project).slice(1);
+  const num = String(index + 1).padStart(2, "0");
+
   const sections = [
     { label: "Le projet", body: project.summary },
-    { label: "Notre approche", body: project.approach },
+    { label: "L'approche", body: project.approach },
     { label: "Le résultat", body: project.result },
   ];
 
-  // Données structurées : la vidéo (résultats enrichis Google) + le fil
-  // d'Ariane. Construites à partir des données du projet.
   const path = `/realisations/${project.slug}`;
   const pageUrl = `${site.url}${path}`;
   const videoLd = videoId
@@ -104,171 +96,104 @@ export default async function ProjectPage({
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Accueil", item: site.url },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: "Réalisations",
-        item: `${site.url}/realisations`,
-      },
+      { "@type": "ListItem", position: 2, name: "Films", item: `${site.url}/realisations` },
       { "@type": "ListItem", position: 3, name: project.title, item: pageUrl },
     ],
   };
 
   return (
-    <article className="pb-16 sm:pb-24">
+    <article className="pt-[calc(var(--nav-h)+24px)] md:pt-[calc(var(--nav-h)+48px)]">
       {videoLd && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(videoLd) }}
-        />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(videoLd) }} />
       )}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
-      />
-      {/* Hero cinéma : le still du film en fond très assombri (zoom arrière au
-          scroll), le titre par-dessus. La vidéo, c'est le lecteur en dessous —
-          une seule vidéo par page, l'image d'ouverture ne consomme rien. */}
-      <header className="relative flex min-h-[62svh] flex-col justify-center overflow-hidden px-5 pt-20 text-left sm:min-h-[78svh] sm:px-8 sm:pt-28 lg:px-10">
-        <div aria-hidden className="absolute inset-0">
-          <div className="h-full w-full opacity-40">
-            <HeroZoom>
-              <Still src={projectThumb(project)} alt="" />
-            </HeroZoom>
-          </div>
-          {/* Voiles : le fond reste une ambiance, jamais une distraction */}
-          <div className="absolute inset-0 bg-[rgba(10,9,8,0.35)]" />
-          <div className="absolute inset-0 bg-gradient-to-b from-[rgba(10,9,8,0.85)] via-transparent to-[var(--color-ink)]" />
-        </div>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
 
-        {/* Titre ET méta calés sur le même bord gauche : plus de décrochage
-            entre un titre aligné à gauche et une catégorie centrée. */}
-        <div className="relative mx-auto w-full max-w-[1400px]">
-          {/* Titre : révélation par masque (la ligne monte de sous un cache),
-              puis catégorie et générique montent en cascade. */}
-          <h1 className="font-wide max-w-[16ch] text-[clamp(3rem,13vw,10rem)] leading-[0.95] text-[var(--color-cream)]">
-            <MaskTitle>{project.title}</MaskTitle>
-          </h1>
-          <Reveal delay={260} as="p" className="font-cond mt-5 text-sm tracking-[0.3em] text-[var(--color-terra)] sm:mt-6">
-            {project.category}
-          </Reveal>
-          <Reveal delay={360} as="p" className="font-cond mt-3 text-[11px] tracking-[0.25em] text-[var(--color-bone-dim)]">
-            {project.client} · {project.year}
-          </Reveal>
-        </div>
+      {/* Le titre, en affiche. */}
+      <header className="gutter">
+        <p className="t-legend mb-5 flex justify-between">
+          <span>
+            <span className="inline-block w-[2.6em] text-[var(--color-terra)]">{num}</span>
+            {project.client} · {project.category} · {project.year}
+          </span>
+          <Link href="/realisations" className="u-draw">
+            ← Films
+          </Link>
+        </p>
+        <h1 className="t-giant m-0 max-w-[12ch]">{project.title}</h1>
       </header>
 
-      {/* Lecteur vidéo — d'abord la vidéo, point d'entrée du récit.
-          Façade premium, charge l'iframe au clic. */}
-      {videoId ? (
-        <ProjectVideo
-          videoId={videoId}
-          posterSrc={projectThumb(project)}
-          title={project.title}
-        />
-      ) : (
-        <div className="px-5 sm:px-8 lg:px-10">
-          <div className="relative mx-auto aspect-video max-w-[1600px] overflow-hidden rounded-2xl bg-[var(--color-ink-2)]">
-            <Still
-              src={projectThumb(project)}
-              alt={`${project.title} — ${project.category} · film réalisé par Mauvais Grain`}
-            />
-          </div>
+      {/* Le film. */}
+      <div className="gutter mt-10 md:mt-16">
+        <Player videoId={videoId} poster={projectThumb(project)} preview={projectPreview(project)} title={project.title} />
+      </div>
+
+      {/* Le texte, en deux colonnes. */}
+      <section className="gutter mt-20 md:mt-32 md:grid md:grid-cols-12 md:gap-x-8">
+        <div className="md:col-span-4">
+          <Rise>
+            <dl className="t-legend space-y-3">
+              {credits.map((c) => (
+                <div key={c.role} className="flex gap-4">
+                  <dt className="w-[9em] opacity-50">{c.role}</dt>
+                  <dd className="m-0">{c.name}</dd>
+                </div>
+              ))}
+              <div className="flex gap-4">
+                <dt className="w-[9em] opacity-50">Film</dt>
+                <dd className="m-0">
+                  <a href={project.video} target="_blank" rel="noreferrer" className="u-draw">
+                    YouTube ↗
+                  </a>
+                </dd>
+              </div>
+            </dl>
+          </Rise>
         </div>
+        <div className="mt-12 md:col-span-7 md:col-start-6 md:mt-0">
+          {sections.map((s, i) => (
+            <Rise key={s.label} className={i ? "mt-12 md:mt-16" : ""}>
+              <p className="t-legend mb-4">{s.label}</p>
+              <p className={i === 0 ? "t-title max-w-[26ch]" : "t-body max-w-[58ch]"}>{s.body}</p>
+            </Rise>
+          ))}
+        </div>
+      </section>
+
+      {/* Les images, nues, à la même marge. */}
+      {stills.length > 0 && (
+        <section className="gutter mt-24 md:mt-40" aria-label="Images du film">
+          <div className="grid grid-cols-1 gap-[var(--gutter)] md:grid-cols-2">
+            {stills.map((src, i) => (
+              <Rise
+                as="figure"
+                key={src}
+                className={`m-0 ${i % 3 === 0 ? "md:col-span-2" : ""}`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={src}
+                  alt={`${project.title} — image ${i + 2}`}
+                  loading="lazy"
+                  decoding="async"
+                  className="aspect-video w-full object-cover"
+                />
+              </Rise>
+            ))}
+          </div>
+        </section>
       )}
 
-      {/* Générique — centré, révélé ligne à ligne en cascade */}
-      <section className="px-5 py-10 sm:px-8 sm:py-20 lg:py-24">
-        <dl className="mx-auto flex max-w-[420px] flex-col items-center gap-5 text-center sm:gap-6">
-          {credits.map((c, i) => (
-            <Reveal key={c.role} delay={i * 90}>
-              <dt className="font-cond text-xs tracking-[0.2em] text-[var(--color-terra)]">
-                {c.role}
-              </dt>
-              <dd className="font-sans mt-1.5 text-[var(--color-bone-dim)]">
-                {c.name}
-              </dd>
-            </Reveal>
-          ))}
-        </dl>
-      </section>
-
-      {/* Texte : Le projet / Notre approche / Le résultat */}
-      <section className="px-5 pt-12 sm:px-8 sm:pt-28 lg:pt-36">
-        <ProjectStory sections={sections} />
-      </section>
-
-      {/* Autres réalisations */}
-      <section className="px-5 pt-14 sm:px-8 sm:pt-32 lg:px-10">
-        <h2 className="font-wide text-center text-[clamp(1.8rem,5vw,3.5rem)] text-[var(--color-bone)]">
-          Autres réalisations
-        </h2>
-        <OtherWorks projects={suggestions} />
-      </section>
-
-      {/* Navigation film précédent / suivant — la continuité « à l'affiche » */}
-      <nav className="mt-16 border-t border-[var(--color-line-soft)] px-5 pt-8 sm:mt-32 sm:px-8 sm:pt-10 lg:px-10">
-        <div className="mx-auto flex max-w-[1100px] items-center justify-between gap-6">
-          <Reveal className="max-w-[45%]">
-          <Link href={`/realisations/${prev.slug}`} className="group block">
-            <p className="font-cond text-[11px] tracking-[0.2em] text-[var(--color-bone-faint)]">
-              <span
-                aria-hidden
-                className="mr-1 inline-block transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-x-2"
-              >
-                ←
-              </span>
-              Film précédent
-            </p>
-            <p className="font-wide mt-2 truncate text-[clamp(1.3rem,2.6vw,2rem)] leading-tight text-[var(--color-bone)] transition-colors duration-500 group-hover:text-[var(--color-cream)]">
-              {prev.title}
-            </p>
+      {/* Le film suivant. */}
+      <section className="gutter mt-28 md:mt-44">
+        <Rise>
+          <p className="t-legend mb-5">Film suivant</p>
+          <Link href={`/realisations/${next.slug}`} className="row-link t-display inline-block">
+            {next.title}
           </Link>
-          </Reveal>
-
-          <Reveal delay={90} className="hidden shrink-0 sm:block">
-          <Link
-            href="/realisations"
-            className="font-cond text-[11px] tracking-[0.2em] text-[var(--color-bone-faint)] transition-colors duration-300 hover:text-[var(--color-terra)]"
-          >
-            Tous les films
-          </Link>
-          </Reveal>
-
-          <Reveal delay={170} className="max-w-[45%]">
-          <Link
-            href={`/realisations/${next.slug}`}
-            className="group block text-right"
-          >
-            <p className="font-cond text-[11px] tracking-[0.2em] text-[var(--color-bone-faint)]">
-              Film suivant
-              <span
-                aria-hidden
-                className="ml-1 inline-block transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-2"
-              >
-                →
-              </span>
-            </p>
-            <p className="font-wide mt-2 truncate text-[clamp(1.3rem,2.6vw,2rem)] leading-tight text-[var(--color-bone)] transition-colors duration-500 group-hover:text-[var(--color-cream)]">
-              {next.title}
-            </p>
-          </Link>
-          </Reveal>
-        </div>
-      </nav>
-
-      {/* Appel à l'action — un seul CTA sobre pour ne pas finir en cul-de-sac */}
-      <section className="px-5 pt-14 text-center sm:px-8 sm:pt-28 lg:px-10">
-        <Reveal>
-          <p className="font-cond text-xs tracking-[0.25em] text-[var(--color-bone-faint)]">
-            Un projet comme celui-ci ?
+          <p className="t-legend mt-4">
+            {next.client} · {next.category} · {next.year}
           </p>
-        </Reveal>
-        <Reveal delay={120}>
-          <div className="mt-6 flex justify-center sm:mt-8">
-            <DevisModal label="Démarrer un projet" />
-          </div>
-        </Reveal>
+        </Rise>
       </section>
     </article>
   );
