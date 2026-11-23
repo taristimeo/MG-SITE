@@ -202,20 +202,20 @@ export const projects: Project[] = [
   {
     slug: "deferlantes-2026",
     title: "Déferlantes 2026",
-    client: "impct",
+    client: "IMPCT",
     category: "Événementiel",
     year: "2026",
     video: "https://www.youtube.com/watch?v=spWfntmTgvg",
     stills: 3,
     summary:
-      "Réaliser l'aftermovie de l'édition 2026 du festival Les Déferlantes, produit par impct. L'objectif : condenser plusieurs jours de festival en un film qui en restitue l'énergie, la lumière du Sud et les visages du public.",
+      "Réaliser l'aftermovie de l'édition 2026 des Déferlantes, produit par IMPCT. L'objectif était de condenser plusieurs jours de festival en un film court qui en garde l'énergie, de la chaleur de l'après-midi aux dernières lumières de la nuit.",
     approach:
-      "Se mêler à la foule, caméra au poing, et filmer le festival à hauteur de festivalier : les regards face caméra, les mains levées, les fins de journée dorées devant les scènes. Un montage au rythme de la musique, sans commentaire.",
+      "Filmer au cœur du public, caméra au poing, à hauteur de festivalier : les mains levées, les regards face caméra, les rires sous les lunettes colorées, les fins de journée dorées entre les bars et la grande scène. Un montage calé sur la musique, sans commentaire.",
     result:
-      "Un aftermovie vivant et solaire, pensé pour relancer l'envie dès la fin de l'édition et porter la communication de la suivante.",
+      "Un aftermovie vivant et solaire, qui fait revivre l'ambiance de l'édition à ceux qui y étaient et donne envie aux autres d'être là l'année suivante.",
     credits: [
       { role: "Réalisateur", name: "Timéo Taris" },
-      { role: "Production", name: "impct" },
+      { role: "Production", name: "IMPCT" },
       { role: "Année", name: "2026" },
     ],
   },
