@@ -200,6 +200,26 @@ export type Project = {
 // Réalisations — du plus récent au plus ancien.
 export const projects: Project[] = [
   {
+    slug: "deferlantes-2026",
+    title: "Déferlantes 2026",
+    client: "impct",
+    category: "Événementiel",
+    year: "2026",
+    video: "https://www.youtube.com/watch?v=spWfntmTgvg",
+    stills: 3,
+    summary:
+      "Réaliser l'aftermovie de l'édition 2026 du festival Les Déferlantes, produit par impct. L'objectif : condenser plusieurs jours de festival en un film qui en restitue l'énergie, la lumière du Sud et les visages du public.",
+    approach:
+      "Se mêler à la foule, caméra au poing, et filmer le festival à hauteur de festivalier : les regards face caméra, les mains levées, les fins de journée dorées devant les scènes. Un montage au rythme de la musique, sans commentaire.",
+    result:
+      "Un aftermovie vivant et solaire, pensé pour relancer l'envie dès la fin de l'édition et porter la communication de la suivante.",
+    credits: [
+      { role: "Réalisateur", name: "Timéo Taris" },
+      { role: "Production", name: "impct" },
+      { role: "Année", name: "2026" },
+    ],
+  },
+  {
     slug: "the-sound-of-discovery",
     title: "The Sound of Discovery",
     client: "Autoproduit",
